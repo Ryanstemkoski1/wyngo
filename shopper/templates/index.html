@@ -1,0 +1,278 @@
+{% extends "layouts/_base.html" %}
+
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+{% endblock %}
+
+{% block container %}
+<!-- Upcoming reservations slider -->
+<div class="max-w-7xl mx-auto pl-4 sm:pl-11 lg:px-7 mb-5">
+    <div class="flex flex-col-reverse lg:flex-row lg:justify-between lg:items-center pb-3 pr-4 lg:pl-4 w-full">
+            <div class="relative w-full">
+                <div class="absolute z-10 lg:-top-[5px] right-0 -top-1 lg:left-[340px] xl:left-[595px] sm:w-[600px]">
+                    <div class="flex justify-end w-full">{% include "components/alert.html" %}</div>
+                </div>
+            </div>
+    </div>
+    {% if upcoming_reservations %}
+    <div class="flex justify-between items-center pb-3 pr-4 lg:pl-4">
+        <div class="text-xl sm:text-2xl text-w-dark-green font-medium">Upcoming reservations</div>
+    </div>
+    <div class="relative hidden lg:block">
+        <span class="absolute top-60 -left-4 hidden cursor-pointer" id="prev-button-upcoming">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+        <span
+            class="absolute top-60 -right-4 cursor-pointer {% if upcoming_reservations|length < 5 %} hidden {% endif %}"
+            id="next-button-upcoming">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+    </div>
+    <swiper-container init="false" class="lg:px-3" id="upcoming-slider">
+        {% for res in upcoming_reservations %}
+        <swiper-slide
+            class="py-2 w-[255px] sm:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 sm:mr-11 lg:mr-0 {% endif %}">
+            {% include "components/product_card.html" with product=res.product reserved=res slider="upcoming" %}
+        </swiper-slide>
+        {% endfor %}
+    </swiper-container>
+    {% endif %}
+</div>
+
+<!-- Inventory near you slider -->
+<div class="max-w-7xl mx-auto pl-4 sm:pl-11 lg:px-7">
+    <div class="flex justify-between items-center pb-3 pr-4 lg:pl-4">
+        <div class="text-xl sm:text-2xl text-w-dark-green font-medium">Inventory near you</div>
+    </div>
+    <div class="relative hidden lg:block">
+        <span class="absolute top-60 -left-4 hidden cursor-pointer" id="prev-button-near-you">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+        <span class="absolute top-60 -right-4 cursor-pointer" id="next-button-near-you">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+    </div>
+    <swiper-container init="false" class="lg:px-3" id="near-you-slider">
+        {% for product in near_you %}
+        <swiper-slide
+            class="py-2 w-[255px] sm:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 sm:mr-11 lg:mr-0 {% endif %}">
+            {% include "components/product_card.html" with product=product slider="near-you" %}
+        </swiper-slide>
+        {% endfor %}
+    </swiper-container>
+</div>
+
+<!-- Just added slider -->
+<div class="max-w-7xl mx-auto pl-4 sm:pl-11 lg:px-7 mt-5">
+    <div class="flex justify-between items-center px-1 pb-3 sm:px-11 lg:px-4">
+        <div class="text-xl sm:text-2xl text-w-dark-green font-medium">Just added</div>
+    </div>
+    <div class="relative hidden lg:block">
+        <span class="absolute top-60 -left-4 hidden cursor-pointer" id="prev-button-just-added">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+        <span class="absolute top-60 -right-4 cursor-pointer" id="next-button-just-added">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+    </div>
+    <swiper-container init="false" class="lg:px-3" id="just-added-slider">
+        {% for product in just_added %}
+        <swiper-slide
+            class="py-2 w-[255px] sm:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 sm:mr-11 lg:mr-0 {% endif %}">
+            {% include "components/product_card.html" with product=product slider="just-added" %}
+        </swiper-slide>
+        {% endfor %}
+    </swiper-container>
+</div>
+
+<!-- Popular categories section -->
+<div class="px-4 sm:px-11 space-y-6 py-6 mt-2 bg-w-light-gray">
+    <div class="font-medium text-center text-xl sm:text-2xl text-w-dark-green">Popular categories</div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 pb-2 sm:container sm:mx-auto lg:px-24 xl:px-56 2xl:px-72">
+        <div
+            class="card cursor-pointer sm:py-6 bg-white opacity-70 hover:bg-w-indigo text-w-dark-green hover:text-white hover:opacity-100 justify-center">
+            <a href="">
+                <div class="card-body px-8 py-4">
+                    <div class="flex">
+                        <div class=" w-8 flex items-center">
+                            <span class="material-symbols-outlined text-[2rem] opacity-70">candle</span>
+                        </div>
+                        <div class=" w-34 pl-5 flex items-center">
+                            <div class="text-xl sm:text-lg lg:text-2xl font-medium xl:text-left">
+                                Antiques
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer sm:py-6 bg-white hover:bg-w-indigo hover:opacity-100 selected-category hover:text-white text-w-indigo justify-center">
+            <a href="">
+                <div class="card-body px-8 py-4">
+                    <div class="flex">
+                        <div class="  flex items-center">
+                            <span class="material-icons-outlined text-[2.5rem]">
+                                bakery_dining
+                            </span>
+                        </div>
+                        <div class=" w-34 pl-3 flex items-center">
+                            <div class="text-xl sm:text-lg lg:text-2xl font-medium xl:text-left">
+                                Bakeries
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer sm:py-6 bg-white opacity-70 hover:bg-w-indigo text-w-dark-green hover:text-white hover:opacity-100 justify-center">
+            <a href="">
+                <div class="card-body px-8 py-4">
+                    <div class="flex">
+                        <div class="  flex items-center">
+                            <span class="material-icons-outlined text-[2rem]">
+                                checkroom
+                            </span>
+                        </div>
+                        <div class=" w-34 pl-5 flex items-center">
+                            <div class="text-xl sm:text-lg lg:text-2xl font-medium xl:text-left">
+                                Boutique Clothing
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer sm:py-6 bg-white opacity-70 hover:bg-w-indigo text-w-dark-green hover:text-white hover:opacity-100 justify-center">
+            <a href="">
+                <div class="card-body px-8 py-4">
+                    <div class="flex">
+                        <div class="  flex items-center">
+                            <span class="material-icons-outlined text-[2rem]">
+                                storefront
+                            </span>
+                        </div>
+                        <div class=" w-34 pl-5 flex items-center">
+                            <div class="text-xl sm:text-lg lg:text-2xl font-medium xl:text-left">
+                                Gas Stations
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer sm:py-6 bg-white opacity-70 hover:bg-w-indigo text-w-dark-green hover:text-white hover:opacity-100 justify-center">
+            <a href="">
+                <div class="card-body pl-8 pr-6 py-4">
+                    <div class="flex">
+                        <div class="  flex items-center">
+                            <span class="material-icons-outlined text-[2rem]">
+                                content_cut
+                            </span>
+                        </div>
+                        <div class=" w-34 pl-5 flex items-center">
+                            <div class="text-xl sm:text-lg lg:text-2xl font-medium xl:text-left">
+                                Hair Salons / Barbers
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer sm:py-6 bg-white opacity-70 hover:bg-w-indigo text-w-dark-green hover:text-white hover:opacity-100 justify-center">
+            <a href="">
+                <div class="card-body px-8 py-4">
+                    <div class="flex">
+                        <div class="  flex items-center">
+                            <span class="material-icons-outlined text-[2rem]">
+                                restaurant
+                            </span>
+                        </div>
+                        <div class=" w-34 pl-5 flex items-center">
+                            <div class="text-xl sm:text-lg lg:text-2xl font-medium lg:text-center xl:text-left">
+                                Restaurants
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Retailers slider -->
+{% if retailers %}
+<div class="max-w-7xl mx-auto pl-4 sm:pl-11 lg:px-7 mt-5 lg:mt-6">
+    <div class="flex justify-between items-center pt-2 pb-3 pr-4 lg:pl-4">
+        <div class="text-xl sm:text-2xl text-w-dark-green font-medium">Retailers near you</div>
+    </div>
+    <div class="relative hidden lg:block">
+        <span class="absolute top-[9.8rem] -left-4 hidden cursor-pointer" id="prev-button-retailers">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+        <span class="absolute top-[9.8rem] -right-4 cursor-pointer" id="next-button-retailers">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+    </div>
+    <swiper-container init="false" class="lg:px-3" id="retailers-slider">
+        {% for retailer in retailers|slice:":16" %}
+        <swiper-slide
+            class="py-2 w-[255px] sm:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 sm:mr-11 lg:mr-0 {% endif %}">
+            {% include "components/retailer_card.html" with retailer=retailer slider="retailers" %}
+        </swiper-slide>
+        {% endfor %}
+    </swiper-container>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-element-bundle.min.js"></script>
+<script src="{% static 'js/shopper/home.js' %}"></script>
+{% endblock %}

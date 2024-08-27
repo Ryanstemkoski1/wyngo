@@ -1,0 +1,12 @@
+.controls-filter {
+    margin: 2px 0;
+    padding: 2px 3px !important;
+    vertical-align: middle;
+    font-family: var(--font-family-primary);
+    font-weight: normal;
+    font-size: 0.8125rem;
+}
+
+.spacing {
+    padding: 5px 0 5px 10px
+}

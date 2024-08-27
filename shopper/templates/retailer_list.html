@@ -1,0 +1,189 @@
+{% extends "layouts/_base.html" %}
+
+{% load static %}
+
+{% block container %}
+
+<div
+    class="max-w-7xl mx-auto mb-2 px-4 xl:px-2 {% if retailers|length == 0 %} h-[610px] {% else %} h-full {% endif %}">
+    <div class="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-12 sm:px-10 sm:gap-6 infinite-container">
+        <div class="col-span-4 sm:col-start-2 lg:col-start-4 sm:col-span-6 grow sm:w-full">
+            <div class="flex justify-end items-center align-middle relative sm:w-full">
+                <input type="text" placeholder="Search Retailers" name="search"
+                    class="input bg-white h-10 w-full text-sm rounded-full focus:ring-transparent focus:ring-0 placeholder-neutral-400"
+                    id="search" />
+                <button id="searchBtn" class=" bg-w-blue h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center
+                        absolute">
+                    <img src="{% static 'img/icons/icon-search.svg' %}" id="searchIcon" class="filter invert" />
+                </button>
+            </div>
+        </div>
+        <div class="col-span-4 sm:col-span-8 lg:col-span-12 mt-4">
+            <div class="flex items-center justify-between">
+                <span class="text-w-dark-green font-medium text-xl sm:text-2xl">
+                    {% if current_category and current_category != "all" %}
+                    {{ current_category }}
+                    {% else %}
+                    Retailers List
+                    {% endif %}
+                </span>
+                <div class="dropdown dropdown-end hidden sm:block cursor-pointer">
+                    <details class="dropdown dropdown-end">
+                        <summary class="bg-w-primary border-w-primary p-2 flex items-center rounded-md text-center">
+                            <span class="material-icons text-white">
+                                filter_alt
+                            </span>
+                        </summary>
+                        <ul tabindex="0"
+                            class="dropdown-content menu p-2 shadow rounded-box z-10 bg-white w-[345px] mt-1">
+                            <div class="h-full">
+                                <div class="flex items-center justify-between text-w-dark-green px-3.5 pt-2">
+                                    <span class="font-medium text-2xl">Categories</span>
+                                </div>
+                                <form action="{% url 'retailers' %}" method="get" class="px-1 py-4 mt-3 space-y-4">
+                                    <div class="px-3 space-y-6 pb-3">
+                                        <div class="radio-icon">
+                                            {% if current_category == "all" or not current_category %}
+                                            <input type="radio" name="category" id="all" class="hidden" value="all"
+                                                checked>
+                                            {% else %}
+                                            <input type="radio" name="category" id="all" class="hidden" value="all">
+                                            {% endif %}
+                                            <label for="all">
+                                                <div class="radio-indicator"></div>
+                                                <span class="font-normal text-sm text-neutral-800">All</span>
+                                            </label>
+                                        </div>
+                                        {% for category in categories %}
+                                        <div class="radio-icon">
+                                            {% if current_category == category.name %}
+                                            <input type="radio" name="category" class="hidden"
+                                                value="{{ category.name }}" id="category_{{ category.id }}" checked>
+                                            {% else %}
+                                            <input type="radio" name="category" class="hidden"
+                                                value="{{ category.name }}" id="category_{{ category.id }}">
+                                            {% endif %}
+
+                                            <label for="category_{{ category.id }}">
+                                                <div class="radio-indicator"></div>
+                                                <span class="font-normal text-sm text-neutral-800">
+                                                    {{ category.name }}
+                                                    ({{ category.retailer_count }})
+                                                </span>
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="px-3 pb-2.5">
+                                        <button type="submit"
+                                            class="bg-w-primary text-white btn-block text-sm font-semibold capitalize border-w-light-gray rounded-full h-10">
+                                            Apply
+                                        </button>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </ul>
+                    </details>
+
+                </div>
+                <button class="sm:hidden bg-w-primary border-w-primary p-2 
+                flex items-center rounded-md text-center" id="openDrawer">
+                    <span class="material-icons text-white">
+                        filter_alt
+                    </span>
+                </button>
+                <div id="overlay"
+                    class="fixed sm:hidden inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+                </div>
+
+                <div id="drawer"
+                    class="fixed bottom-0 left-0 w-full h-0 bg-white overflow-hidden transition-all duration-300 z-50 rounded-t-2xl sm:hidden">
+                    <div class="h-full">
+                        <div class="flex items-center justify-between text-w-dark-green px-6 pt-6 pb-2">
+                            <span class="font-medium text-xl">Filters</span>
+                            <span class="material-icons-outlined" id="closeDrawer">
+                                close
+                            </span>
+                        </div>
+                        <form action="{% url 'retailers' %}" method="get" class="px-1 py-4 mt-2 space-y-2.5">
+                            <div class="px-6 space-y-5 pb-4 h-[280px] overflow-auto">
+                                <div class="radio-icon">
+                                    {% if current_category == "all" or not current_category %}
+                                    <input type="radio" name="category" id="all_mobile" class="hidden" value="all"
+                                        checked>
+                                    {% else %}
+                                    <input type="radio" name="category" id="all_mobile" class="hidden" value="all">
+                                    {% endif %}
+                                    <label for="all_mobile">
+                                        <div class="radio-indicator"></div>
+                                        <span class="font-normal text-sm text-neutral-800">All</span>
+                                    </label>
+                                </div>
+                                {% for category in categories %}
+                                <div class="radio-icon">
+                                    {% if current_category == category.name %}
+                                    <input type="radio" name="category" class="hidden" value="{{ category.name }}"
+                                        id="category_{{ category.id }}_mobile" checked>
+                                    {% else %}
+                                    <input type="radio" name="category" class="hidden" value="{{ category.name }}"
+                                        id="category_{{ category.id }}_mobile">
+                                    {% endif %}
+
+                                    <label for="category_{{ category.id }}_mobile">
+                                        <div class="radio-indicator"></div>
+                                        <span class="font-normal text-sm text-neutral-800">
+                                            {{ category.name }}
+                                            ({{ category.retailer_count }})
+                                        </span>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="flex justify-center border-t px-6 py-4 border-w-primary mt-7">
+                                <button type="submit"
+                                    class="bg-w-primary text-white btn-block text-sm font-semibold capitalize border-w-light-gray rounded-full h-10">
+                                    Apply
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if retailers|length > 0 %}
+        {% for retailer in retailers %}
+        <div class="col-span-4 lg:col-span-3 sm:mt-2 md:mt-3 infinite-item">
+            {% include 'components/list_card.html' with item=retailer %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="col-span-4 lg:col-span-3 sm:mt-8">
+            <div class="text-sm sm:text-xl text-neutral-800 w-full">
+                No retailers found
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% if page_obj.has_next %}
+    <a class="infinite-more-link"
+        href="?page={{ page_obj.next_page_number }}&category={{ current_category|default:'all' }}"></a>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"
+    integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"
+    integrity="sha512-CEiA+78TpP9KAIPzqBvxUv8hy41jyI3f2uHi7DGp/Y/Ka973qgSdybNegWFciqh6GrN2UePx2KkflnQUbUhNIA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/shortcuts/infinite.min.js"
+    integrity="sha512-m3kH21aSkKrGeoqdb7IP7rlu1VcQee5VrjLQepeSOp5M05Wl6HwqJ1Jwo14EHOuBg77pkAlBtQuVMPVeXzfueg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{% static 'js/shopper/retailers.js' %}"></script>
+{% endblock %}

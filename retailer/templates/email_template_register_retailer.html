@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+  <meta charset="utf-8">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <title>Wyndo</title>
+  <style>
+    .footer > * {
+      display: grid;
+      place-items: start;
+      gap: 0.5rem
+    }
+    @media (min-width: 48rem) {
+      .footer {
+        grid-auto-flow: column !important
+      }
+    }
+    @keyframes button-pop {
+      0% {
+        transform: scale(var(--btn-focus-scale, 0.98)) !important
+      }
+      40% {
+        transform: scale(1.02) !important
+      }
+      100% {
+        transform: scale(1) !important
+      }
+    }
+    @keyframes checkmark {
+      0% {
+        background-position-y: 5px !important
+      }
+      50% {
+        background-position-y: -2px !important
+      }
+      100% {
+        background-position-y: 0 !important
+      }
+    }
+    @keyframes modal-pop {
+      0% {
+        opacity: 0 !important
+      }
+    }
+    @keyframes progress-loading {
+      50% {
+        background-position-x: -115% !important
+      }
+    }
+    @keyframes radiomark {
+      0% {
+        box-shadow: 0 0 0 12px hsl(var(--b1)) inset, 0 0 0 12px hsl(var(--b1)) inset !important
+      }
+      50% {
+        box-shadow: 0 0 0 3px hsl(var(--b1)) inset, 0 0 0 3px hsl(var(--b1)) inset !important
+      }
+      100% {
+        box-shadow: 0 0 0 4px hsl(var(--b1)) inset, 0 0 0 4px hsl(var(--b1)) inset !important
+      }
+    }
+    @keyframes rating-pop {
+      0% {
+        transform: translateY(-0.125em) !important
+      }
+      40% {
+        transform: translateY(-0.125em) !important
+      }
+      100% {
+        transform: translateY(0) !important
+      }
+    }
+    td) {
+      padding: 0.75rem 1rem;
+      vertical-align: middle
+    }
+    .table-zebra tbody tr:nth-child(even) {
+      --tw-bg-opacity: 1;
+      background-color: hsl(var(--b2) / var(--tw-bg-opacity))
+    }
+    tbody) :where(tr:not(:last-child)),
+    tbody) :where(tr:first-child:last-child) {
+      border-bottom-width: 1px;
+      --tw-border-opacity: 1;
+      border-bottom-color: hsl(var(--b2) / var(--tw-border-opacity))
+    }
+    tfoot) {
+      white-space: nowrap;
+      font-size: 0.75rem;
+      line-height: 1rem;
+      font-weight: 700;
+      color: hsl(var(--bc) / 0.6)
+    }
+    @keyframes toast-pop {
+      0% {
+        transform: scale(0.9) !important;
+        opacity: 0 !important
+      }
+      100% {
+        transform: scale(1) !important;
+        opacity: 1 !important
+      }
+    }
+    .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+      --tw-space-y-reverse: 0;
+      margin-top: calc(20px * calc(1 - var(--tw-space-y-reverse)));
+      margin-bottom: calc(20px * var(--tw-space-y-reverse))
+    }
+    .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+      --tw-space-y-reverse: 0;
+      margin-top: calc(24px * calc(1 - var(--tw-space-y-reverse)));
+      margin-bottom: calc(24px * var(--tw-space-y-reverse))
+    }
+    @media (max-width: 600px) {
+      .sm-w-6 {
+        width: 24px !important
+      }
+      .sm-leading-8 {
+        line-height: 32px !important
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; width: 100%; background-color: #f8fafc; padding: 0; -webkit-font-smoothing: antialiased; word-break: break-word">
+  <div style="display: none">
+    Request received.
+    &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847;
+  </div>
+  <div role="article" aria-roledescription="email" aria-label="The Website Weekly Newsletter" lang="en">
+    <div style="background-color: #f8fafc; font-family: ui-mulish, Mulish, sans-serif">
+      <table align="center" style="width: 100%; border-radius: 8px; background-color: #59b293" cellpadding="0" cellspacing="0" role="none">
+        <tr>
+          <td>
+            <div style="margin-top: 48px; margin-bottom: 48px; text-align: center">
+              <a href>
+                <img src="https://wyndo-static-qa.s3.amazonaws.com/wyndo-logo.png" alt="Maizzle" style="max-width: 100%; vertical-align: middle; line-height: 1; border: 0; width: 176px">
+              </a>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <table align="center" style="padding-left: 16px; padding-right: 16px" cellpadding="0" cellspacing="0" role="none">
+        <tr>
+          <td style="width: 900px; max-width: 100%">
+            <table style="width: 100%;" cellpadding="0" cellspacing="0" role="none">
+              <tr>
+                <td>
+                  <div role="separator" style="line-height: 24px">&zwj;</div>
+                  <table align="center" style="width: 100%; text-align: center;" cellpadding="0" cellspacing="0" role="none">
+                    <tr>
+                      <td class="sm-w-6" style="width: 48px"></td>
+                      <td>
+                        <div class="space-y-6" style="margin-left: auto; margin-right: auto; text-align: center">
+                          <div class="space-y-5" style="text-align: left; font-size: 16px; font-weight: 400; color: #262626; --tw-space-y-reverse: 0; margin-top: calc(24px * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(24px * var(--tw-space-y-reverse))">
+                            <p>
+                              We have satisfactorily received your request under number <b>{{ request_number }}</b>. The Wyndo team will be verifying the information you provide us and once your request is approved we will notify you by email.
+                            </p>
+                            <p style="--tw-space-y-reverse: 0; margin-top: calc(20px * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(20px * var(--tw-space-y-reverse));">
+                              If you do not receive a response in the next few days, send us an email to help@wyndoshop.com with your request number and we will help you as soon as possible.
+                            </p>
+                          </div>
+                          <div class="space-y-5" style="text-align: left; font-size: 16px; font-weight: 400; color: #262626; --tw-space-y-reverse: 0; margin-top: calc(24px * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(24px * var(--tw-space-y-reverse));">
+                            <p>
+                              If you did not make a request, communicate it <a href style="cursor: pointer; font-size: 16px; color: #4852b3; text-decoration-line: underline">here</a>. In any case, ignoring this message will not change your password either. It is possible that someone entered your email address by mistake.
+                            </p>
+                            <p style="--tw-space-y-reverse: 0; margin-top: calc(20px * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(20px * var(--tw-space-y-reverse));">
+                              Wyndo team.
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="sm-w-6" style="width: 48px"></td>
+                    </tr>
+                  </table>
+                  <div role="separator" class="sm-leading-8" style="line-height: 16px">&zwj;</div><!--[if mso]></div></v:textbox></v:rect><![endif]-->
+                </td>
+              </tr>
+              <tr role="separator">
+                <td style="line-height: 40px">&zwj;</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      <table align="center" style="width: 100%; border-radius: 8px; background-color: #172a26" cellpadding="0" cellspacing="0" role="none">
+        <tr>
+          <td>
+            <footer class="footer" style="display: grid; grid-auto-flow: row; place-items: start; row-gap: 2.5rem; column-gap: 1rem; line-height: 1.25rem; width: auto; justify-content: center; border-radius: 8px; padding: 16px; text-align: center; font-size: 12px; color: #fff">
+              <div style="display: grid; place-items: start; gap: 0.5rem;">
+                <p>
+                  If you believe you received this message in error,
+                  please visit our <a href style="font-weight: 500; color: #4852b3">Help center</a>
+                  for more information about how to delete this account.
+                </p>
+              </div>
+            </footer>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

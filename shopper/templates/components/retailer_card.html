@@ -1,0 +1,83 @@
+{% load static %}
+
+<div class="card bg-white border border-neutral-200 cursor-pointer hover:shadow-md pt-14 mt-20 px-2">
+    <div class="relative">
+        {% if 'shopping' in request.path %}
+        <div class="absolute -top-[120px] left-1/2 transform -translate-x-1/2 -mt-4 z-10" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
+            <div class=" rounded-full w-[140px]">
+                {% if retailer.image %}
+                <img src="{% static 'img/shopping_center/'|add:retailer.image %}" alt="Shoes"
+                    class="w-36 h-36 object-cover rounded-full" />
+                {% else %}
+                <img src="{% static 'img/no-image.png' %}" alt="Shoes" class="w-36 h-36 object-cover rounded-full" />
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <a href="{% url 'retailer-details' retailer_id=retailer.id %}">
+            <div class="absolute -top-[120px] left-1/2 transform -translate-x-1/2 -mt-4 z-10" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
+                <div class=" rounded-full w-[140px]">
+                    {% if retailer.image.url %}
+                    <img src="{{ retailer.image.url }}" alt="Shoes" class="w-36 h-36 object-cover rounded-full" />
+                    {% else %}
+                    <img src="{% static 'img/no-image.png' %}" alt="Shoes"
+                        class="w-36 h-36 object-cover rounded-full" />
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endif %}
+        <span class="absolute -top-[52px] right-0 mt-2 mr-2 rounded-full p-1 cursor-pointer bg-w-light-smooth-gray"
+            id="favorite-span_{{ retailer.id }}{{ device }}" onclick="favoriteBtn(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-6 h-6 text-white favorite stroke-red-600"
+                id="favorite_{{ retailer.id }}{{ device }}">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+            </svg>
+        </span>
+    </div>
+    <div class="card-body px-4 pt-2 pb-3">
+        {% if 'shopping' in request.path %}
+        <div>
+            <div
+                class="text-center mb-2 mt-3 card-title font-medium text-neutral-800 text-2xl h-[65px] justify-center items-center">
+                <p class="line-clamp-2">{{ retailer.name }}</p>
+            </div>
+            <div class="font-normal text-sm text-w-indigo flex gap-2 items-center mt-2">
+                <div class="h-10 flex items-center">
+                    {% if retailer.location_set %}
+                    {{ retailer.location_set.first.address1 }}, {{ retailer.location_set.first.city }}, {{ retailer.location_set.first.zip_code }}
+                    {% else %}
+                    {{ retailer.address }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center h-10">
+                <div class="font-normal text-sm text-neutral-800 pr-4">Reliability Score</div>
+                <progress class="progress-bar progress-bar-success w-16 h-4" value="100" max="100"></progress>
+            </div>
+        </div>
+        {%else%}
+        <a href="{% url 'retailer-details' retailer_id=retailer.id %}">
+            <div
+                class="text-center mb-2 mt-3 card-title font-medium text-neutral-800 text-2xl h-[65px] justify-center items-center">
+                <p class="line-clamp-2">{{ retailer.name }}</p>
+            </div>
+            <div class="font-normal text-sm text-w-indigo flex gap-2 items-center mt-2">
+                <div class="h-10 flex items-center">
+                    {% if retailer.location_set %}
+                    <p class="line-clamp-2"> {{ retailer.location_set.first.address1 }}, {{ retailer.location_set.first.city }}, {{ retailer.location_set.first.zip_code }}</p>
+                    {% else %}
+                    That street, Florida
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center h-10">
+                <div class="font-normal text-sm text-neutral-800 pr-4">Reliability Score</div>
+                <progress class="progress-bar progress-bar-success w-16 h-4" value="100" max="100"></progress>
+            </div>
+        </a>
+        {% endif %}
+    </div>
+</div>

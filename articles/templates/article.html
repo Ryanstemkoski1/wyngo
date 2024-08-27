@@ -1,0 +1,27 @@
+{% extends "layouts/_base.html" %}
+
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+{% endblock %}
+
+{% block article %}
+    {% include "components/title_baner.html" %}
+{% endblock %}
+
+{% block container %}
+    <div style="font-family: ui-mulish, Mulish, sans-serif" class='py-0 md:py-4 mx-4 md:mx-11 max-w-3xl lg:mx-auto font-medium'>
+        <p class='text-xs text-w-grey mb-2'>Last update: {{article.updated_at|date:'F d, Y'}}</p>
+        <article 
+            id='article-content-container' 
+            class='prose prose-sm md:prose-base prose-h1:text-2xl prose-headings:font-medium prose-headings:mb-4 prose-p:font-normal max-w-none'>
+            {{article.content|safe}}
+        </article>
+    </div>
+{% endblock container %}
+
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-element-bundle.min.js"></script>
+{% endblock %}

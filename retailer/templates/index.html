@@ -1,0 +1,332 @@
+{% extends "layouts/_base.html" %}
+
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+{% endblock %}
+
+{% block container %}
+
+<!-- Upcoming reservations slider -->
+<div class="container mx-auto pl-4 md:pl-11 lg:px-7">
+    <div class="flex justify-between items-center pb-3 pr-4 lg:pl-4">
+        <div class="text-xl md:text-2xl text-neutral-800 font-medium">Upcoming reservations</div>
+        <a href="" class="text-xs text-w-indigo font-semibold md:text-sm">See more</a>
+    </div>
+    <div class="relative hidden lg:block">
+        <span class="absolute top-60 -left-4 hidden cursor-pointer" id="prev-button-upcoming">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+        <span
+            class="absolute top-60 -right-4 cursor-pointer {% if upcoming_reservations|length <= 4 %}md:hidden{% endif %}"
+            id="next-button-upcoming">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+    </div>
+    <swiper-container init="false" class="lg:px-3" id="upcoming-slider">
+        {% for product in upcoming_reservations %}
+        <swiper-slide
+            class="py-2 w-[255px] md:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 md:mr-11 lg:mr-0 {% endif %}">
+            {% include "components/product_card.html" with product=product reserved=True %}
+        </swiper-slide>
+        <dialog id="cancel_modal_{{ product.id }}" class="modal">
+            <div class="modal-box bg-white p-4 md:p-6 rounded-md w-11/12 lg:max-w-xl">
+                <h3 class="font-medium text-neutral-900 text-2xl">Cancel reservation?</h3>
+                <p class="py-2 md:pt-5 text-base text-neutral-900 font-normal">Are you sure you want to cancel this
+                    reservation?</p>
+                <div class="modal-action gap-2">
+                    <button onclick="closeModal(this)" id="close_{{ product.id }}"
+                        class="bg-white text-sm font-semibold border-w-primary border text-w-primary capitalize px-7 py-2.5 rounded-lg"
+                        type="button">Cancel</button>
+                    <button
+                        class="bg-w-primary text-sm font-semibold border-w-primary text-white capitalize px-6 py-2.5 rounded-lg">Confirm</button>
+                </div>
+            </div>
+        </dialog>
+        {% endfor %}
+    </swiper-container>
+</div>
+
+
+<!-- Inventory near you slider -->
+<div class="container mx-auto pl-4 md:pl-11 lg:px-7">
+    <div class="flex justify-between items-center pb-3 pr-4 lg:pl-4">
+        <div class="text-xl md:text-2xl text-neutral-800 font-medium">Inventory near you</div>
+        <a href="" class="text-xs text-w-indigo font-semibold md:text-sm">See more</a>
+    </div>
+    <div class="relative hidden lg:block">
+        <span class="absolute top-60 -left-4 hidden cursor-pointer" id="prev-button-near-you">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+        <span class="absolute top-60 -right-4 cursor-pointer" id="next-button-near-you">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+    </div>
+    <swiper-container init="false" class="lg:px-3" id="near-you-slider">
+        {% for product in near_you|slice:":16" %}
+        <swiper-slide
+            class="py-2 w-[255px] md:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 md:mr-11 lg:mr-0 {% endif %}">
+            {% include "components/product_card.html" with product=product %}
+        </swiper-slide>
+        {% endfor %}
+    </swiper-container>
+</div>
+
+<!-- Just added slider -->
+<div class="container mx-auto pl-4 md:pl-11 lg:px-7 mt-5">
+    <div class="flex justify-between items-center px-1 pb-3 md:px-11 lg:px-4">
+        <div class="text-xl md:text-2xl text-neutral-800 font-medium">Just added</div>
+    </div>
+    <div class="relative hidden lg:block">
+        <span class="absolute top-60 -left-4 hidden cursor-pointer" id="prev-button-just-added">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+        <span class="absolute top-60 -right-4 cursor-pointer" id="next-button-just-added">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+    </div>
+    <swiper-container init="false" class="lg:px-3" id="just-added-slider">
+        {% for product in just_added|slice:":16" %}
+        <swiper-slide
+            class="py-2 w-[255px] md:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 md:mr-11 lg:mr-0 {% endif %}}">
+            {% include "components/product_card.html" with product=product %}
+        </swiper-slide>
+        {% endfor %}
+    </swiper-container>
+</div>
+
+<!-- Popular catefories section -->
+<div class="px-4 md:px-11 space-y-5 py-5 mt-4 bg-w-light-gray">
+    <div class="font-medium text-center text-xl md:text-2xl text-neutral-900">Popular categories</div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 pb-2 md:container md:mx-auto lg:px-52">
+        <div
+            class="card cursor-pointer md:py-6 bg-white opacity-70 hover:bg-w-indigo text-neutral-900 hover:text-white hover:opacity-100">
+            <a href="">
+                <div class="card-body p-4">
+                    <div class="flex items-center gap-2 lg:flex-wrap xl:flex-nowrap">
+                        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor" fill-rule="evenodd"
+                            class="lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            <g transform="translate(13.125 13.125)" style="mix-blend-mode:luminosity">
+                                <rect x="6.125" y="7.544" width="6.125" height="1.75" rx=".875" />
+                                <path
+                                    d="m10.314 8.506 2.25 2.681a.875.875 0 0 1-1.341 1.125l-2.25-2.68a.875.875 0 0 1 1.34-1.126zM22.313 14.875a7.438 7.438 0 1 1 0 14.875 7.438 7.438 0 0 1 0-14.875zm0 1.75a5.688 5.688 0 1 0 0 11.375 5.688 5.688 0 0 0 0-11.375zM5.688 18.375a5.688 5.688 0 1 1 0 11.375 5.688 5.688 0 0 1 0-11.375zm0 1.75a3.938 3.938 0 1 0 0 7.875 3.938 3.938 0 0 0 0-7.875z" />
+                                <path
+                                    d="M24.722 0c.483 0 .875.392.875.875v4.194a.875.875 0 0 1-.875.875h-1.535v9.475a.875.875 0 0 1-.772.87l-.102.005a.875.875 0 0 1-.875-.875V5.07c0-.483.391-.875.875-.875h1.534V1.75h-5.448a.875.875 0 0 1-.869-.773l-.006-.102c0-.483.392-.875.875-.875h6.323z" />
+                                <path
+                                    d="M22.18 7.697a.875.875 0 0 1 .264 1.73 16.16 16.16 0 0 0-.54.096c-.44.084-.933.19-1.464.318a29.032 29.032 0 0 0-4.438 1.44c-1.055.447-2.007.944-2.83 1.49-.986.655-1.915 1.467-2.784 2.4a21.1 21.1 0 0 0-2.856 3.9c-.096.17-.158.288-.187.345a.875.875 0 0 1-1.565-.784c.041-.082.117-.224.226-.42a22.831 22.831 0 0 1 3.1-4.234c.958-1.028 1.99-1.929 3.097-2.664.92-.611 1.967-1.157 3.117-1.644a30.744 30.744 0 0 1 4.708-1.53 32.32 32.32 0 0 1 1.549-.336c.284-.055.49-.09.604-.107z" />
+                            </g>
+                        </svg>
+                        <div
+                            class="text-xl md:text-lg lg:text-2xl font-medium lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            Antiques
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="card cursor-pointer md:py-6 bg-white hover:bg-w-indigo hover:opacity-100 selected-category">
+            <a href="">
+                <div class="card-body p-4">
+                    <div class="flex items-center gap-2 lg:flex-wrap xl:flex-nowrap">
+                        <svg class="text-w-indigo lg:flex-auto xl:flex-initial lg:text-center xl:text-left" width="56"
+                            height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                            <g fill-rule="evenodd">
+                                <path
+                                    d="M28.073 27.125c8.616 0 12.266 2.314 16.126 5.796l.207.188A5.112 5.112 0 0 1 40.964 42H15.181a5.112 5.112 0 0 1-3.442-8.891c4.229-3.85 7.563-5.984 16.334-5.984zm0 1.75c-7.403 0-10.48 1.27-15.155 5.528a3.362 3.362 0 0 0 2.263 5.847h25.783a3.362 3.362 0 0 0 2.264-5.847c-4.52-4.116-7.882-5.528-15.155-5.528z"
+                                    fill-rule="nonzero" />
+                                <path
+                                    d="m33.874 28.777-2.132 5.668a.875.875 0 0 0 .529 1.133.913.913 0 0 0 1.157-.54l2.132-5.667a.875.875 0 0 0-.528-1.134.913.913 0 0 0-1.158.54zM28.53 27.962l-2.439 6.483a.875.875 0 0 0 .528 1.133.913.913 0 0 0 1.158-.54l2.439-6.483a.875.875 0 0 0-.528-1.133.913.913 0 0 0-1.158.54zM22.879 27.962l-2.44 6.483a.875.875 0 0 0 .529 1.133.913.913 0 0 0 1.158-.54l2.439-6.483a.875.875 0 0 0-.529-1.133.913.913 0 0 0-1.157.54zM21.789 14.395a.875.875 0 0 1 1.463.96 3.14 3.14 0 0 0-.243.493c-.29.717-.359 1.44-.098 2.082.074.18.174.355.304.525.225.293.403.604.535.93.46 1.128.35 2.298-.095 3.398a4.769 4.769 0 0 1-.403.796.875.875 0 1 1-1.463-.96c.017-.025.039-.062.064-.108l.084-.167c.03-.064.063-.137.096-.218.29-.716.358-1.44.097-2.081a2.272 2.272 0 0 0-.304-.526 4.02 4.02 0 0 1-.535-.929c-.46-1.129-.35-2.298.096-3.399.144-.356.292-.628.402-.796zM27.455 14.395a.875.875 0 1 1 1.464.96 3.14 3.14 0 0 0-.244.493c-.29.717-.359 1.44-.097 2.082.073.18.174.355.304.525.224.293.402.604.535.93.46 1.128.35 2.298-.096 3.398a4.769 4.769 0 0 1-.402.796.875.875 0 0 1-1.464-.96c.017-.025.04-.062.065-.108l.084-.167c.03-.064.062-.137.095-.218.29-.716.359-1.44.097-2.081a2.272 2.272 0 0 0-.304-.526 4.02 4.02 0 0 1-.535-.929c-.46-1.129-.35-2.298.096-3.399.145-.356.292-.628.402-.796zM33.122 14.395a.875.875 0 0 1 1.463.96 3.14 3.14 0 0 0-.243.493c-.29.717-.36 1.44-.098 2.082.074.18.174.355.304.525.225.293.403.604.535.93.46 1.128.35 2.298-.096 3.398a4.769 4.769 0 0 1-.402.796.875.875 0 1 1-1.463-.96c.017-.025.039-.062.064-.108l.084-.167c.03-.064.063-.137.095-.218.29-.716.359-1.44.098-2.081a2.272 2.272 0 0 0-.304-.526 4.02 4.02 0 0 1-.535-.929c-.46-1.129-.35-2.298.096-3.399.144-.356.292-.628.402-.796z" />
+                            </g>
+                        </svg>
+                        <div
+                            class="text-xl md:text-lg lg:text-2xl font-medium category-name text-neutral-900 lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            Bakeries
+                        </div>
+                    </div>
+
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer md:py-6 bg-white opacity-70 hover:bg-w-indigo text-neutral-900 hover:text-white hover:opacity-100">
+            <a href="">
+                <div class="card-body p-4">
+                    <div class="flex items-center gap-2 lg:flex-wrap xl:flex-nowrap">
+                        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"
+                            class="lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            <g style="mix-blend-mode:luminosity" fill="currentColor" fill-rule="evenodd">
+                                <path
+                                    d="M33.583 14.875a3.5 3.5 0 0 1 3.482 3.152l1.925 19.25a3.5 3.5 0 0 1-3.482 3.848H32.98a3.5 3.5 0 0 1-3.413-2.724L28 31.5l-1.227 6.751a3.5 3.5 0 0 1-3.444 2.874h-2.837a3.5 3.5 0 0 1-3.482-3.848l1.925-19.25a3.5 3.5 0 0 1 3.482-3.152h11.166zm0 1.75H22.417c-.899 0-1.651.681-1.74 1.576L18.75 37.45a1.75 1.75 0 0 0 1.741 1.924h2.837a1.75 1.75 0 0 0 1.722-1.437l1.227-6.751c.34-1.874 3.006-1.932 3.428-.075l1.569 6.9a1.75 1.75 0 0 0 1.706 1.363h2.527a1.75 1.75 0 0 0 1.74-1.924L35.325 18.2a1.75 1.75 0 0 0-1.741-1.576z" />
+                                <rect x="19.25" y="21" width="17.5" height="1.75" rx=".875" />
+                            </g>
+                        </svg>
+
+                        <div
+                            class="text-xl md:text-lg lg:text-2xl font-medium lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            Boutique Clothing
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer md:py-6 bg-white opacity-70 hover:bg-w-indigo text-neutral-900 hover:text-white hover:opacity-100">
+            <a href="">
+                <div class="card-body p-4">
+                    <div class="flex items-center gap-2 lg:flex-wrap xl:flex-nowrap">
+                        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor" class="lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            <g style="mix-blend-mode:luminosity" fill="currentColor" fill-rule="evenodd">
+                                <path
+                                    d="M39.375 23.625v12.25a3.5 3.5 0 0 1-3.5 3.5h-15.75a3.5 3.5 0 0 1-3.5-3.5v-12.25h22.75zm-1.75 1.75h-19.25v10.5a1.75 1.75 0 0 0 1.62 1.745l.13.005h15.75a1.75 1.75 0 0 0 1.75-1.75v-10.5z" />
+                                <rect x="14" y="23.625" width="28" height="1.75" rx=".875" />
+                                <rect x="21.875" y="28.875" width="1.75" height="5.25" rx=".875" />
+                                <rect x="27.125" y="28.875" width="1.75" height="5.25" rx=".875" />
+                                <rect x="32.375" y="28.875" width="1.75" height="5.25" rx=".875" />
+                                <path
+                                    d="m33.18 16.572 2.395 6.578a.875.875 0 0 1-1.644.599l-2.395-6.578a.875.875 0 0 1 1.645-.599zM20.424 23.15l2.394-6.578a.875.875 0 0 1 1.645.599l-2.394 6.578a.875.875 0 1 1-1.645-.599z" />
+                            </g>
+                        </svg>
+                        <div
+                            class="text-xl md:text-lg lg:text-2xl font-medium lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            Gas Stations
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer md:py-6 bg-white opacity-70 hover:bg-w-indigo text-neutral-900 hover:text-white hover:opacity-100">
+            <a href="">
+                <div class="card-body p-4">
+                    <div class="flex items-center gap-2 lg:flex-wrap xl:flex-nowrap">
+                        <svg width="56px" height="56px" viewBox="0 0 56 56" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            fill="currentColor" class="lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            <g id="🚧-Home" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                <g id="Mobile---Home---Main-view" transform="translate(-32, -1745)" fill="currentColor">
+                                    <g id="Group-9" transform="translate(-0, 1240)">
+                                        <g id="Group-3" style="mix-blend-mode: luminosity;"
+                                            transform="translate(16, 489)">
+                                            <g id="icon/category/hair-salon---barber" transform="translate(16, 16)">
+                                                <g id="Group" transform="translate(16.625, 16.625)">
+                                                    <path
+                                                        d="M18.3644353,0.648750505 C18.4895094,0.181967665 18.9693042,-0.0950420136 19.436087,0.0300320715 C19.9028699,0.155106157 20.1798795,0.634900994 20.0548055,1.10168383 L17.284,11.44 L18.8931993,17.4461115 C19.3383585,17.0986785 19.8984563,16.8916676 20.5069042,16.8916676 C21.9566517,16.8916676 23.1319042,18.0669201 23.1319042,19.5166676 C23.1319042,20.9664151 21.9566517,22.1416676 20.5069042,22.1416676 C19.2677643,22.1416676 18.2291595,21.283075 17.95355,20.1283501 C17.8272707,20.0179546 17.7310783,19.8700909 17.6843654,19.695756 L16.378,14.821 L15.0725388,19.695756 C15.0351685,19.8352239 14.9661313,19.9577502 14.8753562,20.0577046 L14.8033542,20.1283501 C14.5277447,21.283075 13.4891399,22.1416676 12.25,22.1416676 C10.8002525,22.1416676 9.625,20.9664151 9.625,19.5166676 C9.625,18.0669201 10.8002525,16.8916676 12.25,16.8916676 C12.8584479,16.8916676 13.4185457,17.0986785 13.8637049,17.4461115 L15.472,11.44 L12.7020987,1.10168383 C12.5770247,0.634900994 12.8540343,0.155106157 13.3208172,0.0300320715 C13.7876,-0.0950420136 14.2673949,0.181967665 14.3924689,0.648750505 L16.378,8.06 Z M20.5069042,18.6416676 C20.023655,18.6416676 19.6319042,19.0334185 19.6319042,19.5166676 C19.6319042,19.9999168 20.023655,20.3916676 20.5069042,20.3916676 C20.9901534,20.3916676 21.3819042,19.9999168 21.3819042,19.5166676 C21.3819042,19.0334185 20.9901534,18.6416676 20.5069042,18.6416676 Z M12.25,18.6416676 C11.7667508,18.6416676 11.375,19.0334185 11.375,19.5166676 C11.375,19.9999168 11.7667508,20.3916676 12.25,20.3916676 C12.7332492,20.3916676 13.125,19.9999168 13.125,19.5166676 C13.125,19.0334185 12.7332492,18.6416676 12.25,18.6416676 Z"
+                                                        id="Combined-Shape" fill-rule="nonzero"></path>
+                                                    <path
+                                                        d="M7,0 C7.48324916,4.81217821e-16 7.875,0.391750844 7.875,0.875 C7.875,1.35824916 7.48324916,1.75 7,1.75 L1.749,1.75 L1.75,20.125 L3.5,20.125 L3.5,11.8125 C3.5,11.7370498 3.50954967,11.6638301 3.52750624,11.5939836 C3.50964306,11.5243842 3.5,11.4508182 3.5,11.375 C3.5,10.8917508 3.89175084,10.5 4.375,10.5 L7,10.5 C7.48324916,10.5 7.875,10.8917508 7.875,11.375 C7.875,11.8582492 7.48324916,12.25 7,12.25 L5.25,12.25 L5.25,20.5625 C5.25,20.6383182 5.24035694,20.7118842 5.22223038,20.7820383 C5.24045033,20.8513301 5.25,20.9245498 5.25,21 C5.25,21.4832492 4.85824916,21.875 4.375,21.875 L0.875,21.875 C0.391750844,21.875 7.95867045e-13,21.4832492 7.95807864e-13,21 C7.95798624e-13,20.9245498 0.00954966662,20.8513301 0.0275062424,20.7814836 C0.00964306134,20.7118842 6.66133815e-16,20.6383182 6.66133815e-16,20.5625 L-6.66133815e-16,1.3125 C-6.66133815e-16,1.23704983 0.00954966662,1.1638301 0.0275062424,1.09398357 C0.00964306134,1.02438419 7.95817149e-13,0.950818223 7.95807864e-13,0.875 C7.95748683e-13,0.391750844 0.391750844,8.87714298e-17 0.875,0 L7,0 Z M7,7 C7.48324916,7 7.875,7.39175084 7.875,7.875 C7.875,8.35824916 7.48324916,8.75 7,8.75 L4.375,8.75 C3.89175084,8.75 3.5,8.35824916 3.5,7.875 C3.5,7.39175084 3.89175084,7 4.375,7 L7,7 Z M7,3.5 C7.48324916,3.5 7.875,3.89175084 7.875,4.375 C7.875,4.85824916 7.48324916,5.25 7,5.25 L4.375,5.25 C3.89175084,5.25 3.5,4.85824916 3.5,4.375 C3.5,3.89175084 3.89175084,3.5 4.375,3.5 L7,3.5 Z"
+                                                        id="Combined-Shape"></path>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg>
+                        <div
+                            class="text-xl md:text-lg lg:text-2xl font-medium lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            Hair Salons / Barbers
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div
+            class="card cursor-pointer md:py-6 bg-white opacity-70 hover:bg-w-indigo text-neutral-900 hover:text-white hover:opacity-100">
+            <a href="">
+                <div class="card-body p-4">
+                    <div class="flex items-center gap-2 lg:flex-wrap xl:flex-nowrap">
+                        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor" fill-rule="evenodd"
+                            class="lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            <g style="mix-blend-mode:luminosity" fill="currentColor" fill-rule="evenodd">
+                                <path
+                                    d="M36.75 13.125c.483 0 .875.392.875.875v26.25a2.625 2.625 0 1 1-5.25 0v-10.5H31.5a.875.875 0 0 1-.87-.773l-.005-.102V19.25a6.125 6.125 0 0 1 6.125-6.125zm-.875 16.625h-1.75v10.5c0 .449.338.819.773.87l.102.005a.875.875 0 0 0 .875-.875v-10.5zm0-14.787-.052.01a4.377 4.377 0 0 0-3.448 4.277V28h3.5V14.963zM22.75 23.625V40.25a.875.875 0 1 0 1.75 0V23.625h1.75V40.25a2.625 2.625 0 1 1-5.25 0V23.625h1.75z" />
+                                <path
+                                    d="M28.875 21.437a3.5 3.5 0 0 1-3.5 3.5h-3.5a3.5 3.5 0 0 1-3.5-3.5V14a.875.875 0 1 1 1.75 0v7.437c0 .967.783 1.75 1.75 1.75h3.5a1.75 1.75 0 0 0 1.75-1.75V14a.875.875 0 1 1 1.75 0v7.437z" />
+                                <path
+                                    d="M23.625 13.125c.483 0 .875.392.875.875v7.75a.875.875 0 1 1-1.75 0V14c0-.483.392-.875.875-.875z" />
+                            </g>
+                        </svg>
+                        <div
+                            class="text-xl md:text-lg lg:text-2xl font-medium lg:flex-auto xl:flex-initial lg:text-center xl:text-left">
+                            Restaurants
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Retailers slider -->
+<div class="container mx-auto pl-4 md:pl-11 lg:px-7 mt-5 lg:mt-7">
+    <div class="flex justify-between items-center pb-3 pr-4 lg:pl-4">
+        <div class="text-xl md:text-2xl text-neutral-800 font-medium">Retailers near you</div>
+        <a href="" class="text-xs text-w-indigo font-semibold md:text-sm">See more</a>
+    </div>
+    <div class="relative hidden lg:block">
+        <span class="absolute top-60 -left-4 hidden cursor-pointer" id="prev-button-retailers">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+        <span class="absolute top-60 -right-4 cursor-pointer" id="next-button-retailers">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="w-6 h-6 text-w-secondary">
+                <path fill-rule="evenodd"
+                    d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                    clip-rule="evenodd" />
+            </svg>
+        </span>
+    </div>
+    <swiper-container init="false" class="lg:px-3" id="retailers-slider">
+        {% for retailer in retailers|slice:":16" %}
+        <swiper-slide
+            class="py-2 w-[255px] md:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 md:mr-11 lg:mr-0 {% endif %}">
+            {% include "components/retailer_card.html" with retailer=retailer %}
+        </swiper-slide>
+        {% endfor %}
+    </swiper-container>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-element-bundle.min.js"></script>
+<script src="{% static 'js/shopper/home.js' %}"></script>
+{% endblock %}

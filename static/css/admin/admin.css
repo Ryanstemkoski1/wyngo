@@ -1,0 +1,18 @@
+.field-image {
+    width: 25%;
+}
+.vLargeTextField {
+    width: 60%;
+    height: 40px;
+}
+.column-description {
+    width: 20%;
+}
+.column-is_modified_by_admin {
+    width: 10%;
+}
+.delete-red {
+    color: red;
+    font-weight: bold;
+    font-size: 15px !important;
+}

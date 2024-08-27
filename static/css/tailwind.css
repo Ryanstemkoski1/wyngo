@@ -1,0 +1,400 @@
+@import url("./fonts.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply font-mulish bg-neutral-100 scroll-smooth scroll-m-4;
+}
+
+.input__error {
+  @apply border-red-500;
+}
+
+.alert-success {
+  @apply bg-green-300 text-green-800 border-green-500;
+}
+
+.alert-error {
+  @apply bg-red-300 text-red-800 border-red-500;
+}
+
+.alert-warning {
+  @apply bg-yellow-300 text-yellow-800 border-yellow-500;
+}
+
+.alert-info {
+  @apply bg-blue-300 text-blue-800 border-blue-500;
+}
+
+.break-text {
+  word-break: break-word;
+}
+
+.bar-success::-moz-progress-bar {
+  width: 64px;
+  height: 16px;
+  border-radius: 8px;
+  background-image: linear-gradient(to left, #59b293, #4d997e);
+}
+
+.bar-danger::-moz-progress-bar {
+  width: 64px;
+  height: 16px;
+  border-radius: 8px;
+  background-image: linear-gradient(to left, #f44a4a, #ff3b3b);
+}
+
+.bar-warning::-moz-progress-bar {
+  width: 64px;
+  height: 16px;
+  border-radius: 8px;
+  background-image: linear-gradient(to left, #ffd02c, #cca623);
+}
+
+.bar-success::-webkit-progress-value {
+  width: 64px;
+  height: 16px;
+  border-radius: 8px;
+  background-image: linear-gradient(to left, #59b293, #4d997e);
+}
+
+.bar-danger::-webkit-progress-value {
+  width: 64px;
+  height: 16px;
+  border-radius: 8px;
+  background-image: linear-gradient(to left, #f44a4a, #ff3b3b);
+}
+
+.bar-warning::-webkit-progress-value {
+  width: 64px;
+  height: 16px;
+  border-radius: 8px;
+  background-image: linear-gradient(to left, #ffd02c, #cca623);
+}
+
+.fill-white {
+  fill: red;
+  stroke: red;
+}
+
+.selected-category svg {
+  color: #4852b3;
+}
+
+.selected-category:hover svg {
+  color: #fff;
+}
+
+.selected-category:hover .category-name {
+  color: #fff;
+}
+
+.radio-icon {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.radio-icon label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.radio-icon input[type="radio"] {
+  display: none;
+}
+
+.radio-indicator {
+  min-width: 20px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid black;
+  border-radius: 50%;
+  background-color: white;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 5px;
+}
+
+.radio-icon input[type="radio"]:checked + label .radio-indicator {
+  border-color: black;
+  background-color: white;
+}
+
+.radio-icon input[type="radio"]:checked + label .radio-indicator::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: #59b293;
+  border-radius: 50%;
+}
+
+.price-range-slider {
+  height: 8px;
+  position: relative;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+}
+.price-range-selected {
+  height: 100%;
+  left: 0%;
+  right: 85%;
+  position: absolute;
+  border-radius: 5px;
+  @apply bg-w-primary;
+}
+
+.price-range-input {
+  position: relative;
+}
+
+.price-range-input input {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  background: none;
+  pointer-events: none;
+  appearance: none;
+  top: -8px;
+}
+
+.price-range-input input::-webkit-slider-thumb {
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  border: 3px solid #59b293;
+  background-color: #fff;
+  pointer-events: auto;
+  appearance: none;
+}
+
+.price-range-input input::-moz-range-thumb {
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  border: 3px solid #e0e0e0;
+  background-color: #fff;
+  pointer-events: auto;
+  -moz-appearance: none;
+}
+
+.gallery-thumbs swiper-slide {
+  opacity: 0.6;
+}
+
+.gallery-thumbs .swiper-slide-active {
+  opacity: 1;
+}
+
+/* The container must be positioned relative: */
+.custom-select {
+  position: relative;
+  border: 1px solid #262626;
+  border-radius: 10px;
+}
+
+.custom-select select {
+  display: none; /*hide original SELECT element: */
+}
+
+.select-selected {
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+/* Style the arrow inside the select element: */
+.select-selected:after {
+  position: absolute;
+  content: url("data:image/svg+xml,<svg height='10px' width='10px' fill='%23262626' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+  top: 10px;
+  right: 25px;
+  width: 0;
+  height: 0;
+}
+
+/* Point the arrow upwards when the select box is open (active): */
+.select-selected.select-arrow-active:after {
+  content: url("data:image/svg+xml,<svg height='10px' width='10px' fill='%23262626' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+  transform: rotate(180deg);
+  top: 28px;
+  right: 15px;
+}
+.select-items div:hover,
+.same-as-selected {
+  background-color: #172a26;
+  color: #ffffff;
+  padding: 10px 8px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+/* style the items (options), including the selected item: */
+.select-items > .div-item,
+.select-selected {
+  color: #262626;
+  padding: 10px 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: "Mulish", sans-serif;
+  font-size: 14px;
+}
+
+/* Style items (options): */
+.select-items {
+  position: absolute;
+  background-color: #ffffff;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 6px 0;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px 0 rgba(38, 38, 38, 0.2);
+  margin-top: 2px;
+  height: auto;
+  overflow: auto;
+  padding-left: 10px;
+  padding-top: 8px;
+  padding-right: 4px;
+}
+
+.select-items-small {
+  height: auto;
+}
+
+.select-items::-webkit-scrollbar {
+  width: 8px;
+}
+
+.select-items::-webkit-scrollbar-track {
+  background-color: #e0e0e0;
+  border-radius: 6px;
+}
+
+.select-items::-webkit-scrollbar-thumb {
+  background-color: #172a26;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.select-items::-webkit-scrollbar-thumb:hover {
+  background-color: #172a26;
+}
+
+.select-hide {
+  display: none;
+}
+
+select {
+  background: url("data:image/svg+xml,<svg height='10px' width='10px' fill='#262626' viewBox='0 0 16 16' fill='%23000000' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>")
+    no-repeat;
+  background-position: calc(100% - 0.75rem) center !important;
+  -moz-appearance: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  padding-right: 2rem !important;
+}
+
+select[disabled] {
+  pointer-events: none;
+}
+
+#article-content-container {
+  & > * {
+    @apply text-neutral-800;
+  }
+  & > p {
+    @apply leading-[22px];
+  }
+}
+
+.retailers-scroll::-webkit-scrollbar {
+  background-color: transparent;
+  width: 8px;
+}
+
+.retailers-scroll:hover::-webkit-scrollbar {
+  width: 8px;
+}
+
+.retailers-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(23, 42, 38, 0.5);
+  border-radius: 6px;
+}
+
+.retailers-scroll::-webkit-scrollbar-track {
+  border-radius: 6px;
+}
+
+.container-bottom-shadow {
+  background-image: linear-gradient(to bottom, rgba(245, 245, 245, 0), #dad7d7);
+}
+
+.progress-bar {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border-radius: 20px;
+}
+
+.progress-bar::-webkit-progress-bar {
+  background-color: rgba(224, 224, 224, 0.5);
+  border-radius: 20px;
+}
+
+.progress-bar-danger::-webkit-progress-value {
+  background-color: #ff3b3b;
+  border-radius: 20px;
+}
+
+.progress-bar-danger::-moz-progress-bar {
+  background-color: #ff3b3b;
+  border-radius: 20px;
+}
+
+.progress-bar-warning::-webkit-progress-value {
+  background-image: linear-gradient(to left, #ffd02c, #cca623);
+  border-radius: 20px;
+}
+
+.progress-bar-warning::-moz-progress-bar{
+  background-image: linear-gradient(to left, #ffd02c, #cca623);
+  border-radius: 20px;
+}
+
+.progress-bar-success::-webkit-progress-value {
+  background-image: linear-gradient(to left, #59b293, #4d997e);
+  border-radius: 20px;
+}
+
+.progress-bar-success::-moz-progress-bar {
+  background-image: linear-gradient(to left, #59b293, #4d997e);
+  border-radius: 20px;
+}
+
+.breadcrumbs-scroll::-webkit-scrollbar {
+  width: 2px;
+  height: 4px;
+}
+
+.breadcrumbs-scroll::-webkit-scrollbar-track {
+  background-color: #e0e0e0;
+  border-radius: 6px;
+}
+
+.breadcrumbs-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(23, 42, 38, 0.5);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.breadcrumbs-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #172a26;
+}
+
+.bg-w-light-smooth-gray{
+  background-color: #f5f5f5
+}

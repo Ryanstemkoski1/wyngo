@@ -1,0 +1,20 @@
+{% extends "layouts/_base.html" %}
+
+{% block content %}
+{% block messages_cards %}{% endblock %}
+<div
+    class="card bg-white text-neutral-800 md:w-[504px] lg:w-[432px] mx-auto relative
+    {% if 'forgot_password/' in request.path or 'password_reset/done' in request.path or 'password_reset/confirm' in request.path %} mt-28 {% endif %}">
+    <div class="card-body p-4 md:p-7">
+        {% block card_title %}{% endblock %}
+        <span class="text-[13.5px] font-normal pr-0">{% block card_subtitle %}{% endblock %}</span>
+        <div>
+            {% block card_body %}{% endblock %}
+        </div>
+    </div>
+    {% block card_icon %}{% endblock %}
+</div>
+
+{% block info %}{% endblock %}
+
+{% endblock %}

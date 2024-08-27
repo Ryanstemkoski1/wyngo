@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Wyndo</title>
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'css/wyndo.min.css' %}">
+    {% block styles %}{% endblock %}
+</head>
+
+<body>
+    {% with "signup/" as su %}
+    {% with "login/" as lo %}
+    {% with "forgot_password/" as fp %}
+    {% with "password_reset/" as pr %}
+
+    {% if lo in request.path or su in request.path or fp in request.path or pr in request.path %}
+
+    {% include "layouts/_simple_nav.html" %}
+
+    {% else %}
+
+    {% include "layouts/_nav.html" %}
+
+    {% block article %}
+
+    {% endblock %}
+
+    {% endif %}
+
+    <main
+        class="py-6 md:pb-6 {% if 'login/' in request.path or 'signup/' in request.path or 'forgot_password/' in request.path or 'password_reset/' in request.path %} min-h-[calc(100vh_-_12rem)] md:min-h-[calc(100vh_-_9.8rem)] {% endif %}">
+        {% block container %}
+        <div class="px-5 md:pt-14 md:pb-8 lg:pt-10 lg:pb-2 max-w-7xl mx-auto">
+            {% block content %}{% endblock %}
+        </div>
+        {% endblock %}
+    </main>
+
+    {% if lo in request.path or su in request.path or fp in request.path or pr in request.path %}
+
+    {% include "layouts/_simple_footer.html" %}
+
+    {% else %}
+
+    {% include "layouts/_footer.html" %}
+
+    {% endif %}
+
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+</body>
+
+{% block scripts %}{% endblock %}
+
+<script>
+    const arrowIcon = {
+        down: "{% static 'img/icons/icon-arrow-down.svg' %}",
+        up: "{% static 'img/icons/icon-arrow-up.svg' %}"
+    }
+</script>
+
+<script src="{% static 'js/shopper/navbar.js' %}"></script>
+
+</html>

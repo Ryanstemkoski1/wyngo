@@ -1,0 +1,16 @@
+{% load static %}
+<header class="navbar bg-w-primary">
+    <div class="py-4 max-w-7xl mx-auto px-1 lg:px-3.5 w-full">
+        <div class="flex-1">
+            <a href="/" class="btn btn-ghost px-0">
+                <img src="{% static 'img/wyndo-logo.png' %}" alt="Wyndo Logo" class="hidden md:block md:w-36">
+                <img src="{% static 'img/wyndo-logo-mobile.png' %}" alt="Wyndo Logo" class="md:hidden">
+            </a>
+        </div>
+        <div class="flex items-center px-1">
+            <a class="cursor-pointer">
+                <img src="{% static 'img/icons/icon-help.svg' %}" alt="Help" class="inline-block w-6 h-6">
+            </a>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,108 @@
+{% extends "layouts/_base.html" %}
+
+{% load custom_filters %}
+
+{% load static %}
+
+
+{% block container %}
+<!-- Upcoming reservations slider -->
+<div
+    class="max-w-7xl mx-auto px-4 sm:px-11 lg:px-7 mb-2 {% if upcoming_reservations|length == 0 %} h-[610px] {% else %} h-full {% endif %}">
+    <div class="flex flex-col-reverse lg:flex-row lg:justify-between lg:items-center pb-3 pr-4 lg:pl-4 w-full">    
+        {% if upcoming_reservations %}
+        <div class="text-xl md:text-2xl text-w-dark-green font-medium w-full">Upcoming reservations</div>
+        {% endif %}
+    </div>
+    {% if upcoming_reservations %}
+
+    <!-- Mobile -->
+    <div class="flex flex-col gap-2 sm:hidden">
+        {% for res in upcoming_reservations %}
+        <div class="relative">
+            <div class="absolute top-4 left-2 badge bg-w-indigo border-w-indigo px-1 py-3">
+                <div class="flex text-white text-xs font-normal items-center gap-1">
+                    <div class="flex items-center">
+                        <span class="pl-1">{{ res.time_limit|minutes_until_datetime }}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span> left</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div
+            class="infinite-item-mobile lg:hidden bg-white border border-neutral-200 cursor-pointer hover:shadow-md rounded-xl flex flex-row overflow-hidden">
+            <div class="w-4/12">
+                <div class="flex items-center justify-center h-full">
+
+                    {% if res.variant.variantimage_set.first.image %}
+                    <img src=" {{ res.variant.variantimage_set.first.image.url }}"
+                        class="object-cover rounded-lg px-px h-28 object-fill" />
+                    {% elif res.variant.image %}
+                    <img src="{{ res.variant.image.url }}" class="object-cover rounded-lg px-px h-28 object-fill" />
+                    {% else %}
+                    <img src="{% static 'img/no-image.png' %}" class="object-cover rounded-lg px-px h-28 object-fill" />
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="px-4 py-2 text-neutral-800 w-8/12">
+                <a href="{% url 'reservation-details' reservation_id=res.id %}">
+                    <div class="card-title font-medium text-neutral-800 text-2xl">${{ res.total }}</div>
+                    <div class="font-medium text-neutral-800 text-base">{{ res.variant.product.name }}</div>
+                </a>
+                <a href="{% url 'retailer-details' retailer_id=res.variant.product.inventory.location.retailer.id %}">
+                    <div class="flex items-center gap-1 text-sm text-w-blue mt-1">
+                        <span class="material-icons-outlined">
+                            storefront
+                        </span>
+                        <div class="font-normal underline">
+                            {{ res.variant.product.inventory.location.retailer.name }}
+                        </div>
+                    </div>
+                </a>
+                <div class="font-normal text-sm text-neutral-800 line-clamp-2 mt-1">
+                    {{ res.variant.product.inventory.location.address1 }} {{ res.variant.product.inventory.location.city }} {{ res.variant.product.inventory.location.zip_code }}
+                </div>
+                <div class="bg-w-light-gray rounded-lg w-full px-3 py-2 my-1.5 space-y-0.5">
+                    <div class="font-normal text-sm text-neutral-800">
+                        Reserved quantity: {{ res.quantity }}
+                    </div>
+                    <div class="font-normal text-sm text-neutral-800 flex items-center gap-1" style="display: grid;">
+                        <span>Reservation code</span>
+                        <div>
+                            <span>{{ res.reservation_code }}</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'reservation-details' reservation_id=res.id %}"
+                    class=" bg-w-primary text-white text-sm font-semibold capitalize border-w-light-gray rounded-full h-10 flex items-center justify-center btn-block mt-3.5 mb-2"
+                    id="details_{{ product.id }}">
+                    Reservation details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Tablet and Desktop -->
+    <div class="hidden sm:grid sm:grid-cols-8 lg:grid-cols-12 gap-6 mt-4">
+        {% for res in upcoming_reservations %}
+        <div class="sm:col-span-4 lg:col-span-3">
+            {% include "components/product_card.html" with product=res.product reserved=res %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="flex flex-col items-center justify-center">
+        <div class="text-xl md:text-2xl text-w-dark-green font-medium w-full">No upcoming reservations</div>
+        <div class="text-sm text-neutral-800 font-normal mt-2">You have no upcoming reservations.</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

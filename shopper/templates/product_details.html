@@ -1,0 +1,474 @@
+{% extends "layouts/_base.html" %}
+
+{% load static %}
+{% load custom_filters %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+<style>
+    @media screen and (max-width: 768px) {
+        .product-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+    }
+
+    .product-name {
+        white-space: nowrap;
+
+            {
+            #overflow: hidden;
+            #
+        }
+
+        text-overflow: ellipsis;
+    }
+
+    @media screen and (max-width: 768px) {
+        .custom-warp {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const productNameElements = document.querySelectorAll('.product-name');
+        const text = productNameElements[0].innerText
+        if (window.innerWidth > 768) {
+            if (text.length > 70) {
+                productNameElements[0].innerText = text.substring(0, 70) + '...';
+            }
+        } else if (window.innerWidth < 768) {
+            if (text.length > 20) {
+                productNameElements[0].innerText = text.substring(0, 5) + '...';
+            }
+        }
+    });
+</script>
+
+{% endblock %}
+
+{% block container %}
+<div class="sticky top-0 z-[5] w-full bg-neutral-100">
+
+    <div class="max-w-7xl mx-auto py-4 mb-3 px-4 sm:px-12 xl:px-10">
+        <div class="flex flex-col-reverse lg:flex-row lg:justify-between lg:items-center pb-3 pr-4 lg:pl-4 w-full">
+            <div class="relative w-full">
+                <div class="absolute z-10 lg:-top-[5px] right-0 -top-1 lg:left-[340px] xl:left-[595px] sm:w-[600px]">
+                    <div class="flex justify-end w-full">{% include "components/alert.html" %}</div>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center justify-between gap-8">
+            <div class="lg:w-2/4 breadcrumbs-scroll">
+
+
+                <div class="text-sm flex custom-warp gap-1 items-center font-normal no-underline">
+
+                    {% if "retailers" in previous_url %}
+                    <a href="{% url 'retailers' %}?origin={{ origin }}"
+                        class="text-neutral-400 hover:text-neutral-800 hover:underline"> Retailers</a>
+                    {% elif "reservation" in previous_url %}
+                    <a href="{{ previous_url }}"
+                        class="text-neutral-400 hover:text-neutral-800 hover:underline">Reservations</a>
+                    {% else %}
+                    <a href="{{ request.scheme }}://{{ request.get_host }}"
+                        class="text-neutral-400 hover:text-neutral-800 hover:underline">Home</a>
+                    {% endif %}
+                    <span class="material-icons-outlined text-neutral-400">
+                        chevron_right
+                    </span>
+                    <a href="{% url 'retailer-details' retailer_id=product.inventory.location.retailer.id %}?origin={{ origin }}"
+                        class="text-neutral-400 hover:text-neutral-800 hover:underline inline-flex whitespace-nowrap">
+                        {{ product.inventory.location.retailer.name }}
+                    </a>
+                    <span class="material-icons-outlined text-neutral-400">
+                        chevron_right
+                    </span>
+                    <span class="text-neutral-800 inline-flex whitespace-nowrap product-name">
+                        {{ product.name }}
+                    </span>
+                </div>
+
+
+            </div>
+            <div class="hidden sm:block">
+                <a href="{{ previous_url }}"
+                    class="border border-w-primary text-w-primary btn-block text-sm font-semibold rounded-lg capitalize h-10 px-9 py-2.5">
+                    Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="max-w-7xl mx-auto mb-5 min-h-max lg:mt-6">
+    <div class="grid grid-cols-4 sm:gap-6 sm:grid-cols-8 lg:grid-cols-12 px-4 sm:px-12 lg:px-10 xl:px-9">
+        <div class="col-span-4 lg:col-span-8 lg:h-fit">
+            <swiper-container
+                class="bg-white border border-w-light-gray rounded-xl px-14 xl:px-32 mb-4 h-[230px] md:h-[210px] lg:h-[440px] xl:h-[500px]"
+                init="false" id="product-gallery">
+            </swiper-container>
+            <div class="flex items-center justify-center gap-2 lg:px-8">
+                <span class="select-none material-icons cursor-pointer opacity-50 text-neutral-800 w-full text-end"
+                    id="prev-button-product-gallery">
+                    chevron_left
+                </span>
+                <swiper-container class="w-52 lg:w-[78%] xl:w-[95%] gallery-thumbs select-none" init="false"
+                    id="product-gallery-thumbs">
+                </swiper-container>
+                <span class="select-none material-icons cursor-pointer text-neutral-800 w-full opacity-50"
+                    id="next-button-product-gallery">
+                    chevron_right
+                </span>
+            </div>
+            <div
+                class="border border-w-light-gray bg-white p-4 lg:p-6 text-neutral-800 rounded-xl my-6 {% if product.variants.first.description|length == 0 %} hidden sm:block {% endif %}">
+                <div
+                    class="flex items-center justify-between {% if product.variants.first.description|length > 0 %} border-b border-w-light-gray pb-4 {% endif %}">
+                    <span class="text-2xl font-medium" id="product_name_2">
+                        {% if product_variants|length > 1 %}
+                        {{ product_variants.first.name }}
+                        {% else %}
+                        {{ product.name }}
+                        {% endif %}
+                    </span>
+                </div>
+                {% if product.variants.first.description|length > 0 %}
+                <div class="flex flex-col gap-4 pt-4">
+                    <span class="font-medium text-base">
+                        Description
+                    </span>
+                    <span class="font-normal text-sm" id="description">
+                        {{ product.variants.first.description }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div
+            class="col-span-4 sm:col-start-5 sm:col-span-4 lg:col-start-9 lg:col-span-4 lg:h-fit {% if product.variants.first.description|length == 0 %}sm:pt-0 pt-6{% endif %}">
+            <div class="border border-w-light-gray bg-white px-4 py-3 sm:p-6 text-neutral-800 rounded-xl">
+                <div class="border-b border-w-light-gray pb-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl font-medium" id="product_name">
+                            {% if product_variants|length > 1 %}
+                            {{ product_variants.first.name }}
+                            {% else %}
+                            {{ product.name }}
+                            {% endif %}
+                        </span>
+                        <span class="rounded-full bg-w-light-smooth-gray p-1 cursor-pointer" id="favorite-span_offer"
+                            onclick="favoriteBtn(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-6 h-6 text-white favorite stroke-red-600"
+                                id="favorite_offer">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="font-medium text-2xl pt-4" id="price">
+                        {% if product_variants|length > 1 %}
+                        ${{ product_variants.0.price }}
+                        {% else %}
+                        ${{ product.variants.first.price }}
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center text-w-indigo gap-1 pt-2">
+                        <span class="material-icons-outlined">
+                            storefront
+                        </span>
+                        <a href="{% url 'retailer-details' retailer_id=product.inventory.location.retailer.id %}">
+                            <span class="text-xl font-medium underline">
+                                {{ product.inventory.location.retailer.name }}
+                            </span>
+                        </a>
+                    </div>
+                    <div class="font-normal text-sm line-clamp-1 opacity-50 pt-2 mb-2">
+                        {{ product.inventory.location.address1 }}
+                        {% if product.inventory.location.address2 %}
+                        {{ product.inventory.location.address2 }},
+                        {% endif %}
+                        {% if product.inventory.location.city %}
+                        {{ product.inventory.location.city }},
+                        {% endif %}
+                        {% if product.inventory.location.zip_code %}
+                        {{ product.inventory.location.zip_code }}
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center">
+                        <div class="font-normal text-sm opacity-50 text-neutral-800 pr-4">Reliability Score</div>
+                        {% with product_stock=product_variants.first|calculate_reliability_score %}
+                            {% if product_stock < 1 %} 
+                                <progress class="progress-bar progress-bar-danger w-16 h-4"
+                                    value="33" max="100" id="score"></progress>
+                            {% elif product_stock == 1 %}
+                                <progress class="progress-bar progress-bar-warning w-16 h-4" value="66"
+                                    max="100" id="score"></progress>
+                            {% else %}
+                                <progress class="progress-bar progress-bar-success w-16 h-4" value="100"
+                                    max="100" id="score"></progress>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+                <form action="{% url 'make-reservation' product_id=product.id %}" method="post" class="mt-2"
+                    id="make-res_{{ product.id }}">
+                    {% csrf_token %}
+                    {% if product_variants|length > 1 %}
+                    <div class="pt-2 font-medium text-base mb-2">
+                        Product variation
+                    </div>
+                    <!-- Tablet and Desktop variation select -->
+                    <div class="hidden sm:block">
+                        <div class="custom-select">
+                            <select name="variation" id="variation" class="w-full disabled:borderdisabled:border-neutral-800 disabled:text-neutral-800
+                            disabled:text-sm disabled:opacity-100 focus:ring-neutral-800 active:ring-neutral-800
+                            ring-neutral-80">
+                                {% for variation in product_variants %}
+                                <option value="{{ variation.id }}" data-price="{{ variation.price }}"
+                                    data-name="{{ variation.name }}" data-stock="{{ variation|calculate_reliability_score }}"
+                                    data-description="{{ variation.description }}">
+                                    {{ variation.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div id="openDrawer" class="sm:hidden">
+                        <select disabled name="variations-mobile" id="variations_mobile"
+                            class="w-full rounded-lg disabled:border disabled:border-neutral-800 disabled:text-neutral-800 disabled:text-sm disabled:opacity-100 focus:ring-neutral-800 active:ring-neutral-800 ring-neutral-800">
+                            {% for variation in product_variants %}
+                            <option value="{{ variation.id }}" data-price="{{ variation.price }}" data-stock="{{ variation|calculate_reliability_score }}" data-name="{{ variation.name }}" data-description="{{ variation.description }}">
+                                {{ variation.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="overlay"
+                        class="fixed sm:hidden inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+                    </div>
+
+                    <div id="drawer"
+                        class="fixed bottom-0 left-0 w-full h-0 bg-white overflow-hidden transition-all duration-300 z-50 rounded-t-2xl sm:hidden">
+                        <div class="h-full">
+                            <div class="flex items-center justify-between text-w-dark-green px-6 pt-6 pb-2">
+                                <span class="font-medium text-xl">Product variation</span>
+                                <span class="material-icons-outlined" id="closeDrawer">
+                                    close
+                                </span>
+                            </div>
+                            <div class="px-6 space-y-5 pt-5 h-[280px] overflow-auto">
+                                {% for variation in product_variants %}
+                                <div class="radio-icon">
+                                    {% if variation.id == product_variants.first.id %}
+                                    <input checked value="{{ variation.id }}" type="radio" name="variation-radio"
+                                        data-price="{{ variation.price }}" data-name="{{ variation.name }}"
+                                        data-description="{{ variation.description }}"
+                                        data-stock="{{ variation.stock }}" id="{{ variation.id }}_radio" class="hidden">
+                                    {% else %}
+                                    <input value="{{ variation.id }}" type="radio" name="variation-radio"
+                                        data-price="{{ variation.price }}" data-name="{{ variation.name }}"
+                                        data-description="{{ variation.description }}"
+                                        data-stock="{{ variation.stock }}" id="{{ variation.id }}_radio" class="hidden">
+                                    {% endif %}
+                                    <label for="{{ variation.id }}_radio">
+                                        <div class="radio-indicator"></div>
+                                        <span class="font-normal text-sm text-neutral-800">
+                                            {{ variation.name }}
+                                        </span>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="flex justify-center border-t px-6 py-4 border-w-primary mt-8">
+                                <button type="button" onclick="applyFilter()"
+                                    class="bg-w-primary text-white btn-block text-sm font-semibold capitalize border-w-light-gray rounded-full h-10">
+                                    Apply
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="card-actions justify-center gap-4 flex-col items-center pt-2">
+                        <div class="flex items-center gap-4 justify-center w-full">
+                            <button type="button"
+                                class="rounded-full bg-w-primary p-2 disabled:bg-w-light-gray minus-btn"
+                                id="minus_product" onclick="minusBtn(this)" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                    class="w-6 h-6 text-white">
+                                    <path fill-rule="evenodd"
+                                        d="M3.75 12a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <input type="text" name="quantity" id="quantity_product" min="1" readonly max="500"
+                                class="w-12 border border-neutral-800 appearance-none rounded-xl text-center text-neutral-800 disabled:bg-white"
+                                value="1">
+                            <button type="button"
+                                class="rounded-full bg-w-primary p-2 plus-btn disabled:bg-w-light-gray"
+                                id="plus_product" onclick="plusBtn(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                    class="w-6 h-6 text-white">
+                                    <path fill-rule="evenodd"
+                                        d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        {% if reserved %}
+                        <button type="submit" disabled
+                            class=" bg-w-primary text-white btn-block hidden text-sm font-semibold capitalize border-w-light-gray rounded-full h-10"
+                            id="save_{{ product.id }}">
+                            Save
+                        </button>
+                        <button type="button" onclick="editBtn(this)"
+                            class=" bg-w-primary text-white btn-block  text-sm font-semibold capitalize border-w-light-gray rounded-full h-10"
+                            id="edit_{{ product.id }}">
+                            Edit
+                        </button>
+                        <button type="button" onclick="cancelBtn(this)"
+                            class=" bg-white border border-w-primary text-w-primary btn-block text-sm font-semibold capitalize rounded-full h-10"
+                            id="cancel_{{ product.id }}">
+                            Cancel Reservation
+                        </button>
+                        {% else %}
+                        <button type="button" onclick="reserveBtn(this)"
+                            class=" bg-w-primary text-white btn-block text-sm font-semibold capitalize border-w-light-gray rounded-full h-10"
+                            id="reserve_{{ product.id }}">
+                            Reserve
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            {% if other_retailers %}
+            <div class="font-medium text-xl text-w-dark-green w-full px-4 mt-4 sm:mt-8 lg:text-2xl lg:pb-2">
+                Other retailers selling this product
+            </div>
+            <div class="{% if other_retailers|length > 1 %}relative{% endif %} mt-4">
+                {% if other_retailers|length > 1 %}
+                <div class="absolute inset-x-0 bottom-0 h-8"></div>
+                {% endif %}
+                <div class="lg:h-[320px] lg:overflow-auto retailers-scroll space-y-4">
+                    {% for product in other_retailers %}
+                    <div class="border border-w-light-gray bg-white px-4 py-3 sm:p-6 text-neutral-800 rounded-xl">
+                        <div class="flex items-center justify-between">
+                            {% if product.variants.all|length == 1 %}
+                            <div class="font-medium text-neutral-800 text-xl">
+                                ${{ product.variants.first.price }}
+                            </div>
+                            {% elif product.min_price != product.max_price %}
+                            <div class="font-medium text-neutral-800 text-xl">
+                                ${{ product.min_price }} - ${{ product.max_price }}
+                            </div>
+                            {% else %}
+                            <div class="font-medium text-neutral-800 text-xl">
+                                ${{ product.min_price }}
+                            </div>
+                            {% endif %}
+                            <a href="{% url 'products' product_id=product.id %}"
+                                class="py-px px-4 border border-w-primary text-w-primary text-sm rounded-lg font-medium">
+                                View
+                            </a>
+                        </div>
+                        <div class="flex items-center text-w-indigo gap-1 pt-1">
+                            <span class="material-icons-outlined">
+                                storefront
+                            </span>
+                            <a href="{% url 'retailer-details' retailer_id=product.inventory.location.retailer.id %}">
+                                <span class="text-base font-medium underline">
+                                    {{ product.inventory.location.retailer.name }}
+                                </span>
+                            </a>
+                        </div>
+                        <div class="text-sm !line-clamp-1 text-neutral-800 opacity-50 pt-1">
+                            {{ product.inventory.location.address1 }}, {{ product.inventory.location.city }}, {{ product.inventory.location.zip_code }}
+                        </div>
+                        <div class="flex items-center pt-1">
+                            <div class="font-normal text-sm opacity-50 text-neutral-800 pr-4">Reliability Score</div>
+                            {% with product_stock=product.variants.first|calculate_reliability_score %}
+                            {% if product_stock < 1 %} <progress class="progress-bar progress-bar-danger w-16 h-4"
+                                value="33" max="100" id="score"></progress>
+                                {% elif product_stock == 1 %}
+                                <progress class="progress-bar progress-bar-warning w-16 h-4" value="66"
+                                    max="100" id="score"></progress>
+                                {% else %}
+                                <progress class="progress-bar progress-bar-success w-16 h-4" value="100"
+                                    max="100" id="score"></progress>
+                                {% endif %}
+                                {% endwith %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% if related_items %}
+    <div class="pl-4 sm:pl-11 mt-4 lg:mt-0 lg:px-6">
+        <div class="flex justify-between items-center pb-3 pr-4 lg:pl-4">
+            <div class="text-xl sm:text-2xl text-w-dark-green font-medium">Related items</div>
+        </div>
+        <div class="relative hidden lg:block">
+            <span class="absolute top-60 -left-4 hidden cursor-pointer" id="prev-button-related-items">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                    class="w-6 h-6 text-w-secondary">
+                    <path fill-rule="evenodd"
+                        d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                        clip-rule="evenodd" />
+                </svg>
+            </span>
+            <span class="absolute top-60 -right-4 cursor-pointer" id="next-button-related-items">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                    class="w-6 h-6 text-w-secondary">
+                    <path fill-rule="evenodd"
+                        d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                        clip-rule="evenodd" />
+                </svg>
+            </span>
+        </div>
+        <swiper-container init="false" class="lg:px-3" id="related-items-slider">
+            {% for product in related_items|slice:":16" %}
+            {% if product.variants.all|length > 1 and product.min_price > 0 %}
+            <swiper-slide
+                class="py-2 w-[255px] sm:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 sm:mr-11 lg:mr-0 {% endif %}">
+                {% include "components/product_card.html" with product=product %}
+            </swiper-slide>
+            {% elif product.variants.first.price > 0 %}
+            <swiper-slide
+                class="py-2 w-[255px] sm:w-[240px] lg:w-[282px] rounded-2xl {% if forloop.last %} mr-4 sm:mr-11 lg:mr-0 {% endif %}">
+                {% include "components/product_card.html" with product=product %}
+            </swiper-slide>
+            {% endif %}
+            {% endfor %}
+        </swiper-container>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-element-bundle.min.js"></script>
+<script>
+
+    const variantImages = JSON.parse('{{ variants_json|safe }}')
+
+    let currentVariant = parseInt('{{ product_variants.0.id }}')
+
+    const noImage = '{% static "img/no-image.png" %}'
+
+    const productImage = '{% if product.variants.first.image %}{{ product.variants.first.image.url }}{% endif %}'
+
+</script>
+<script src="{% static 'js/shopper/products.js' %}"></script>
+{% endblock %}

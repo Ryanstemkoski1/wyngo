@@ -1,0 +1,50 @@
+{% extends "layouts/_base.html" %}
+
+{% load static %}
+
+{% block container %}
+
+<div class="max-w-7xl mx-auto mb-2 px-1 xl:px-2 h-full">
+    <div class="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-12 sm:px-11 sm:gap-6 infinite-container">
+        <div class="col-span-4 sm:col-start-2 lg:col-start-4 sm:col-span-6 grow sm:w-full">
+            <div class="flex justify-end items-center align-middle relative sm:w-full">
+                <input type="text" placeholder="Search Shopping Centers" name="search"
+                    class="input bg-white h-10 w-full text-sm rounded-full focus:ring-transparent focus:ring-0 placeholder-neutral-400"
+                    id="search" />
+                <button id="searchBtn" class=" bg-w-blue h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center
+                        absolute">
+                    <img src="{% static 'img/icons/icon-search.svg' %}" id="searchIcon" class="filter invert" />
+                </button>
+            </div>
+        </div>
+        <div class="col-span-4 sm:col-span-8 lg:col-span-12 mt-4">
+            <div class="flex items-center justify-between">
+                <span class="text-w-dark-green font-medium text-xl sm:text-2xl">
+                    Shopping Centers near you
+                </span>
+            </div>
+        </div>
+        {% for shopping_center in shopping_centers %}
+        <div class="col-span-4 lg:col-span-3 sm:mt-8 infinite-item">
+            {% include 'components/list_card.html' with item=shopping_center score=score %}
+        </div>
+        {% endfor %}
+    </div>
+    {% if shopping_centers.has_next %}
+    <a class="infinite-more-link" href="?page={{ shopping_centers.next_page_number }}"></a>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"
+    integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"
+    integrity="sha512-CEiA+78TpP9KAIPzqBvxUv8hy41jyI3f2uHi7DGp/Y/Ka973qgSdybNegWFciqh6GrN2UePx2KkflnQUbUhNIA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/shortcuts/infinite.min.js"
+    integrity="sha512-m3kH21aSkKrGeoqdb7IP7rlu1VcQee5VrjLQepeSOp5M05Wl6HwqJ1Jwo14EHOuBg77pkAlBtQuVMPVeXzfueg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{% static 'js/shopper/shopping_center.js' %}"></script>
+{% endblock %}

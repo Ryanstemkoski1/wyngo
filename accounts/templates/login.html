@@ -1,0 +1,80 @@
+{% extends "components/account_card.html" %}
+{% load static %}
+
+
+{% block card_title %}
+<div class="card-title text-2xl font-medium">
+    <div class="flex flex-col">
+        <span>Hello!</span>
+        <span>Welcome to Wyndo</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block card_subtitle %}
+To continue reserving products, login.
+{% endblock %}
+
+
+{% block card_body %}
+<form action="{% url 'login' %}" method="POST" class="space-y-3">
+    {% csrf_token %}
+    <div class="form-control">
+        <label for="email" class="label font-normal text-sm px-3 pb-1">Email*</label>
+        <div class="flex justify-end items-center align-middle relative">
+            <input type="email" placeholder="you@example.com" name="email"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+        </div>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Please, make sure to enter a valid email
+            address.</span>
+    </div>
+    <div class="form-control">
+        <label for="name" class="label font-normal text-sm px-3 pb-1">Password*</label>
+        <div class="flex justify-end items-center align-middle relative">
+            <input type="password" placeholder="At least 8 characters" name="password"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <img src="{% static 'img/icons/icon-eye-hide.svg' %}" class="absolute w-6 mr-2 cursor-pointer eye-icon" />
+        </div>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Please, enter a valid password.</span>
+    </div>
+    <div class="form-control pt-7">
+        <div class="flex justify-between items-center">
+            <div class="text-sm font-normal md:pr-2">
+                <input type="checkbox" class="text-w-primary bg-white rounded-sm border-w-green border-2 w-5 h-5"
+                    name="remember_me" />
+                Remember me
+            </div>
+            <a href="{% url 'forgot_password' %}" class="text-w-blue font-normal text-sm">Forgot password?</a>
+        </div>
+    </div>
+    <div class="form-control pt-6">
+        <button disabled type="submit"
+            class="disabled:bg-w-light-gray bg-w-primary text-white btn-block disabled:text-neutral-400 text-sm font-semibold capitalize border-w-light-gray rounded-full h-10">Login</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block info %}
+<div class="text-sm font-normal text-neutral-800 text-center pt-4">
+    Don't have an account? <a href="{% url 'sign-up' %}" class="text-w-blue font-medium">Create account</a>
+</div>
+{% if messages %}
+<div class="flex justify-center mt-3">
+    <div class="w-full md:w-2/3 lg:w-1/2">
+        {% include "components/alert.html" with messages=messages %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/validator@latest/validator.min.js"></script>
+<script>
+    const showPasswordIcon = {
+        show: "{% static 'img/icons/icon-eye-show.svg' %}",
+        hide: "{% static 'img/icons/icon-eye-hide.svg' %}"
+    }
+</script>
+<script src="{% static 'js/accounts/login.js' %}"></script>
+
+{% endblock %}

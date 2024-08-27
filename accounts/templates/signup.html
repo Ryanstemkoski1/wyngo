@@ -1,0 +1,114 @@
+{% extends "components/account_card.html" %}
+{% load static %}
+
+
+{% block card_title %}
+<h2 class="card-title text-2xl font-medium">Let's create your account</h2>
+{% endblock %}
+
+{% block card_subtitle %}
+Create an account it takes less than a minute.
+{% endblock %}
+
+{% block card_body %}
+<form action="./" method="post" class="space-y-2">
+    {% csrf_token %}
+
+    <div class="flex flex-col md:flex-row md:justify-between md:gap-3">
+        <div class="form-control w-full">
+            <label for="name" class="label font-normal text-sm px-3 pb-1">Name*</label>
+            <input type="text" placeholder="Enter your first name" name="name"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Required</span>
+            <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Too long</span>
+        </div>
+        <div class="messages"></div>
+        <div class="form-control w-full">
+            <label for="name" class="label font-normal text-sm px-3 pb-1">Last Name*</label>
+            <input type="text" placeholder="Enter your last name" name="last_name"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Required</span>
+            <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Too long</span>
+        </div>
+    </div>
+    <div class="form-control">
+        <label for="name" class="label font-normal text-sm px-3 pb-1">Email*</label>
+        <div class="flex justify-end items-center align-middle relative">
+            <input type="email" placeholder="you@example.com" name="email"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <img src="{% static 'img/icons/icon-check-circle.svg' %}" class="absolute w-6 mr-2 envelope-icon" />
+        </div>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Please, make sure to enter a valid email
+            address.</span>
+    </div>
+    <div class="form-control">
+        <label for="name" class="label font-normal text-sm px-3 pb-1">Password*</label>
+        <div class="flex justify-end items-center align-middle relative">
+            <input type="password" placeholder="At least 8 characters" name="password"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <img src="{% static 'img/icons/icon-eye-hide.svg' %}" class="absolute w-6 mr-2 cursor-pointer eye-icon" />
+        </div>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Please, enter a valid password.</span>
+        <div class="font-normal text-xs px-3 pt-1">
+            Minimum 8 characters with at least 1 capital letter, 1 lowercase letter and 1 number.
+        </div>
+    </div>
+    <div class="form-control">
+        <label for="name" class="label font-normal text-sm px-3 pb-1">Confirm Password*</label>
+        <div class="flex justify-end items-center align-middle relative">
+            <input type="password" placeholder="At least 8 characters" name="confirm_password"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <img src="{% static 'img/icons/icon-eye-hide.svg' %}" class="absolute w-6 mr-2 cursor-pointer eye-icon" />
+        </div>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Please, make sure your passwords
+            match.</span>
+    </div>
+    <div class="form-control pt-7">
+        <div class="flex  gap-2 items-start">
+            <input type="checkbox" class="text-w-primary bg-white rounded-sm border-w-green border-2 w-5 h-5"
+                name="terms_conditions" />
+            <div class="text-sm font-normal md:pr-2">
+                By Creating an account, I have read an agree to Wyndo <a
+                    href="{% url 'article-details' slug='terms-n-conditions' %}" class="text-w-blue font-medium">Terms
+                    and Conditions</a> and <a href="{% url 'article-details' slug='privacy-policy' %}"
+                    class="text-w-blue font-medium">Privacy
+                    Policy</a>
+            </div>
+        </div>
+    </div>
+    <div class="form-control pt-6">
+        <button disabled type="submit"
+            class="disabled:bg-w-light-gray bg-w-primary text-white btn-block disabled:text-neutral-400 text-sm font-semibold capitalize border-w-light-gray rounded-full h-10">Register</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block info %}
+<div class="text-sm font-normal text-neutral-800 text-center pt-4">
+    Already have an account? <a href="{% url 'login' %}" class="text-w-blue font-medium">Log In</a>
+</div>
+{% if messages %}
+<div class="flex justify-center mt-3">
+    <div class="w-full md:w-2/3 lg:w-1/2">
+        {% include "components/alert.html" with messages=messages %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/validator@latest/validator.min.js"></script>
+<script>
+    const showPasswordIcon = {
+        show: "{% static 'img/icons/icon-eye-show.svg' %}",
+        hide: "{% static 'img/icons/icon-eye-hide.svg' %}"
+    }
+
+    const emailIcon = {
+        valid: "{% static 'img/icons/icon-check-circle-success.svg' %}",
+        invalid: "{% static 'img/icons/icon-alert.svg' %}"
+    }
+</script>
+<script src="{% static 'js/accounts/signup.js' %}"></script>
+
+{% endblock %}

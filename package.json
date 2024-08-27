@@ -1,0 +1,20 @@
+{
+  "name": "wyndo",
+  "version": "1.0.1",
+  "description": "> Wyndo is a web application that allows access to a catalog of products previously registered from a POS (Point of Sale) by retailers. The goal is to allow Wyndo users to reserve products from inventory for purchase in a local area, as well as to provide retailers with a wider range of visibility for their businesses.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tailwind-watch": "npx tailwindcss -i ./static/css/tailwind.css -o ./static/css/wyndo.min.css --watch --minify",
+    "tailwind-build": "npx tailwindcss -i ./static/css/tailwind.css -o ./static/css/wyndo.min.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.4",
+    "@tailwindcss/typography": "^0.5.10",
+    "daisyui": "^3.2.1",
+    "tailwindcss": "^3.3.2"
+  }
+}

@@ -1,0 +1,731 @@
+{% extends "layouts/_base.html" %}
+{% load custom_filters %}
+{% load static %}
+
+
+{% block container %}
+<div class="flex flex-col-reverse lg:flex-row lg:justify-between lg:items-center pb-3 pr-4 lg:pl-4 w-full">
+    <div class="relative w-full">
+        <div class="absolute z-10 lg:-top-[5px] right-0 -top-1 lg:left-[340px] xl:left-[595px] sm:w-[600px]">
+            <div class="flex justify-end w-full">{% include "components/alert.html" with messages=messages %}</div>
+        </div>
+    </div>
+</div>
+<div class="max-w-7xl mx-auto mb-5 px-4 sm:px-11 lg:px-10 xl:px-9 min-h-max">
+    <div class="flex items-center justify-between sticky top-0 z-[1] w-full bg-neutral-100 py-4 mb-4">
+        <div class="text-sm flex gap-1 items-center font-normal no-underline">
+            {% if origin == home_url %}
+            <a href="{% url 'index' %}" class="text-neutral-400 hover:text-neutral-800 hover:underline">
+                Home
+            </a>
+            {% elif "retailers" in origin %}
+            <a href="{% url 'retailers' %}" class="text-neutral-400 hover:text-neutral-800 hover:underline">
+                Retailers
+            </a>
+            {% else %}
+            <a href="{% url 'reservations' %}" class="text-neutral-400 hover:text-neutral-800 hover:underline">
+                Reservations
+            </a>
+            {% endif %}
+            <span class="material-icons-outlined text-neutral-400">
+                chevron_right
+            </span>
+            <span class="text-neutral-800">{{ retailer.name }}</span>
+        </div>
+        <div class="hidden sm:block">
+            <a href="{% url 'retailers' %}"
+                class="border border-w-primary text-w-primary btn-block text-sm font-semibold rounded-lg capitalize h-10 px-9 py-2.5">
+                Back
+            </a>
+        </div>
+    </div>
+    <!-- Mobile -->
+    <div class="flex flex-col gap-4 sm:hidden" id="mobile-container">
+        <div
+            class="card bg-white border border-neutral-200 cursor-pointer hover:shadow-md pt-16 mt-20 px-2 md:hidden lg:block">
+            <div class="relative">
+                <div class="absolute -top-[120px] left-1/2 transform -translate-x-1/2 -mt-4" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
+                    <div class=" rounded-full w-[140px]">
+                        <img src="{{ retailer.image.url }}" alt="Shoes"
+                            class="rounded-full object-cover w-[140px] h-[140px]" />
+                    </div>
+                </div>
+                <span class="absolute -top-[57px] right-0 mt-2 mr-2 rounded-full bg-w-light-smooth-gray p-1 cursor-pointer"
+                    id="favorite-span_{{ retailer.id }}mobile" onclick="favoriteBtn(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-6 h-6 text-white favorite stroke-red-600"
+                            id="favorite_{{ retailer.id }}mobile">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                </span>
+            </div>
+            <div class="card-body px-4 pt-2 pb-3">
+                <div class="mt-3 card-title font-medium text-neutral-800 text-2xl items-baseline line-clamp-2 pr-16">
+                    {{ retailer.name }}
+                </div>
+                <div class="line-clamp-2 font-normal text-sm text-w-indigo ">
+                    {% if retailer.location %}
+                    <div class="line-clamp-2">{{ retailer.location }}</div>
+                    {% else %}
+                    <div class="line-clamp-2">{{ retailer.location_set.first.address1 }}, {{ retailer.location_set.first.city }}, {{ retailer.location_set.first.zip_code }}</div>
+                    {% endif %}
+                </div>
+                <div class="flex items-center">
+                    <div class="font-normal text-sm text-neutral-800 pr-4">Reliability Score</div>
+                    {% if score == 0 %}
+                    <span class="text-xs font-normal text-neutral-400">N/A</span>
+                    {% else %}
+                    <progress
+                        class="progress-bar {% if score < 30 %}progress-bar-danger {% elif score < 60 %}progress-bar-warning {% else %}progress-bar-success {% endif %} w-16 h-4"
+                        value="{{ score }}" max="100"></progress>
+                    {% endif %}
+                </div>
+                <div class="pt-px bg-w-light-gray my-1.5"></div>
+                <div class="text-neutral-800">
+                    <span class="font-medium text-base">Retailer description</span>
+                    <div class="text-sm font-normal text-neutral-800 pt-4 pb-2">
+                        {{ retailer.description }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-between items-center gap-4 mt-4 mb-1">
+            <div class="flex justify-end items-center align-middle relative w-full">
+                <input type="text" placeholder="Search product in {{ retailer.name }}" name="search"
+                    class="input pr-16 text-ellipsis bg-white h-10 w-full text-sm rounded-full focus:ring-transparent focus:ring-0 placeholder-neutral-400"
+                    id="search" />
+                <button id="searchBtn" class=" bg-neutral-400 h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center
+                        absolute">
+                    <img src="{% static 'img/icons/icon-search.svg' %}" id="searchIcon" />
+                </button>
+            </div>
+            <button class="sm:hidden bg-w-primary border-w-primary p-2 
+            flex items-center rounded-md text-center" id="openDrawer">
+                <span class="material-icons text-white">
+                    filter_alt
+                </span>
+            </button>
+            <div id="overlay"
+                class="fixed sm:hidden inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+            </div>
+
+            <div id="drawer"
+                class="fixed bottom-0 left-0 w-full h-0 bg-white overflow-hidden transition-all duration-300 z-50 rounded-t-2xl sm:hidden">
+                <div class="h-full">
+                    <div class="flex items-center justify-between text-w-dark-green px-6 pt-6 pb-2">
+                        <span class="font-medium text-xl">Categories</span>
+                        <span class="material-icons-outlined" id="closeDrawer">
+                            close
+                        </span>
+                    </div>
+                    <div class="space-y-4 px-10 pt-6">
+                        <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                            <span class="font-normal text-sm">Pies (16)</span>
+                            <span class="material-icons-outlined">
+                                expand_more
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                            <span class="font-normal text-sm">Cakes (4)</span>
+                            <span class="material-icons-outlined">
+                                expand_more
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                            <span class="font-normal text-sm">Cookies (10)</span>
+                            <span class="material-icons-outlined">
+                                expand_more
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                            <span class="font-normal text-sm">Soft drinks (8)</span>
+                            <span class="material-icons-outlined">
+                                expand_more
+                            </span>
+                        </div>
+                    </div>
+                    <div class="font-medium text-xl text-w-dark-green px-6 pt-8 pb-2">Price</div>
+                    <div class="flex items-center justify-between px-10 price-range-price mt-3 mb-4">
+                        <span class="font-normal text-sm text-neutral-800" id="min">$0.00</span>
+                        <span class="font-normal text-sm text-neutral-800" id="max">$15.00</span>
+                    </div>
+                    <div class="price-range px-10">
+                        <div class="price-range-slider">
+                            <span class="price-range-selected"></span>
+                        </div>
+                        <div class="price-range-input">
+                            <input type="range" class="min" min="0" max="100" value="0" step="5">
+                            <input type="range" class="max" min="0" max="100" value="15" step="5">
+                        </div>
+                    </div>
+                    <div class="flex justify-center border-t px-6 py-3.5 border-w-primary mt-6">
+                        <button type="submit"
+                            class="bg-w-primary text-white btn-block text-sm font-semibold capitalize border-w-light-gray rounded-full h-10">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="font-medium text-w-dark-green text-xl">Best sellers</span>
+            <div class="flex items-center gap-2">
+                <span class="text-neutral-800 text-sm font-semibold">Sort by</span>
+                <div class="text-neutral-800 bg-neutral-400 flex items-center p-1 rounded-md">
+                    <span class="material-icons-outlined">
+                        filter_list
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="infinite-container-mobile">
+            {% for product in page_obj %}
+            {% if product.variants.all|length > 1 and product.min_price > 0 %}
+            <div
+                class="infinite-item-mobile lg:hidden bg-white border border-neutral-200 cursor-pointer hover:shadow-md rounded-xl flex justify-evenly overflow-hidden mb-2">
+                <div class="w-4/12">
+                    <a href="{% url 'products' product_id=product.id %}">
+                        <div class="flex items-center justify-center h-full">
+                            {% if product.variants.first.variantimage_set.first.image %}
+                            <img src="{{ product.variants.first.variantimage_set.first.image.url }}" alt="Image"
+                                class="rounded-lg px-px h-28 object-fill">
+                            {% else %}
+                            <img src="{% static 'img/no-image.png' %}" alt="Image"
+                                class="rounded-lg px-px h-28 object-fill">
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                <div class="relative">
+                    <span class="absolute top-0 right-0 mt-2 rounded-full bg-w-light-smooth-gray p-1 cursor-pointer"
+                        id="favorite-span_{{ product.id }}prod" onclick="favoriteBtn(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-6 h-6 text-white favorite stroke-red-600"
+                            id="favorite_{{ product.id }}prod">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="px-4 py-2 text-neutral-800 w-8/12">
+                    <a href="{% url 'products' product_id=product.id %}">
+                        {% if product.variants.all|length == 1 %}
+                        <div class="card-title font-medium text-neutral-800 text-xl">${{ product.variants.first.price }}
+                        </div>
+                        {% elif product.min_price != product.max_price %}
+                        <div class="card-title font-medium text-neutral-800 text-xl">
+                            ${{ product.min_price }} - ${{ product.max_price }}
+                        </div>
+                        {% else %}
+                        <div class="card-title font-medium text-neutral-800 text-xl">
+                            ${{ product.min_price }}
+                        </div>
+                        {% endif %}
+                        <div class="line-clamp-2 font-medium text-base pr-6 h-12">
+                            {{ product.name }}
+                        </div>
+                        <div class="flex items-center h-9">
+                            <div class="font-normal text-sm opacity-50 text-neutral-800 pr-4">Reliability Score</div>
+                            {% with product_total=product|calculate_reliability_score %}
+                                {% if product_total < 1 %}
+                                    <progress class="progress-bar progress-bar-danger w-16 h-4" value="33" 
+                                        max="100" id="score"></progress>
+                                {% elif product_total == 1 %}
+                                    <progress class="progress-bar progress-bar-warning w-16 h-4" value="66"
+                                        max="100" id="score"></progress>
+                                {% else %}
+                                    <progress class="progress-bar progress-bar-success w-16 h-4" value="100"
+                                        max="100" id="score"></progress>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </a>
+                    <form action="{% url 'make-reservation' product_id=product.id %}" method="post"
+                        id="make-res_{{ product.id }}{{ slider }}{{device}}">
+                        {% csrf_token %}
+                        <div class="card-actions justify-center gap-4 flex-col items-center pt-2 pb-1">
+                            <div class="flex items-center gap-4 justify-center w-full">
+                                <button type="button"
+                                    class="rounded-full bg-w-primary p-2 disabled:bg-w-light-gray minus-btn"
+                                    id="minus_{{ product.id }}mobile" onclick="minusBtn(this)" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="w-6 h-6 text-white">
+                                        <path fill-rule="evenodd"
+                                            d="M3.75 12a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <input type="text" name="quantity" id="quantity_{{ product.id }}mobile" min="1" readonly
+                                    max="500"
+                                    class="w-12 border border-neutral-800 appearance-none rounded-xl text-center text-neutral-800 disabled:bg-white"
+                                    value="{% if reserved %}{{ product.reserved_quantity }}{% else %}1{% endif %}">
+                                <button type="button"
+                                    class=" {% if reserved %}disabled{% endif %} rounded-full bg-w-primary p-2 plus-btn disabled:bg-w-light-gray"
+                                    id="plus_{{ product.id }}mobile" onclick="plusBtn(this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="w-6 h-6 text-white">
+                                        <path fill-rule="evenodd"
+                                            d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                            {% if product.variants.all|length > 1 %}
+                            <div class="font-normal text-neutral-800 text-xs">
+                                This product contains variations that may change the price
+                            </div>
+                            <a href="{% url 'products' product_id=product.id %}"
+                                class="mt-0.5 bg-w-primary text-white text-sm font-semibold capitalize border-w-light-gray rounded-full h-8 flex items-center justify-center btn-block"
+                                id="more_{{ product.id }}">
+                                Select
+                            </a>
+                            {% else %}
+                            <button type="submit"
+                                class=" bg-w-primary text-white btn-block text-sm font-semibold capitalize border-w-light-gray rounded-full h-8"
+                                id="reserve_{{ product.id }}">
+                                Reserve
+                            </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% elif product.variants.first.price > 0 %}
+            <div
+                class="infinite-item-mobile lg:hidden bg-white border border-neutral-200 cursor-pointer hover:shadow-md rounded-xl flex justify-evenly overflow-hidden mb-2">
+                <div class="w-4/12">
+                    <a href="{% url 'products' product_id=product.id %}">
+                        <div class="flex items-center justify-center h-full">
+                            {% if product.variants.first.variantimage_set.first.image %}
+                            <img src="{{ product.variants.first.variantimage_set.first.image.url }}" alt="Image"
+                                class="rounded-lg px-px h-28 object-fill">
+                            {% else %}
+                            <img src="{% static 'img/no-image.png' %}" alt="Image"
+                                class="rounded-lg px-px h-28 object-fill">
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                <div class="relative">
+                    <span class="absolute top-0 right-0 mt-2 rounded-full bg-w-light-smooth-gray p-1 cursor-pointer"
+                        id="favorite-span_{{ product.id }}prod" onclick="favoriteBtn(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-6 h-6 text-white favorite stroke-red-600"
+                            id="favorite_{{ product.id }}prod">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="px-4 py-2 text-neutral-800 w-8/12">
+                    <a href="{% url 'products' product_id=product.id %}">
+                        {% if product.variants.all|length == 1 %}
+                        <div class="card-title font-medium text-neutral-800 text-xl">${{ product.variants.first.price }}
+                        </div>
+                        {% elif product.min_price != product.max_price %}
+                        <div class="card-title font-medium text-neutral-800 text-xl">
+                            ${{ product.min_price }} - ${{ product.max_price }}
+                        </div>
+                        {% else %}
+                        <div class="card-title font-medium text-neutral-800 text-xl">
+                            ${{ product.min_price }}
+                        </div>
+                        {% endif %}
+                        <div class="line-clamp-2 font-medium text-base pr-6 h-12">
+                            {{ product.name }}
+                        </div>
+                        <div class="flex items-center h-9">
+                            <div class="font-normal text-sm opacity-50 text-neutral-800 pr-4">Reliability Score</div>
+                            {% with product_total=product|calculate_reliability_score %}
+                                {% if product_total < 1 %}
+                                    <progress class="progress-bar progress-bar-danger w-16 h-4" value="33" 
+                                        max="100" id="score"></progress>
+                                {% elif product_total == 1 %}
+                                    <progress class="progress-bar progress-bar-warning w-16 h-4" value="66"
+                                        max="100" id="score"></progress>
+                                {% else %}
+                                    <progress class="progress-bar progress-bar-success w-16 h-4" value="100"
+                                        max="100" id="score"></progress>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </a>
+                    <form action="{% url 'make-reservation' product_id=product.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="card-actions justify-center gap-4 flex-col items-center pt-2 pb-1">
+                            <div class="flex items-center gap-4 justify-center w-full">
+                                <button type="button"
+                                    class="rounded-full bg-w-primary p-2 disabled:bg-w-light-gray minus-btn"
+                                    id="minus_{{ product.id }}mobile" onclick="minusBtn(this)" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="w-6 h-6 text-white">
+                                        <path fill-rule="evenodd"
+                                            d="M3.75 12a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <input type="text" name="quantity" id="quantity_{{ product.id }}mobile" min="1" readonly
+                                    max="500"
+                                    class="w-12 border border-neutral-800 appearance-none rounded-xl text-center text-neutral-800 disabled:bg-white"
+                                    value="{% if reserved %}{{ product.reserved_quantity }}{% else %}1{% endif %}">
+                                <button type="button"
+                                    class=" {% if reserved %}disabled{% endif %} rounded-full bg-w-primary p-2 plus-btn disabled:bg-w-light-gray"
+                                    id="plus_{{ product.id }}mobile" onclick="plusBtn(this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="w-6 h-6 text-white">
+                                        <path fill-rule="evenodd"
+                                            d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                            {% if product.variants.all|length > 1 %}
+                            <div class="font-normal text-neutral-800 text-xs">
+                                This product contains variations that may change the price
+                            </div>
+                            <a href="{% url 'products' product_id=product.id %}"
+                                class="mt-0.5 bg-w-primary text-white text-sm font-semibold capitalize border-w-light-gray rounded-full h-8 flex items-center justify-center btn-block"
+                                id="more_{{ product.id }}">
+                                Select
+                            </a>
+                            {% else %}
+                            <button type="submit"
+                                class=" bg-w-primary text-white btn-block text-sm font-semibold capitalize border-w-light-gray rounded-full h-8"
+                                id="reserve_{{ product.id }}">
+                                Reserve
+                            </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Tablet -->
+    <div class="hidden sm:block lg:hidden" id="tablet-container">
+        <div class="flex items-center mt-6 gap-6">
+            <div class="w-3/12">
+                <div class=" rounded-full w-[152px]" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
+                    <img src="{{ retailer.image.url }}" alt="Shoes"
+                        class="rounded-full w-[152px] h-[152px] object-cover" />
+                </div>
+            </div>
+            <div class="card bg-white border border-neutral-200 px-4 py-5 cursor-pointer hover:shadow-md w-full">
+                <div class="flex">
+                    <div class="border-r border-w-light-gray space-y-2 pr-2 flex-1">
+                        <div class="flex items-baseline justify-between pr-2">
+                            <div class="text-2xl font-medium text-neutral-800 block self-end h-[64px]">
+                                {{ retailer.name }}
+                            </div>
+                            <span class="rounded-full bg-w-light-gray p-1 cursor-pointer h-full"
+                                id="favorite-span_{{ retailer.id }}tablet" onclick="favoriteBtn(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor"
+                                    class="w-6 h-6 text-white favorite stroke-red-600"
+                                    id="favorite_{{ retailer.id }}tablet">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="flex justify-end flex-col h-[68px] gap-2">
+                            <div class="line-clamp-2 font-normal text-sm text-w-indigo">
+                                {% if retailer.location %}
+                                <div class="line-clamp-2">{{ retailer.location }}</div>
+                                {% else %}
+                                <div class="line-clamp-2">{{ retailer.location_set.first.address1 }}, {{ retailer.location_set.first.city }}, {{ retailer.location_set.first.zip_code }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center">
+                                <div class="font-normal text-sm text-neutral-800 pr-4">Reliability Score</div>
+                                {% if score == 0 %}
+                                <span class="text-xs font-normal text-neutral-400">N/A</span>
+                                {% else %}
+                                <progress
+                                    class="progress-bar {% if score < 30 %}progress-bar-danger {% elif score < 60 %}progress-bar-warning {% else %}progress-bar-success {% endif %} w-16 h-4"
+                                    value="{{ score }}" max="100"></progress>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pl-4 flex-1 space-y-4">
+                        <span class="font-medium text-base text-neutral-800">
+                            Description
+                        </span>
+                        <div class="text-sm text-neutral-800 line-clamp-5">
+                            {{ retailer.description|capfirst }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center w-full pt-6 gap-6">
+            <div class="flex justify-end items-center align-middle relative w-full">
+                <input type="text" placeholder="Search product in {{ retailer.name }}" name="search"
+                    class="input bg-white h-10 w-full text-sm rounded-full focus:ring-transparent focus:ring-0 placeholder-neutral-400 border-w-light-gray"
+                    id="searchInput" />
+                <div
+                    class="bg-neutral-400 h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center absolute">
+                    <img src="{% static 'img/icons/icon-search.svg' %}" class="" id="searchIcon" />
+                </div>
+            </div>
+            <div class="dropdown dropdown-end hidden md:block cursor-pointer">
+                <details class="dropdown dropdown-end">
+                    <summary class="bg-w-primary border-w-primary p-2 flex items-center rounded-md text-center">
+                        <span class="material-icons text-white">
+                            filter_alt
+                        </span>
+                    </summary>
+                    <ul tabindex="0"
+                        class="dropdown-content menu px-6 pb-2 shadow rounded-box z-10 bg-white mt-1 w-[345px]">
+                        <div class="h-full">
+                            <div class="flex items-center justify-between text-w-dark-green pt-2">
+                                <span class="font-medium text-2xl">Categories</span>
+                            </div>
+                            <div class="space-y-4 pt-6 px-4">
+                                <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                                    <span class="font-normal text-sm">Pies (16)</span>
+                                    <span class="material-icons-outlined">
+                                        expand_more
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                                    <span class="font-normal text-sm">Cakes (4)</span>
+                                    <span class="material-icons-outlined">
+                                        expand_more
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                                    <span class="font-normal text-sm">Cookies (10)</span>
+                                    <span class="material-icons-outlined">
+                                        expand_more
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                                    <span class="font-normal text-sm">Soft drinks (8)</span>
+                                    <span class="material-icons-outlined">
+                                        expand_more
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="font-medium text-2xl text-w-dark-green pt-8 pb-2">Price</div>
+                            <div
+                                class="flex items-center justify-between price-range-price price-tablet mt-3 mb-4 px-4">
+                                <span class="font-normal text-sm text-neutral-800" id="min">$0.00</span>
+                                <span class="font-normal text-sm text-neutral-800" id="max">$15.00</span>
+                            </div>
+                            <div class="price-range px-4 pb-4">
+                                <div class="price-range-slider">
+                                    <span class="price-range-selected selected-tablet"></span>
+                                </div>
+                                <div class="price-range-input input-tablet">
+                                    <input type="range" class="min" min="0" max="100" value="0" step="5">
+                                    <input type="range" class="max" min="0" max="100" value="15" step="5">
+                                </div>
+                            </div>
+                            <div class="px-3 pt-4 pb-5">
+                                <button type="submit"
+                                    class="bg-w-primary text-white btn-block text-sm font-semibold capitalize border-w-light-gray rounded-full h-10">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                    </ul>
+                </details>
+            </div>
+        </div>
+        <div class="flex items-center justify-between pt-8">
+            <span class="font-medium text-w-dark-green text-2xl">Best sellers</span>
+            <div class="flex items-center gap-2">
+                <span class="text-neutral-800 text-sm font-semibold">Sort by</span>
+                <div class="text-neutral-800 bg-neutral-400 flex items-center p-1 rounded-md">
+                    <span class="material-icons-outlined">
+                        filter_list
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 grid-rows-auto gap-6 mt-1 infinite-container-tablet">
+            {% for product in page_obj %}
+            {% if product.variants.all|length > 1 and product.min_price > 0 %}
+            <div class="mt-5 infinite-item-tablet">
+                {% include "components/product_card.html" with product=product device="tabletprod" %}
+            </div>
+            {% elif product.variants.first.price > 0 %}
+            <div class="mt-5 infinite-item-tablet">
+                {% include "components/product_card.html" with product=product device="tabletprod" %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Desktop -->
+    <div class="hidden lg:block" id="desktop-container">
+        <div class="flex lg:gap-4 xl:gap-1">
+            <div class="flex flex-col w-4/12">
+                <div class="card bg-white border border-neutral-200 pt-16 mt-20 px-2 md:hidden lg:block w-[282px]">
+                    <div class="relative">
+                        <div class="absolute -top-[120px] left-1/2 transform -translate-x-1/2 -mt-4" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
+                            <div class=" rounded-full w-[140px]">
+                                {% if retailer.image %}
+                                <img src="{{ retailer.image.url }}"
+                                    class="rounded-full w-[140px] h-[140px] object-cover" />
+                                {% else %}
+                                <img src="{% static 'img/no-image.png' %}"
+                                    class="rounded-full w-[140px] h-[140px] object-cover" />
+                                {% endif %}
+                            </div>
+                        </div>
+                        <span
+                            class="absolute -top-[57px] right-0 mt-2 mr-2 rounded-full bg-w-light-smooth-gray p-1 cursor-pointer"
+                            id="favorite-span_{{ retailer.id }}desktop" onclick="favoriteBtn(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-6 h-6 text-white favorite stroke-red-600"
+                                id="favorite_{{ retailer.id }}desktop">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="card-body px-4 pt-2 pb-3">
+                        <div
+                            class="mt-3 card-title font-medium text-neutral-800 text-2xl items-baseline line-clamp-2 pr-5">
+                            {{ retailer.name }}
+                        </div>
+                        <div class="line-clamp-2 font-normal text-sm text-w-indigo pb-3">
+                            {% if retailer.location %}
+                            <div class="line-clamp-2">{{ retailer.location }}</div>
+                            {% else %}
+                            <div class="line-clamp-2">{{ retailer.location_set.first.address1 }}, {{ retailer.location_set.first.city }}, {{ retailer.location_set.first.zip_code }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center">
+                            <div class="font-normal text-sm text-neutral-800 pr-4">Reliability Score</div>
+                            {% if score == 0 %}
+                            <span class="text-xs font-normal text-neutral-400">N/A</span>
+                            {% else %}
+                            <progress
+                                class="progress-bar {% if score < 30 %}progress-bar-danger {% elif score < 60 %}progress-bar-warning {% else %}progress-bar-success {% endif %} w-16 h-4"
+                                value="{{ score }}" max="100"></progress>
+                            {% endif %}
+                        </div>
+                        <div class="pt-px bg-w-light-gray my-1.5"></div>
+                        <div class="text-neutral-800">
+                            <span class="font-medium text-base">Retailer description</span>
+                            <div class="text-sm font-normal text-neutral-800 pt-4 pb-2">
+                                {{ retailer.description }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-full hidden lg:block w-[282px]">
+                    <div class="flex items-center justify-between text-w-dark-green pt-6 pb-2">
+                        <span class="font-medium text-2xl">Categories</span>
+                    </div>
+                    <div class="space-y-4 pt-6">
+                        <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                            <span class="font-normal text-sm">Pies (16)</span>
+                            <span class="material-icons-outlined">
+                                expand_more
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                            <span class="font-normal text-sm">Cakes (4)</span>
+                            <span class="material-icons-outlined">
+                                expand_more
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                            <span class="font-normal text-sm">Cookies (10)</span>
+                            <span class="material-icons-outlined">
+                                expand_more
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-neutral-800 cursor-pointer">
+                            <span class="font-normal text-sm">Soft drinks (8)</span>
+                            <span class="material-icons-outlined">
+                                expand_more
+                            </span>
+                        </div>
+                    </div>
+                    <div class="font-medium text-2xl text-w-dark-green pt-8 pb-2">Price</div>
+                    <div class="flex items-center justify-between price-range-price price-desktop mt-3 mb-4 px-4">
+                        <span class="font-normal text-sm text-neutral-800" id="min">$0.00</span>
+                        <span class="font-normal text-sm text-neutral-800" id="max">$15.00</span>
+                    </div>
+                    <div class="price-range px-4">
+                        <div class="price-range-slider">
+                            <span class="price-range-selected selected-desktop"></span>
+                        </div>
+                        <div class="price-range-input input-desktop">
+                            <input type="range" class="min" min="0" max="100" value="0" step="5">
+                            <input type="range" class="max" min="0" max="100" value="15" step="5">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col w-full justify-end mt-20">
+                <div class="flex justify-end items-center align-middle relative md:w-[152px] lg:w-full">
+                    <input type="text" placeholder="Search product in {{ retailer.name }}" name="search"
+                        class="input bg-white h-10 w-full text-sm rounded-full focus:ring-transparent focus:ring-0 placeholder-neutral-400 border-w-light-gray"
+                        id="searchInput" />
+                    <div
+                        class="bg-neutral-400 h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center absolute">
+                        <img src="{% static 'img/icons/icon-search.svg' %}" class="" id="searchIcon" />
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mt-8">
+                    <span class="font-medium text-w-dark-green text-2xl">Best sellers</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-neutral-800 text-sm font-semibold">Sort by</span>
+                        <div class="text-neutral-800 bg-neutral-400 flex items-center p-1 rounded-md">
+                            <span class="material-icons-outlined">
+                                filter_list
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 grid-rows-auto lg:gap-3 xl:gap-6 mt-6 infinite-container-desktop h-full">
+                    {% for product in page_obj %}
+                    {% if product.variants.all|length > 1 and product.min_price > 0 %}
+                    <div class="infinite-item-desktop">
+                        {% include "components/product_card.html" with product=product device="desktopprod" %}
+                    </div>
+                    {% elif product.variants.first.price > 0 %}
+                    <div class="infinite-item-desktop">
+                        {% include "components/product_card.html" with product=product device="desktopprod" %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% if page_obj.has_next %}
+<a class="infinite-more-link-mobile sm:hidden" href="?page={{ page_obj.next_page_number }}"></a>
+<a class="infinite-more-link-tablet hidden sm:block" href="?page={{ page_obj.next_page_number }}"></a>
+<a class="infinite-more-link-desktop hidden lg:block" href="?page={{ page_obj.next_page_number }}"></a>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"
+    integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"
+    integrity="sha512-CEiA+78TpP9KAIPzqBvxUv8hy41jyI3f2uHi7DGp/Y/Ka973qgSdybNegWFciqh6GrN2UePx2KkflnQUbUhNIA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/shortcuts/infinite.min.js"
+    integrity="sha512-m3kH21aSkKrGeoqdb7IP7rlu1VcQee5VrjLQepeSOp5M05Wl6HwqJ1Jwo14EHOuBg77pkAlBtQuVMPVeXzfueg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{% static 'js/shopper/retailers.js' %}"></script>
+{% endblock %}

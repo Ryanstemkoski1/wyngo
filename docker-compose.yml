@@ -1,0 +1,100 @@
+version: '3.x'
+
+services:
+  web:
+    container_name: wyndo-app
+    build:
+      context: ./
+    command: >
+      bash -c "python manage.py makemigrations
+      && python manage.py migrate
+      && python manage.py createsu
+      && python manage.py loaddata articles.json categories.json 
+      && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "${DJANGO_PORT}:${DJANGO_PORT}"
+    depends_on:
+      - db
+      - redis
+
+  node:
+    container_name: wyndo-tailwind
+    image: "node:18"
+    working_dir: /app
+    stdin_open: true
+    command: bash -c "npm i && npm run tailwind-watch"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    depends_on:
+      - web
+
+  db:
+    container_name: wyndo-postgres
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${RDS_DB_NAME}
+      POSTGRES_USER: ${RDS_USERNAME}
+      POSTGRES_PASSWORD: ${RDS_PASSWORD}
+    ports:
+      - ${RDS_PORT}:${RDS_PORT}
+    volumes:
+      - pgdata-wyndo:/var/lib/postgresql/data
+
+  redis:
+    container_name: wyndo-redis
+    image: "redis:7.0"
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - redis-data:/data
+
+  celery:
+    container_name: wyndo-celery
+    build:
+      context: ./
+    command: celery -A wyndo worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+      - redis
+      - db
+    working_dir: /app
+
+  celery_beat:
+    container_name: wyndo-celery-beat
+    build:
+      context: ./
+    command: celery -A wyndo beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+      - redis
+      - db
+      - celery
+    working_dir: /app
+
+  # Ngrok
+  ngrok:
+    container_name: wyndo-ngrok
+    image: ngrok/ngrok:latest
+    ports:
+      - 4040:4040
+    environment:
+      NGROK_AUTH_TOKEN: ${NGROK_AUTH_TOKEN}
+    command:
+      - start
+      - --all
+      - --authtoken=${NGROK_AUTH_TOKEN}
+      - --config
+      - /etc/ngrok.yml
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml
+
+volumes:
+  pgdata-wyndo:
+  redis-data:

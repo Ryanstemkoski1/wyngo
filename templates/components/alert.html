@@ -1,0 +1,26 @@
+{% if messages %}
+{% for message in messages %}
+<div class="bg-white text-neutral-800 mt-2 mb-4 p-4 rounded-lg shadow-xl">
+    <div class="flex items-center gap-2 justify-between">
+        <div class="flex items-center gap-2">
+            <span
+                class="material-icons {% if message.extra_tags == 'error' %} text-red-600 {% elif message.extra_tags == 'warning' %} text-yellow-600 {% else %} text-w-primary {% endif %}">
+                {% if message.extra_tags == 'error' %}
+                error
+                {% elif message.extra_tags == 'warning' %}
+                warning
+                {% else %}
+                check_circle
+                {% endif %}
+            </span>
+            <span class="font-sans text-sm md:text-base text-w-secondary-dark">
+                {{ message }}
+            </span>
+        </div>
+        <span class="material-icons-outlined cursor-pointer close-alert">
+            close
+        </span>
+    </div>
+</div>
+{% endfor %}
+{% endif %}

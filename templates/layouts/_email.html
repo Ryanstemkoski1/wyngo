@@ -1,0 +1,38 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/wyndo.min.css' %}">
+</head>
+
+<body>
+    <div class="container mx-auto">
+        <div class="navbar bg-w-primary rounded-lg flex justify-center py-12">
+            <a class="btn btn-ghost normal-case">
+                <img src="{% static 'img/wyndo-logo.png' %}" alt="Wyndo Logo" class="w-44">
+            </a>
+        </div>
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+        <footer class="footer footer-center p-6 bg-w-green  rounded-lg text-xs">
+            <div>
+                <p>
+                    If you believe you received this message in error,
+                    please visit our <a href=""
+                        class="font-medium text-w-indigo">Help center</a>
+                    for more information about how to delete this account.
+                </p>
+            </div>
+        </footer>
+    </div>
+</body>
+
+
+</html>

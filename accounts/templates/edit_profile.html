@@ -1,0 +1,163 @@
+{% extends "layouts/_base.html" %}
+
+{% load static %}
+
+
+{% block container %}
+<div class="max-w-7xl mx-auto px-5 sm:pt-3 sm:pb-11">
+    <div class="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-12 lg:gap-6">
+        <div class="col-span-3 lg:col-start-3">
+            <div class="flex text-w-dark-green gap-2 px-2 sm:pl-12 sm:pt-6 items-center">
+                <span class="material-icons-outlined">
+                    perm_identity
+                </span>
+                <span class="font-medium text-xl sm:text-2xl">Edit profile</span>
+            </div>
+        </div>
+        <div
+            class="col-span-4 row-start-1 sm:row-start-auto sm:col-start-5 lg:col-start-8 lg:col-span-5 lg:ml-3 xl:col-start-9 xl:col-span-4 xl:ml-3">
+            {% include "components/alert.html" with messages=messages %}
+        </div>
+        <div class="col-span-4 sm:col-span-8 sm:px-6 lg:col-start-3">
+            <div class="card bg-white text-neutral-800 mx-auto p-4 sm:p-6 mt-4">
+                <div class="flex justify-between">
+                    <span class="font-medium text-neutral-800 text-xl sm:text-2xl">
+                        Personal information
+                    </span>
+                    <span class="material-icons-outlined cursor-pointer edit-btn">
+                        edit
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <form action="{% url 'profile' %}" method="post" class="space-y-2">
+                        {% csrf_token %}
+
+                        <div class="grid grid-cols-4 sm:grid-cols-2 sm:gap-6">
+                            <div class="form-control w-full col-span-4 sm:col-span-1">
+                                <label for="first_name" class="label font-normal text-sm px-3 pb-1">Name*</label>
+                                <input type="text" placeholder="Enter your first name" name="first_name" disabled
+                                    value="{{ user.first_name }}"
+                                    class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm disabled:text-neutral-400 disabled:bg-white disabled:border-neutral-400" />
+                                <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Required</span>
+                                <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Too long</span>
+                            </div>
+                            <div class="form-control w-full col-span-4 sm:col-span-1">
+                                <label for="name" class="label font-normal text-sm px-3 pb-1">Last Name*</label>
+                                <input type="text" placeholder="Enter your last name" name="last_name" disabled
+                                    value="{{ user.last_name }}"
+                                    class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm disabled:text-neutral-400 disabled:bg-white disabled:border-neutral-400" />
+                                <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Required</span>
+                                <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Too long</span>
+                            </div>
+                            <div class="form-control w-full col-span-4 sm:col-span-1">
+                                <label for="name" class="label font-normal text-sm px-3 pb-1">Email*</label>
+                                <div class="flex justify-end items-center align-middle relative">
+                                    <input type="email" placeholder="you@example.com" name="email" disabled
+                                        value="{{ user.email }}"
+                                        class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm disabled:text-neutral-400 disabled:bg-white disabled:border-neutral-400" />
+                                    <span class="material-icons-outlined absolute w-6 mr-2 text-neutral-400">
+                                        lock
+                                    </span>
+                                </div>
+                                <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Please, make
+                                    sure to
+                                    enter a valid email
+                                    address.</span>
+                            </div>
+                        </div>
+                        <div class="form-control">
+                            <span class="font-medium text-neutral-800 text-xl mt-4 sm:text-2xl">
+                                Change password
+                            </span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:gap-6">
+                            <div class="form-control w-full">
+                                <label for="name" class="label font-normal text-sm px-3 pb-1">Password</label>
+                                <div class="flex justify-end items-center align-middle relative">
+                                    <input type="password" placeholder="At least 8 characters" name="password" disabled
+                                        class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm disabled:text-neutral-400 disabled:bg-white disabled:border-neutral-400 disabled:placeholder-neutral-400" />
+                                    <img src="{% static 'img/icons/icon-eye-hide.svg' %}"
+                                        class="absolute w-6 mr-2 cursor-pointer eye-icon" />
+                                </div>
+                            </div>
+                            <div class="form-control w-full">
+                                <label for="name" class="label font-normal text-sm px-3 pb-1">Confirm Password</label>
+                                <div class="flex justify-end items-center align-middle relative">
+                                    <input type="password" placeholder="At least 8 characters" name="confirm_password"
+                                        disabled
+                                        class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm disabled:text-neutral-400 disabled:bg-white disabled:border-neutral-400 disabled:placeholder-neutral-400" />
+                                    <img src="{% static 'img/icons/icon-eye-hide.svg' %}"
+                                        class="absolute w-6 mr-2 cursor-pointer eye-icon" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-control pt-4 space-y-8 hidden actions">
+                            <div class="space-y-2">
+                                <div class="flex gap-1">
+                                    <span class="material-icons-outlined text-w-light-gray check-min">
+                                        check_circle
+                                    </span>
+                                    <span>
+                                        Minimun 8 characters
+                                    </span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <span class="material-icons-outlined text-w-light-gray check-upper">
+                                        check_circle
+                                    </span>
+                                    <span>
+                                        At least 1 capital letter
+                                    </span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <span class="material-icons-outlined text-w-light-gray check-lower">
+                                        check_circle
+                                    </span>
+                                    <span>
+                                        At least 1 lowercase letter
+                                    </span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <span class="material-icons-outlined text-w-light-gray check-number">
+                                        check_circle
+                                    </span>
+                                    <span>
+                                        At least 1 number
+                                    </span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <span class="material-icons-outlined text-w-light-gray check-match">
+                                        check_circle
+                                    </span>
+                                    <span>
+                                        Passwords must match
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="space-y-4 sm:flex sm:justify-end sm:space-y-0 sm:gap-4">
+                                <button type="submit" class="disabled:bg-w-light-gray bg-w-primary text-white btn-block disabled:text-neutral-400 text-sm font-semibold 
+                                    capitalize border-w-light-gray rounded-md h-10 sm:w-1/6 save">Save</button>
+                                <button type="button" class=" bg-white border border-w-primary text-w-primary btn-block text-sm font-semibold
+                                     capitalize rounded-md h-10 sm:w-1/6 cancel-btn">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/validator@latest/validator.min.js"></script>
+<script>
+    const showPasswordIcon = {
+        show: "{% static 'img/icons/icon-eye-show.svg' %}",
+        hide: "{% static 'img/icons/icon-eye-hide.svg' %}"
+    }
+</script>
+<script src="{% static 'js/accounts/edit_profile.js' %}"></script>
+{% endblock %}

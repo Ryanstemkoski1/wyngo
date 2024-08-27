@@ -1,0 +1,31 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/admin/filters-admin.css' %}">
+
+<form method="get">
+
+    {% for key, value in params %}
+        {% if key != 'min_price' and key != 'max_price' %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+    {% endfor %}
+    <h3>Min Price:</h3>
+
+    <div class="spacing">
+        <input type="number" class="vDateField" step="0.01" id="min_price" name="min_price__gte"
+               value="{{ spec.request.GET.min_price__gte }}"
+               placeholder="Min Price">
+    </div>
+
+    <h3>Max Price:</h3>
+
+    <div class="spacing">
+        <input type="number" class="vDateField" step="0.01" id="max_price" name="max_price__lte"
+               value="{{ spec.request.GET.max_price__lte }}"
+               placeholder="Max Price">
+    </div>
+
+    <div class="spacing">
+        <input class="controls-filter button" type="submit" value="Filter">
+        <input type="reset" class="button" value="Reset" onclick="window.location.href = window.location.href.split('?')[0];">
+    </div>
+</form>

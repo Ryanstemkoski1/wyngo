@@ -1,0 +1,215 @@
+{% load static %}
+
+<header class="bg-w-primary py-8 drawer drawer-end z-10">
+    <!-- Mobile view -->
+    <div class="sm:hidden">
+        <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content">
+            <div class="flex justify-between px-2 max-h-8">
+                <a href="/" class="brand">
+                    <img src="{% static 'img/wyndo-logo-mobile.png' %}" alt="logo" class="sm:hidden">
+                </a>
+                <div class="flex items-center gap-3">
+                    <div class=" flex justify-end items-center align-middle relative">
+                        <input type="text" placeholder="Search Wyndo Inventory" name="search"
+                            class="input bg-white h-10 w-full text-sm rounded-full hidden focus:ring-transparent focus:ring-0"
+                            id="searchInputMobile" />
+                        <div
+                            class="bg-neutral-400 h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center">
+                            <img src="{% static 'img/icons/icon-search.svg' %}" id="searchIcon" />
+                            <div id="closeIcon" class="hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-white">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <label for="my-drawer-3" class="btn btn-ghost p-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-6 h-6 text-white">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="drawer-side z-20">
+            <label for="my-drawer-3" class="drawer-overlay"></label>
+            <div class="menu p-4 w-[22rem] h-full bg-white rounded-l-2xl">
+                <div class="px-6 py-4">
+                    <div class="flex justify-between">
+                        <div class="flex text-neutral-800 items-center gap-2">
+                            {% if user.is_authenticated and not user.is_staff %}
+                            <a href="{% url 'profile' %}">
+                                <img src="{% static 'img/icons/icon-avatar.svg' %}" class="filter invert">
+                            </a>
+                            {% else %}
+                            <img src="{% static 'img/icons/icon-avatar.svg' %}" class="filter invert">
+                            {% endif %}
+                            <div class="flex flex-col">
+                                {% if user.is_authenticated and not user.is_staff %}
+                                <span class="text-sm break-text">
+                                    {{ user.first_name }} {{ user.last_name }}
+                                </span>
+                                {% else %}
+                                <div class="text-sm">
+                                    <a href="{% url 'login' %}" class="text-sm underline font-normal">Login</a>
+                                </div>
+                                {% endif %}
+                                <div class="flex items-center">
+                                    <img src="{% static 'img/icons/icon-marker.svg' %}" class="filter invert">
+                                    <span class="text-xs">Austin 78701</span>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="{% static 'img/icons/icon-close.svg' %}" class="close-drawer cursor-pointer">
+                    </div>
+                </div>
+                <div class="px-2 py-4">
+                    <div
+                        class="text-sm px-4 py-3 {% if request.path == '/' %} bg-neutral-800 text-w-primary {% else %} text-neutral-800 {% endif %}">
+                        <a href="/">
+                            Home
+                        </a>
+                    </div>
+                    <div
+                        class="text-sm px-4 py-3 {% if 'categories/' in request.path %} bg-neutral-800 text-w-primary {% else %} text-neutral-800 {% endif %}">
+                        <a href="/">
+                            Browse
+                        </a>
+                    </div>
+
+                    <div
+                        class="text-sm px-4 py-3 {% if 'stores/' in request.path %} bg-neutral-800 text-w-primary {% else %} text-neutral-800 {% endif %}">
+                        <a href="/">
+                            Near Me
+                        </a>
+                    </div>
+                    <div
+                        class="text-sm px-4 py-3 {% if 'retailers/' in request.path %} bg-neutral-800 text-w-primary {% else %} text-neutral-800 {% endif %}">
+                        <a href="{% url 'retailers' %}">
+                            Retailers
+                        </a>
+                    </div>
+                    <div
+                        class="text-sm px-4 py-3 {% if 'shopping-centers/' in request.path %} bg-neutral-800 text-w-primary {% else %} text-neutral-800 {% endif %}">
+                        <a href="{% url 'shopping-centers' %}">
+                            Shopping Centers
+                        </a>
+                    </div>
+                    <div
+                        class="text-sm px-4 py-3 {% if 'reservations/' in request.path %} bg-neutral-800 text-w-primary {% else %} text-neutral-800 {% endif %}">
+                        <a href="{% url 'reservations' %}">
+                            Reservations
+                        </a>
+                    </div>
+                </div>
+                {% if user.is_authenticated %}
+                <div class="mt-auto right-0 text-sm text-neutral-800 flex items-center px-6 py-4">
+                    <img src="{% static 'img/icons/icon-logout.svg' %}">
+                    <span>
+                        <a href="{% url 'logout' %}">
+                            Logout
+                        </a>
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tablet and Desktop view -->
+    <div class="hidden sm:block sm:max-w-2xl mx-auto lg:max-w-7xl w-full lg:px-8">
+        <div class="grid sm:grid-cols-8 lg:grid-cols-12 gap-6">
+            <div class="col-span-2 lg:col-span-4">
+                <a href="/" class="brand">
+                    <img src="{% static 'img/wyndo-logo.png' %}" alt="logo" class="w-44">
+                </a>
+            </div>
+            <div class="col-start-3 col-span-2 lg:col-start-5 lg:col-span-4 grow">
+                <div class="flex justify-end items-center align-middle relative sm:w-[152px] lg:w-full">
+                    <input type="text" placeholder="Search Wyndo Inventory" name="search"
+                        class="input bg-white h-10 w-full text-sm rounded-full focus:ring-transparent focus:ring-0 placeholder-neutral-400"
+                        id="searchInput" />
+                    <div
+                        class="bg-neutral-400 h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center absolute">
+                        <img src="{% static 'img/icons/icon-search.svg' %}" class="" id="searchIcon" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-start-5 lg:col-start-9 col-span-4">
+                <div
+                    class="flex text-right text-white {% if user.is_authenticated %} gap-1 {% else %} gap-2 {% endif %} justify-end items-center">
+                    <div class="flex flex-col w-40">
+                        <span class="text-sm font-semibold break-text text-right line-clamp-2">
+                            {% if user.is_authenticated and not user.is_staff %}
+                            {{ user.first_name }} {{ user.last_name }}
+                            {% else %}
+                            <a href="{% url 'login' %}" class="text-sm underline font-normal">Login</a>
+                            {% endif %}
+                        </span>
+                        <span class="flex items-center text-right text-xs gap-1 justify-end">
+                            <img src="{% static 'img/icons/icon-marker.svg' %}">
+                            New Hampshire 03987
+                        </span>
+                    </div>
+                    <div>
+                        <img src="{% static 'img/icons/icon-avatar.svg' %}">
+                    </div>
+                    {% if user.is_authenticated and not user.is_staff %}
+                    <details class="dropdown dropdown-end flex sm:w-[32px] self-center">
+                        <summary class="btn btn-ghost sm:p-0">
+                            <img src="{% static 'img/icons/icon-arrow-down.svg' %}" class="arrow cursor-pointer">
+                        </summary>
+                        <ul class="dropdown-content z-[1] menu shadow px-0 bg-white rounded-sm w-44">
+                            <li class="text-neutral-800 hover:bg-neutral-800 hover:text-white">
+                                <a href="{% url 'profile' %}">Profile</a>
+                            </li>
+                            <li class="text-neutral-800 hover:bg-neutral-800 hover:text-white"><a
+                                    href="{% url 'logout' %}">Logout</a>
+                            </li>
+                        </ul>
+                    </details>
+                    {% endif %}
+                    <div class="flex items-center justify-between gap-4">
+                        <img src="{% static 'img/icons/icon-favorite.svg' %}">
+                        <div class="indicator">
+                            <span
+                                class="indicator-item badge badge-error bg-red-500 text-white translate-x-1/4 -translate-y-1/4 text-[8px] py-0 pl-0 pr-px w-4 h-4">2</span>
+                            <img src="{% static 'img/icons/icon-notification.svg' %}">
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="hidden sm:block border-t border-white">
+    <div class="flex bg-w-primary justify-center font-semibold text-sm pt-2">
+        <a href="{% url 'index' %}"
+            class="text-center px-6 pb-2 {% if request.path == '/' %} text-white border-b-2 border-white {% else %}text-white opacity-60 {% endif %} hover:text-white cursor-pointer hover:opacity-100">
+            Home</a>
+        <a
+            class="flex items-center gap-1 text-center px-7 pb-2 {% if 'categories/' in request.path %} text-white border-b-2 border-white {% else %}text-white opacity-60 {% endif %} hover:text-white cursor-pointer hover:opacity-100">
+            Browse
+        </a>
+        <a
+            class="text-center px-6 pb-2 {% if 'stores/' in request.path %} text-white border-b-2 border-white {% else %}text-white opacity-60 {% endif %} hover:text-white hover:opacity-100 cursor-pointer">
+            Near Me</a>
+        <a href="{% url 'retailers' %}"
+            class="flex items-center gap-1 text-center px-7 pb-2 {% if 'retailers/' in request.path %} text-white border-b-2 border-white {% else %}text-white opacity-60 {% endif %} hover:text-white cursor-pointer hover:opacity-100">
+            Retailers
+        </a>
+        <a href="{% url 'shopping-centers' %}"
+            class="text-center px-6 pb-2 {% if 'shopping-centers/' in request.path %} text-white border-b-2 border-white {% else %}text-white opacity-60 {% endif %} hover:text-white cursor-pointer hover:opacity-100">
+            Shopping Centers</a>
+        <a href="{% url 'reservations' %}"
+            class="text-center px-6 pb-2 {% if 'reservations/' in request.path %} text-white border-b-2 border-white {% else %}text-white opacity-60 {% endif %} hover:text-white cursor-pointer hover:opacity-100">
+            Reservations</a>
+    </div>
+</div>

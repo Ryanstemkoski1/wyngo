@@ -1,0 +1,127 @@
+{% extends "components/account_card.html" %}
+{% load static %}
+
+
+{% block card_title %}
+<h2 class="card-title text-2xl font-medium">Let's create your request</h2>
+{% endblock %}
+
+{% block card_subtitle %}
+Completing this form will take less than a minute.
+{% endblock %}
+
+{% block card_body %}
+<form action="" method="post" class="space-y-2" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="flex flex-col md:flex-row md:justify-between md:gap-3">
+        <div class="form-control w-full">
+            <label for="name" class="label font-normal text-sm px-3 pb-1">Business Name*</label>
+            <input type="text" placeholder="Enter your business name" name="name"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Required</span>
+            <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Too long</span>
+            <div class="messages"></div>
+        </div>
+    </div>
+    <div class="form-control">
+        <label for="name" class="label font-normal text-sm px-3 pb-1">Email*</label>
+        <div class="flex justify-end items-center align-middle relative">
+            <input type="email" placeholder="you@example.com" name="email"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <img src="{% static 'img/icons/icon-check-circle.svg' %}" class="absolute w-6 mr-2 envelope-icon" />
+        </div>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Please, make sure to enter a valid
+            email
+            address.</span>
+    </div>
+    <div class="form-control">
+        <label for="name" class="label font-normal text-sm px-3 pb-1">Store Description*</label>
+        <textarea class="textarea textarea-bordered bg-white border-neutral-800" placeholder="Enter a short description of your business here"
+            name="description"></textarea>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Required</span>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Too long</span>
+        <span class="text-xs font-normal pt-2 px-3">
+            Try to be direct, we recommend that you indicate the catergory of your store and what type of products
+            services you offer.
+        </span>
+    </div>
+
+    <div class="form-control">
+        <label for="name" class="label font-normal text-sm px-3 pb-1">Type of Retailer*</label>
+        <select name="category" class="w-full rounded-lg border-neutral-800 text-sm text-neutral-400">
+            <option class="text-neutral-500" value="" selected disable>Choose a type</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}">
+                {{ category.name }}
+            </option>
+            {% endfor %}
+        </select>
+        <span class="text-xs font-normal pt-2 px-3">
+            Once you submit it, you will not be able to change this.
+        </span>
+    </div>
+    <div class="form-control">
+        <label for="name" class="label font-normal text-sm px-3 pb-1">Upload Logo*</label>
+        <div class="border border-neutral-800 rounded-lg p-1">
+            <input type="file" name="image" accept="image/png, image/jpeg, images/jpg"
+                class="file-input file-input-accent text-sm border-neutral-800 w-full max-w-xs text-neutral-400" />
+        </div>
+        <span name= "formats" class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Only images with these formats .jpeg, .jpg and .png are accepted.</span>
+        <span class="text-xs font-normal pt-2 px-3">
+            We recommend that the logo occupies 85% of the image box and that the size is at least 400x400 pixels.
+        </span>
+    </div>
+    <div class="form-control pt-7">
+        <div class="flex  gap-2 items-start">
+            <input type="checkbox" class="text-w-primary bg-white rounded-sm border-w-green border-2 w-5 h-5"
+                name="terms_conditions" />
+            <div class="text-sm font-normal md:pr-2">
+                By Creating an account, I have read an agree to Wyndo <a
+                    href="{% url 'article-details' slug='terms-n-conditions' %}" class="text-w-blue font-medium">Terms
+                    and Conditions</a> and <a href="{% url 'article-details' slug='privacy-policy' %}"
+                    class="text-w-blue font-medium">Privacy
+                    Policy</a>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="merchant_id" value="{{ merchant_id }}">
+    <input type="hidden" name="app_id" value="{{ app_id }}">
+    <input type="hidden" name="code" value="{{ code }}">
+    <input type="hidden" name="origin" value="{{ origin }}">
+    <input type="hidden" name="state" value="{{ state }}">
+    <input type="hidden" name="continue" value="{{ can_continue }}">
+
+    <div class="form-control pt-6">
+        <button disabled type="submit"
+            class="disabled:bg-w-light-gray bg-w-primary text-white btn-block disabled:text-neutral-400 text-sm font-semibold capitalize border-w-light-gray rounded-full h-10">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block messages_cards %}
+{% if messages %}
+<div class="flex justify-center mt-3">
+    <div class="w-full md:w-2/3 lg:w-1/2">
+        {% include "components/alert.html" with messages=messages %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/validator@latest/validator.min.js"></script>
+<script>
+    const showPasswordIcon = {
+        show: "{% static 'img/icons/icon-eye-show.svg' %}",
+        hide: "{% static 'img/icons/icon-eye-hide.svg' %}"
+    }
+
+    const emailIcon = {
+        valid: "{% static 'img/icons/icon-check-circle-success.svg' %}",
+        invalid: "{% static 'img/icons/icon-alert.svg' %}"
+    }
+</script>
+<script src="{% static 'js/retailers/signup.js' %}"></script>
+
+{% endblock %}

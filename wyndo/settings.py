@@ -191,7 +191,6 @@ LOGGING = {
     },
 }
 
-
 if "AWS_STORAGE_BUCKET_NAME" in os.environ:
     STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
@@ -294,35 +293,46 @@ SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
 RETAILER_PERMISSION_GROUP_NAME = getenv("RETAILER_PERMISSION_GROUP_NAME", "Retailer_Permission_Group")
 DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
-  {
-    "app_label": "inventories",
-    "model": "inventory",
-    "codes": [
-      "view_inventory"
-    ]
-  },
-  {
-    "app_label": "inventories",
-    "model": "product",
-    "codes": [
-      "view_product"
-    ],
-    "inventories": "view_product"
-  },
-  {
-    "app_label": "inventories",
-    "model": "variant",
-    "codes": [
-      "view_variant"
-    ]
-  },
-  {
-    "app_label": "inventories",
-    "model": "variantimage",
-    "codes": [
-      "view_variantimage"
-    ]
-  }
+    {
+        "app_label": "inventories",
+        "model": "inventory",
+        "codes": [
+            "view_inventory",
+            "change_inventory",
+            "add_inventory"
+        ]
+    },
+    {
+        "app_label": "inventories",
+        "model": "product",
+        "codes": [
+            "view_product",
+            "change_product",
+            "delete_product",
+            "add_product"
+        ],
+        "inventories": "view_product"
+    },
+    {
+        "app_label": "inventories",
+        "model": "variant",
+        "codes": [
+            "view_variant"
+            "change_variant",
+            "delete_variant",
+            "add_variant"
+        ]
+    },
+    {
+        "app_label": "inventories",
+        "model": "variantimage",
+        "codes": [
+            "view_variantimage"
+            "change_variantimage",
+            "delete_variantimage",
+            "add_variantimage"
+        ]
+    }
 ]
 RETAILER_PERMISSION_GROUP_DATA = json.loads(getenv("RETAILER_PERMISSION_GROUP_CODES", "[]"))
 if len(RETAILER_PERMISSION_GROUP_DATA) == 0:

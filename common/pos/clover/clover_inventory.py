@@ -275,11 +275,13 @@ class CloverInventory(Inventory):
                 "price": int(product.min_price) * 100,
                 "stockCount": product.total_stock,
             }
-            self._request_client._request(
+            item = self._request_client._request(
                 path=path,
                 method="POST",
                 json=payload
             )
+            product.origin_id = item.get("id")
+            product.save()
 
 class CloverProductMapper:
     def __init__(self, clover_client):

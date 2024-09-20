@@ -11,7 +11,9 @@ from django_admin_inline_paginator.admin import TabularInlinePaginated
 from rangefilter.filters import DateRangeFilter
 
 from common.filters import PriceRangeFilter
+from common.pos.clover import CloverInventory
 from common.retailer_utils import RetailerUtils
+from retailer.models import Retailer
 from .forms import CategoryForm, ProductForm, VariantForm
 from .models import Category, Product, Variant, Inventory, Reservation
 
@@ -41,11 +43,7 @@ class VariantInline(admin.TabularInline):
     extra = 0
     exclude = ("currency", "origin_id", "origin_parent_id")
     readonly_fields = (
-        "sku",
-        "upc",
-        "stock",
-        "price",
-        "display_images",
+
     )
     fields = (
         "name",
@@ -54,7 +52,7 @@ class VariantInline(admin.TabularInline):
         "upc",
         "stock",
         "image",
-        "display_images",
+        # "display_images",
         "description",
         "is_modified_by_admin",
     )
@@ -76,7 +74,7 @@ class VariantInline(admin.TabularInline):
     display_images.short_description = "Images"
 
     def has_add_permission(self, request, _):
-        return False
+        return True
 
     class Media:
         css = {"all": ("css/admin/admin.css", "css/admin/iconsgoogle.css")}
@@ -108,12 +106,7 @@ class ProductAdmin(admin.ModelAdmin):
         "updated_at",
     )
     readonly_fields = (
-        "min_price",
-        "max_price",
-        "origin",
         "origin_id",
-        "inventory",
-        "total_stock",
     )
     fields = (
         "is_active",
@@ -138,6 +131,30 @@ class ProductAdmin(admin.ModelAdmin):
         if not request.user.is_superuser:
             return qs.filter(inventory__in=RetailerUtils.get_retailer_inventories(request.user.email))
         return qs
+
+    # def save_model(self, request, obj, form, change):
+    #     super().save_model(request, obj, form, change)
+    #     retailer = Retailer.objects.filter(email=request.user.email).first()
+    #     if not retailer:
+    #         return
+    #     pos_instance = CloverInventory(retailer)
+    #     pos_instance.create_pos_item(obj)
+
+    def save_model(self, request, obj, form, change):
+        pass  # don't actually save the parent instance
+
+    def save_formset(self, request, form, formset, change):
+        formset.save()  # this will save the children
+        form.instance.save()  # form.instance is the parent
+        retailer = Retailer.objects.filter(
+            email=request.user.email,
+            origin=form.instance.origin,
+        ).first()
+        if not retailer:
+            return
+        pos_instance = CloverInventory(retailer)
+        pos_instance.create_pos_item(form.instance)
+
 
     class Media:
         js = (

@@ -50,6 +50,10 @@ class AbstractInventory(ABC):
     def delete_product(self, origin_id: str, inventory: IventoryModel):
         pass
 
+    @abstractmethod
+    def create_pos_item(self, product):
+        pass
+
 
 class Inventory(AbstractInventory):
     def __init__(self, retailer):

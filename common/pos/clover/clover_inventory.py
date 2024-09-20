@@ -1,3 +1,4 @@
+import json
 import logging
 import traceback
 
@@ -227,6 +228,58 @@ class CloverInventory(Inventory):
         self._inventory = self.get_or_create_inventories()
         self.delete_product(origin_id=item_id, inventory=self._inventory)
 
+    def create_pos_item(self, product: Product):
+        variants = product.variants.all()
+        path = f"{self._merchant_id}/items"
+        if len(variants) > 0:
+            # first create the group
+            group_path = f"{self._merchant_id}/item_groups"
+            group = self._request_client._request(
+                path=group_path,
+                method="POST",
+                json={
+                    "name": product.name
+                }
+            )
+            product.origin_id = group.get("id")
+            product.save()
+            for variant in variants:
+                payload = {
+                    "hidden": "false",
+                    "available": "true",
+                    "name": variant.name,
+                    "alternateName": variant.name,
+                    "price": int(variant.price) * 100,
+                    "stockCount": variant.stock,
+                    "sku": variant.sku,
+                    "code": variant.upc,
+                    "itemGroup": {
+                        "id": group.get("id")
+                    },
+                    "options": [{"name": variant.name}]
+                }
+                response = self._request_client._request(
+                    path=path,
+                    method="POST",
+                    json=payload
+                )
+                variant.origin_id = response.get("id")
+                variant.origin_parent_id = group.get("id")
+                variant.save()
+
+        else:
+            payload = {
+                "hidden": "false",
+                "available": "true",
+                "name": product.name,
+                "price": int(product.min_price) * 100,
+                "stockCount": product.total_stock,
+            }
+            self._request_client._request(
+                path=path,
+                method="POST",
+                json=payload
+            )
 
 class CloverProductMapper:
     def __init__(self, clover_client):

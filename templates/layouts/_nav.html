@@ -150,10 +150,12 @@
                             <a href="{% url 'login' %}" class="text-sm underline font-normal">Login</a>
                             {% endif %}
                         </span>
+                        {% if user.address %}
                         <span class="flex items-center text-right text-xs gap-1 justify-end">
                             <img src="{% static 'img/icons/icon-marker.svg' %}">
                             New Hampshire 03987
                         </span>
+                        {% endif %}
                     </div>
                     <div>
                         <img src="{% static 'img/icons/icon-avatar.svg' %}">
@@ -163,16 +165,16 @@
                         <summary class="btn btn-ghost sm:p-0">
                             <img src="{% static 'img/icons/icon-arrow-down.svg' %}" class="arrow cursor-pointer">
                         </summary>
-                        <ul class="dropdown-content z-[1] menu shadow px-0 bg-white rounded-sm w-44">
+                        <ul class="dropdown-content z-[1] menu shadow px-0 bg-white rounded-sm w-48">
                             {% if user.is_staff %}
-                            <li class="text-neutral-800 hover:bg-neutral-800 hover:text-white">
+                            <li class="text-neutral-800 hover:text-[#59b293]">
                                 <a href="{% url 'admin:index' %}">Inventory Management</a>
                             </li>
                             {% endif %}
-                            <li class="text-neutral-800 hover:bg-neutral-800 hover:text-white">
+                            <li class="text-neutral-800 hover:text-[#59b293]">
                                 <a href="{% url 'profile' %}">Profile</a>
                             </li>
-                            <li class="text-neutral-800 hover:bg-neutral-800 hover:text-white"><a
+                            <li class="text-neutral-800 hover:text-[#59b293]"><a
                                     href="{% url 'logout' %}">Logout</a>
                             </li>
                         </ul>

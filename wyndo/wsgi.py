@@ -11,6 +11,10 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
+from common.retailer_utils import RetailerUtils
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wyndo.settings')
 
 application = get_wsgi_application()
+# Create retail permission group
+RetailerUtils.create_retailer_permission_group()

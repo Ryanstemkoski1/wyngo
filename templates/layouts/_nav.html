@@ -41,7 +41,7 @@
                 <div class="px-6 py-4">
                     <div class="flex justify-between">
                         <div class="flex text-neutral-800 items-center gap-2">
-                            {% if user.is_authenticated and not user.is_staff %}
+                            {% if user.is_authenticated %}
                             <a href="{% url 'profile' %}">
                                 <img src="{% static 'img/icons/icon-avatar.svg' %}" class="filter invert">
                             </a>
@@ -49,7 +49,7 @@
                             <img src="{% static 'img/icons/icon-avatar.svg' %}" class="filter invert">
                             {% endif %}
                             <div class="flex flex-col">
-                                {% if user.is_authenticated and not user.is_staff %}
+                                {% if user.is_authenticated %}
                                 <span class="text-sm break-text">
                                     {{ user.first_name }} {{ user.last_name }}
                                 </span>
@@ -144,7 +144,7 @@
                     class="flex text-right text-white {% if user.is_authenticated %} gap-1 {% else %} gap-2 {% endif %} justify-end items-center">
                     <div class="flex flex-col w-40">
                         <span class="text-sm font-semibold break-text text-right line-clamp-2">
-                            {% if user.is_authenticated and not user.is_staff %}
+                            {% if user.is_authenticated %}
                             {{ user.first_name }} {{ user.last_name }}
                             {% else %}
                             <a href="{% url 'login' %}" class="text-sm underline font-normal">Login</a>
@@ -158,12 +158,17 @@
                     <div>
                         <img src="{% static 'img/icons/icon-avatar.svg' %}">
                     </div>
-                    {% if user.is_authenticated and not user.is_staff %}
+                    {% if user.is_authenticated %}
                     <details class="dropdown dropdown-end flex sm:w-[32px] self-center">
                         <summary class="btn btn-ghost sm:p-0">
                             <img src="{% static 'img/icons/icon-arrow-down.svg' %}" class="arrow cursor-pointer">
                         </summary>
                         <ul class="dropdown-content z-[1] menu shadow px-0 bg-white rounded-sm w-44">
+                            {% if user.is_staff %}
+                            <li class="text-neutral-800 hover:bg-neutral-800 hover:text-white">
+                                <a href="{% url 'admin:index' %}">Inventory Management</a>
+                            </li>
+                            {% endif %}
                             <li class="text-neutral-800 hover:bg-neutral-800 hover:text-white">
                                 <a href="{% url 'profile' %}">Profile</a>
                             </li>

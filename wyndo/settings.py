@@ -292,3 +292,38 @@ CKEDITOR_CONFIGS = {
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
+RETAILER_PERMISSION_GROUP_NAME = getenv("RETAILER_PERMISSION_GROUP_NAME", "Retailer_Permission_Group")
+DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
+  {
+    "app_label": "inventories",
+    "model": "inventory",
+    "codes": [
+      "view_inventory"
+    ]
+  },
+  {
+    "app_label": "inventories",
+    "model": "product",
+    "codes": [
+      "view_product"
+    ],
+    "inventories": "view_product"
+  },
+  {
+    "app_label": "inventories",
+    "model": "variant",
+    "codes": [
+      "view_variant"
+    ]
+  },
+  {
+    "app_label": "inventories",
+    "model": "variantimage",
+    "codes": [
+      "view_variantimage"
+    ]
+  }
+]
+RETAILER_PERMISSION_GROUP_DATA = json.loads(getenv("RETAILER_PERMISSION_GROUP_CODES", "[]"))
+if len(RETAILER_PERMISSION_GROUP_DATA) == 0:
+    RETAILER_PERMISSION_GROUP_DATA = DEFAULT_RETAILER_PERMISSION_GROUP_DATA

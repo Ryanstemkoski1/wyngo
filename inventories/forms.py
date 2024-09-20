@@ -54,7 +54,7 @@ class ProductForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ProductForm, self).__init__(*args, **kwargs)
-        if self.instance.pk:
+        if self.instance.pk and "category" in self.fields:
             self.fields["category"].initial = self.instance.category
 
     def save(self, commit=True):

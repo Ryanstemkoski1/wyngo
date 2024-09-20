@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.core import validators
-
+from common.retailer_utils import RetailerUtils
 from wyndo.settings import (
     CLOVER_API_SECRET,
     SQUARE_API_SECRET,
@@ -80,6 +80,9 @@ class RetailerSignupForm(forms.ModelForm):
                 instance.category.add(category)
 
             instance.save()
+
+            # Check retailer account to promote
+            RetailerUtils.check_and_promote_retailer_admin_account(instance.email)
 
         return instance
 

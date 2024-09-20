@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
+from common.retailer_utils import RetailerUtils
 from .forms import UserForm, LoginForm, UserProfileUpdateForm
 from .models import User
 
@@ -121,11 +122,14 @@ class LoginView(TemplateView):
 
         user = auth.authenticate(request, username=email, password=password)
 
-        if user is None or user.is_staff:
+        if user is None:
             messages.error(request, "Invalid email or password.", extra_tags="error")
             return redirect("login")
 
         auth.login(request, user)
+
+        # Check retailer
+        RetailerUtils.check_and_promote_retailer_admin_account(user.email)
 
         return redirect("index")
 

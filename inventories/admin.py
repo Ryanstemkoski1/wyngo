@@ -11,6 +11,7 @@ from django_admin_inline_paginator.admin import TabularInlinePaginated
 from rangefilter.filters import DateRangeFilter
 
 from common.filters import PriceRangeFilter
+from common.retailer_utils import RetailerUtils
 from .forms import CategoryForm, ProductForm, VariantForm
 from .models import Category, Product, Variant, Inventory, Reservation
 
@@ -132,6 +133,12 @@ class ProductAdmin(admin.ModelAdmin):
 
     get_variations.short_description = "Variations"
 
+    def get_queryset(self, request):
+        qs: QuerySet = super().get_queryset(request)
+        if not request.user.is_superuser:
+            return qs.filter(inventory__in=RetailerUtils.get_retailer_inventories(request.user.email))
+        return qs
+
     class Media:
         js = (
             "js/admin/jquery-3.3.1.min.js",
@@ -187,6 +194,8 @@ class InventoryAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs: QuerySet = super().get_queryset(request)
+        if not request.user.is_superuser:
+            return qs.filter(location__in=RetailerUtils.get_retailer_locations(request.user.email))
         return qs.filter(location__retailer__is_approved=True)
 
     class Media:

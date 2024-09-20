@@ -22,7 +22,7 @@ class Retailer(BaseTimeModel):
 
     name = models.CharField(max_length=30)
 
-    email = models.EmailField(_("email address"), blank=True)
+    email = models.EmailField(_("email address"), blank=True, db_index=True)
 
     description = models.TextField(max_length=280)
 

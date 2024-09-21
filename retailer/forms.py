@@ -1,6 +1,9 @@
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core import validators
+from django.db import transaction
+
 from common.retailer_utils import RetailerUtils
 from wyndo.settings import (
     CLOVER_API_SECRET,
@@ -11,6 +14,7 @@ from wyndo.settings import (
 from .models import Retailer, Category
 
 
+User = get_user_model()
 class RetailerForm(forms.ModelForm):
     class Meta:
         model = Retailer
@@ -41,6 +45,7 @@ class RetailerSignupForm(forms.ModelForm):
     name = forms.CharField(max_length=128, required=True)
     description = forms.CharField(widget=forms.Textarea)
     email = forms.EmailField(required=True, validators=[validators.validate_email])
+    password = forms.CharField(widget=forms.PasswordInput)
     code = forms.CharField(max_length=128, required=False)
     merchant_id = forms.CharField(max_length=128, required=False)
     app_id = forms.CharField(max_length=128, required=False)
@@ -61,7 +66,12 @@ class RetailerSignupForm(forms.ModelForm):
                 raise forms.ValidationError("Invalid file. Error: {}".format(e))
         return image
 
+    @transaction.atomic
     def save(self, commit=True):
+        data = self.cleaned_data
+        user = self.create_retailer_admin(data["email"], data["password"])
+        if user is None:
+            raise forms.ValidationError("Cannot create user for this email address")
         instance: Retailer = super(RetailerSignupForm, self).save(commit=False)
         if instance is not None:
             instance.merchant_id = (
@@ -86,12 +96,21 @@ class RetailerSignupForm(forms.ModelForm):
 
         return instance
 
+    def create_retailer_admin(self, email, password):
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("User with this email already exists.")
+
+        user = User.objects.create_user(email, password, is_staff=True,
+                                        is_active=True, is_superuser=False)
+        return user
+
     class Meta:
         model = Retailer
         fields = [
             "name",
             "description",
             "email",
+            "password",
             "code",
             "merchant_id",
             "app_id",

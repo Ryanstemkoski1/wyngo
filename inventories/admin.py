@@ -195,6 +195,15 @@ class ProductAdmin(admin.ModelAdmin):
         pos_instance.delete_pos_product(obj)
         super().delete_model(request, obj)
 
+    # def _clean_variant_name(self, product):
+    #     product_name = product.name
+    #     for variant in product.variants.all():
+    #         variant_name = variant.name
+    #         _variant_name = variant_name.replace(product_name, "") \
+    #             if variant_name.startswith(product_name) else variant_name
+    #         variant.name = _variant_name
+    #         variant.save()
+    #     product.save()
 
 
     class Media:

@@ -36,6 +36,18 @@ Completing this form will take less than a minute.
             address.</span>
     </div>
     <div class="form-control">
+        <label for="password" class="label font-normal text-sm px-3 pb-1">Password*</label>
+        <div class="flex justify-end items-center align-middle relative">
+            <input type="password" id="password" placeholder="At least 8 characters" name="password"
+                class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm" />
+            <img src="{% static 'img/icons/icon-eye-hide.svg' %}" class="absolute w-6 mr-2 cursor-pointer eye-icon" />
+        </div>
+        <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Please, enter a valid password.</span>
+        <div class="font-normal text-xs px-3 pt-1">
+            Minimum 8 characters with at least 1 capital letter, 1 lowercase letter and 1 number.
+        </div>
+    </div>
+    <div class="form-control">
         <label for="name" class="label font-normal text-sm px-3 pb-1">Store Description*</label>
         <textarea class="textarea textarea-bordered bg-white border-neutral-800" placeholder="Enter a short description of your business here"
             name="description"></textarea>

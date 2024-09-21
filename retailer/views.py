@@ -2,6 +2,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import TemplateView
@@ -107,7 +108,13 @@ def connect_retailer(request):
     logger.info(f"Is form valid? {form.is_valid()}")
 
     if form.is_valid():
-        retailer = form.save()
+        try:
+            retailer = form.save()
+        except ValidationError as e:
+            messages.error(request, str(e), extra_tags="error")
+            return False
+        except Exception as e:
+            return False
     else:
         logger.info(f"Errors {form.errors}")
         return False
@@ -205,7 +212,7 @@ class RetailerSignupView(TemplateView):
             messages.success(
                 request, "Retailer created successfully.", extra_tags="success"
             )
-            return redirect("sign_up", origin=request.POST.get("origin"))
+            return redirect("login")
         else:
             messages.error(request, "Retailer creation failed.", extra_tags="error")
             return redirect("sign_up", origin=request.POST.get("origin"))

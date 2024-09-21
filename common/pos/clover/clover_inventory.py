@@ -471,7 +471,6 @@ class CloverInventory(Inventory):
             )
 
 
-
 class CloverProductMapper:
     def __init__(self, clover_client):
         self._clover_client = clover_client

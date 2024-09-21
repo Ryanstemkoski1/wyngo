@@ -21,8 +21,10 @@ const image = document.querySelectorAll('[name="image"]');
 const category = document.querySelectorAll('[name="category"]');
 const formats = document.querySelectorAll('[name="formats"]');
 const button = document.querySelector("button");
+const password = document.querySelectorAll('[name="password"]');
 
 let isValidEmail = false;
+let isValidPassword = false;
 let isValidName = false;
 let isValidTermsConditions = false;
 let isValidDescription = false;
@@ -42,7 +44,13 @@ email.forEach((input) => {
 });
 
 const validate = () => {
-  if (isValidName && isValidEmail && terms_conditions[0].checked && isValidCategory && isValidDescription && isValidImage && can_continue !== "False") {
+  if (isValidName && isValidEmail &&
+        isValidPassword &&
+        terms_conditions[0].checked &&
+        isValidCategory &&
+        isValidDescription &&
+        isValidImage &&
+        can_continue !== "False") {
     button.disabled = false;
   } else {
     button.disabled = true;
@@ -88,6 +96,46 @@ email[0].addEventListener("keyup", function () {
     isValidEmail = false;
     this.classList.add("input__error");
     this.parentNode.nextElementSibling.classList.remove("hidden");
+  }
+
+  validate();
+});
+
+password[0].addEventListener("keyup", function () {
+  let value = this.value;
+
+  if (value.startsWith(" ")) {
+    this.value = "";
+    isValidName = false;
+    return;
+  }
+
+  if (
+    validator.isStrongPassword(this.value, {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 0,
+    })
+  ) {
+    isValidPassword = true;
+    this.classList.remove("input__error");
+    this.parentNode.nextElementSibling.classList.add("hidden");
+  } else {
+    isValidPassword = false;
+    this.classList.add("input__error");
+    this.parentNode.nextElementSibling.classList.remove("hidden");
+  }
+
+  if (confirm_password[0].value !== "" && !validator.equals(this.value, confirm_password[0].value)) {
+    isValidConfirmPassword = false;
+    confirm_password[0].classList.add("input__error");
+    confirm_password[0].parentNode.nextElementSibling.classList.remove("hidden");
+  } else if(validator.equals(this.value, confirm_password[0].value)) {
+    isValidConfirmPassword = true;
+    confirm_password[0].classList.remove("input__error");
+    confirm_password[0].parentNode.nextElementSibling.classList.add("hidden");
   }
 
   validate();

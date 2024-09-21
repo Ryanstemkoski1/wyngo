@@ -38,12 +38,12 @@ class CategoryAdmin(admin.ModelAdmin):
 class VariantInline(admin.TabularInline):
     model = Variant
     form = VariantForm
-    verbose_name = "Product Detail"
+    verbose_name = "Variation"
     verbose_name_plural = "Variations"
     extra = 0
     exclude = ("currency", "origin_id", "origin_parent_id")
     readonly_fields = (
-
+        "display_images",
     )
     fields = (
         "name",
@@ -52,13 +52,13 @@ class VariantInline(admin.TabularInline):
         "upc",
         "stock",
         "image",
-        # "display_images",
+        "display_images",
         "description",
         "is_modified_by_admin",
     )
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return True
 
     def display_images(self, obj):
         images = obj.get_images()
@@ -88,6 +88,7 @@ class VariantInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     search_fields = ["name"]
+    actions = None
     list_filter = (
         "origin",
         PriceRangeFilter,
@@ -132,28 +133,57 @@ class ProductAdmin(admin.ModelAdmin):
             return qs.filter(inventory__in=RetailerUtils.get_retailer_inventories(request.user.email))
         return qs
 
-    # def save_model(self, request, obj, form, change):
-    #     super().save_model(request, obj, form, change)
-    #     retailer = Retailer.objects.filter(email=request.user.email).first()
-    #     if not retailer:
-    #         return
-    #     pos_instance = CloverInventory(retailer)
-    #     pos_instance.create_pos_item(obj)
-
     def save_model(self, request, obj, form, change):
         pass  # don't actually save the parent instance
 
     def save_formset(self, request, form, formset, change):
         formset.save()  # this will save the children
         form.instance.save()  # form.instance is the parent
+        if not change and formset.instance.variants.count() == 0:
+            """
+            For products with no variations, we create a default one to ensure it appears on the list. 
+            This logic from load_inventory is a bit unusual, but it works.
+            """
+            product = form.instance
+            default_variant = Variant(
+                name=product.name,
+                price=product.min_price,
+                stock=product.total_stock,
+                product=product,
+            )
+            default_variant.save()
+            form.instance.variants.add(default_variant)
+            form.instance.save()
+
         retailer = Retailer.objects.filter(
             email=request.user.email,
             origin=form.instance.origin,
         ).first()
         if not retailer:
             return
+        if form.instance.origin == Product.SQUARE:
+            return  # Not supported SQUARE yet
+
         pos_instance = CloverInventory(retailer)
-        pos_instance.create_pos_item(form.instance)
+        if change:
+            pos_instance.update_pos_item(form.instance, form, formset)
+        else:
+            pos_instance.create_pos_item(form.instance)
+
+    def delete_model(self, request, obj):
+        retailer = Retailer.objects.filter(
+            email=request.user.email,
+            origin=obj.origin,
+        ).first()
+        if not retailer:
+            return
+        if obj.origin == Product.SQUARE:
+            return  # Not supported SQUARE yet
+
+        pos_instance = CloverInventory(retailer)
+        pos_instance.delete_pos_product(obj)
+        super().delete_model(request, obj)
+
 
 
     class Media:

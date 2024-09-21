@@ -228,6 +228,7 @@ class CloverInventory(Inventory):
         self._inventory = self.get_or_create_inventories()
         self.delete_product(origin_id=item_id, inventory=self._inventory)
 
+    @transaction.atomic
     def create_pos_item(self, product: Product):
         variants = product.variants.all()
         path = f"{self._merchant_id}/items"
@@ -243,12 +244,34 @@ class CloverInventory(Inventory):
             )
             product.origin_id = group.get("id")
             product.save()
+
+            # create attributes
+            attributes_path = f"{self._merchant_id}/attributes"
+            attributes_payload = {
+                "itemGroup": {"id": group.get("id")},
+                "name": f"variants-for-{product.name}",
+            }
+            attribute = self._request_client._request(
+                path=attributes_path,
+                method="POST",
+                json=attributes_payload
+            )
+            attribute_id = attribute.get("id")
+
             for variant in variants:
+                option_path = f"{self._merchant_id}/attributes/{attribute_id}/options"
+                option = self._request_client._request(
+                    path=option_path,
+                    method="POST",
+                    json={
+                        "name": variant.name
+                    }
+                )
+                # create item
                 payload = {
                     "hidden": "false",
                     "available": "true",
                     "name": variant.name,
-                    "alternateName": variant.name,
                     "price": int(variant.price) * 100,
                     "stockCount": variant.stock,
                     "sku": variant.sku,
@@ -256,15 +279,43 @@ class CloverInventory(Inventory):
                     "itemGroup": {
                         "id": group.get("id")
                     },
-                    "options": [{"name": variant.name}]
+                    "options": [
+                        {
+                            "attribute": {"id": attribute_id},
+                            "name": variant.name,
+                            "id": option.get("id"),
+                        }
+                    ]
                 }
                 response = self._request_client._request(
                     path=path,
                     method="POST",
                     json=payload
                 )
+
+                # Link item to variant
+                self._request_client._request(
+                    path=f"{self._merchant_id}/option_items",
+                    method="POST",
+                    json={
+                        "elements":
+                        [
+                            {
+                                "option":
+                                {
+                                    "id": option.get("id")
+                                },
+                                "item":
+                                {
+                                    "id": response.get("id")
+                                }
+                            },
+                        ]
+                    }
+                )
                 variant.origin_id = response.get("id")
                 variant.origin_parent_id = group.get("id")
+                variant.name = response.get("name") + " " + variant.name
                 variant.save()
 
         else:
@@ -282,6 +333,144 @@ class CloverInventory(Inventory):
             )
             product.origin_id = item.get("id")
             product.save()
+
+    def update_pos_item(self, product: Product, form, formset):
+        # First PUT group_items
+        if form.changed_data and 'name' in form.changed_data:
+            payload = {
+                "name": product.name,
+            }
+            path = f"{self._merchant_id}/item_groups/{product.origin_id}"
+            self._request_client._request(
+                path=path,
+                method="POST",
+                json=payload
+            )
+
+        if len(formset.deleted_objects) > 0:
+            item_ids = ','.join([x.origin_id for x in formset.deleted_objects if x.origin_id])
+            if item_ids:
+                path = f"{self._merchant_id}/items/?itemIds={item_ids}"
+                self._request_client._request(
+                    path=path,
+                    method="DELETE"
+                )
+
+        if len(formset.new_objects) > 0:
+            group_id = product.origin_id
+            attributes = self._request_client._request(
+                path=f"{self._merchant_id}/attributes",
+                method="GET",
+                params={
+                    "itemGroup.id": group_id
+                }
+            )
+            attribute_id = attributes.get("elements")[0].get("id") if attributes.get("elements") else None
+            if attribute_id is None:
+                return
+            for variant in formset.new_objects:
+                # create option
+                option_path = f"{self._merchant_id}/attributes/{attribute_id}/options"
+                option = self._request_client._request(
+                    path=option_path,
+                    method="POST",
+                    json={
+                        "name": variant.name
+                    }
+                )
+                # create item
+                payload = {
+                    "hidden": "false",
+                    "available": "true",
+                    "name": variant.name,
+                    "price": int(variant.price) * 100,
+                    "stockCount": variant.stock,
+                    "sku": variant.sku,
+                    "code": variant.upc,
+                    "itemGroup": {
+                        "id": group_id
+                    },
+                    "options": [
+                        {
+                            "attribute": {"id": attribute_id},
+                            "name": variant.name,
+                            "id": option.get("id"),
+                        }
+                    ]
+                }
+                response = self._request_client._request(
+                    path=f"{self._merchant_id}/items",
+                    method="POST",
+                    json=payload
+                )
+
+                # Link item to variant
+                self._request_client._request(
+                    path=f"{self._merchant_id}/option_items",
+                    method="POST",
+                    json={
+                        "elements":
+                            [
+                                {
+                                    "option":
+                                        {
+                                            "id": option.get("id")
+                                        },
+                                    "item":
+                                        {
+                                            "id": response.get("id")
+                                        }
+                                },
+                            ]
+                    }
+                )
+
+                variant.origin_id = response.get("id")
+                variant.origin_parent_id = group_id
+                variant.name = response.get("name") + " " + variant.name
+                variant.save()
+
+        if len(formset.changed_objects) > 0:
+            for obj in formset.changed_objects:
+                variant = obj[0]
+                payload = {
+                    "hidden": "false",
+                    "available": "true",
+                    # "name": variant.name, // name is not updatable
+                    "price": int(variant.price) * 100,
+                    "stockCount": variant.stock,
+                    "sku": variant.sku,
+                    "code": variant.upc,
+                    "itemGroup": {
+                        "id": product.origin_id
+                    },
+                }
+                path = f"{self._merchant_id}/items/{variant.origin_id}"
+                self._request_client._request(
+                    path=path,
+                    method="POST",
+                    json=payload
+                )
+
+    def delete_pos_product(self, product):
+        if not product.origin_id:
+            return
+        path = f"{self._merchant_id}/item_groups/{product.origin_id}"
+        self._request_client._request(
+            path=path,
+            method="DELETE"
+        )
+
+        variants = product.variants.all()
+        variants_ids = ','.join([x.origin_id for x in variants if x.origin_id])
+        if variants_ids:
+            path = f"{self._merchant_id}/items/?itemIds={variants_ids}"
+            self._request_client._request(
+                path=path,
+                method="DELETE"
+            )
+
+
 
 class CloverProductMapper:
     def __init__(self, clover_client):

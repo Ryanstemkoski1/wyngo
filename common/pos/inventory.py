@@ -54,6 +54,14 @@ class AbstractInventory(ABC):
     def create_pos_item(self, product):
         pass
 
+    @abstractmethod
+    def update_pos_item(self, product):
+        pass
+
+    @abstractmethod
+    def delete_pos_product(self, product):
+        pass
+
 
 class Inventory(AbstractInventory):
     def __init__(self, retailer):

@@ -309,7 +309,7 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
             "view_product",
             "change_product",
             "delete_product",
-            "add_product"
+            "add_product",
         ],
         "inventories": "view_product"
     },
@@ -317,20 +317,20 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "app_label": "inventories",
         "model": "variant",
         "codes": [
-            "view_variant"
+            "view_variant",
             "change_variant",
             "delete_variant",
-            "add_variant"
+            "add_variant",
         ]
     },
     {
         "app_label": "inventories",
         "model": "variantimage",
         "codes": [
-            "view_variantimage"
+            "view_variantimage",
             "change_variantimage",
             "delete_variantimage",
-            "add_variantimage"
+            "add_variantimage",
         ]
     }
 ]

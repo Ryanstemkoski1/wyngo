@@ -122,6 +122,17 @@ class ProductAdmin(admin.ModelAdmin):
         "is_modified_by_admin",
     )
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ProductAdmin, self).get_form(request, obj, **kwargs)
+        if request.user.is_superuser:
+            inventory_qs = Inventory.objects.all()
+        else:
+            inventory_qs = Inventory.objects.filter(
+                location__retailer__email=request.user.email
+            )
+        form.base_fields['inventory'].queryset = inventory_qs
+        return form
+
     def get_variations(self, obj):
         return obj.variants.count()
 

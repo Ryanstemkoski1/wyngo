@@ -106,3 +106,44 @@ class CloverRequestClient:
     def delete_order(self, order_id):
         path = f"{self._merchant_id}/orders/{order_id}"
         return self._request(path=path, method="DELETE")
+
+    def create_item(self, product):
+        path = f"{self._merchant_id}/items/"
+        item = self._request(
+            path=path,
+            method="POST",
+            json={
+                "hidden": "false",
+                "available": "true",
+                "name": product.name,
+                "price": int(product.min_price) * 100,
+                "stockCount": product.total_stock,
+            }
+        )
+        return item
+
+    def update_item(self, product):
+        path = f"{self._merchant_id}/items/{product.origin_id}"
+        item = self._request(
+            path=path,
+            method="POST",
+            json={
+                "hidden": "false",
+                "available": "true",
+                "name": product.name,
+                "price": int(product.min_price) * 100,
+                "stockCount": product.total_stock,
+            }
+        )
+        return item
+
+    def update_group_item(self, product):
+        payload = {
+            "name": product.name,
+        }
+        path = f"{self._merchant_id}/item_groups/{product.origin_id}"
+        return self._request(
+            path=path,
+            method="POST",
+            json=payload
+        )

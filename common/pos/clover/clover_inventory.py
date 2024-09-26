@@ -228,6 +228,7 @@ class CloverInventory(Inventory):
         self._inventory = self.get_or_create_inventories()
         self.delete_product(origin_id=item_id, inventory=self._inventory)
 
+
     @transaction.atomic
     def create_pos_item(self, product: Product):
         variants = product.variants.all()
@@ -335,17 +336,14 @@ class CloverInventory(Inventory):
             product.save()
 
     def update_pos_item(self, product: Product, form, formset):
+        if product.is_single_product():
+            self._request_client.update_item(product)
+            return
+
+        # Update product and its variants
         # First PUT group_items
         if form.changed_data and 'name' in form.changed_data:
-            payload = {
-                "name": product.name,
-            }
-            path = f"{self._merchant_id}/item_groups/{product.origin_id}"
-            self._request_client._request(
-                path=path,
-                method="POST",
-                json=payload
-            )
+            self._request_client.update_group_item(product)
 
         if len(formset.deleted_objects) > 0:
             item_ids = ','.join([x.origin_id for x in formset.deleted_objects if x.origin_id])

@@ -58,14 +58,15 @@ class VariantInline(admin.TabularInline):
     )
 
     def has_delete_permission(self, request, obj=None):
-        return True
+        return False
 
     def display_images(self, obj):
         images = obj.get_images()
         return format_html(
             "<br>".join(
                 [
-                    f'<a href="{image.image.url}" target="_blank">View image #{i + 1}</a> <a href="#" class="delete-image"><span class="material-symbols-outlined delete-red" data-image-id="{image.id}">highlight_off</span></a>'
+                    f'<a href="{image.image.url}" target="_blank">View image #{i + 1}</a>'
+                    #<a href="#" class="delete-image"><span class="material-symbols-outlined delete-red" data-image-id="{image.id}">highlight_off</span></a>
                     for i, image in enumerate(images)
                 ]
             )
@@ -74,7 +75,7 @@ class VariantInline(admin.TabularInline):
     display_images.short_description = "Images"
 
     def has_add_permission(self, request, _):
-        return True
+        return False
 
     class Media:
         css = {"all": ("css/admin/admin.css", "css/admin/iconsgoogle.css")}
@@ -107,7 +108,15 @@ class ProductAdmin(admin.ModelAdmin):
         "updated_at",
     )
     readonly_fields = (
+        "name",
+        "category",
+        "origin",
         "origin_id",
+        "min_price",
+        "inventory",
+        "max_price",
+        "total_stock",
+        "is_modified_by_admin",
     )
     fields = (
         "is_active",
@@ -124,13 +133,13 @@ class ProductAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(ProductAdmin, self).get_form(request, obj, **kwargs)
-        if request.user.is_superuser:
-            inventory_qs = Inventory.objects.all()
-        else:
-            inventory_qs = Inventory.objects.filter(
-                location__retailer__email=request.user.email
-            )
-        form.base_fields['inventory'].queryset = inventory_qs
+        # if request.user.is_superuser:
+        #     inventory_qs = Inventory.objects.all()
+        # else:
+        #     inventory_qs = Inventory.objects.filter(
+        #         location__retailer__email=request.user.email
+        #     )
+        # form.base_fields['inventory'].queryset = inventory_qs
         return form
 
     def get_variations(self, obj):
@@ -144,56 +153,41 @@ class ProductAdmin(admin.ModelAdmin):
             return qs.filter(inventory__in=RetailerUtils.get_retailer_inventories(request.user.email))
         return qs
 
-    def save_model(self, request, obj, form, change):
-        pass  # don't actually save the parent instance
-
-    def save_formset(self, request, form, formset, change):
-        formset.save()  # this will save the children
-        form.instance.save()  # form.instance is the parent
-        if not change and formset.instance.variants.count() == 0:
-            """
-            For products with no variations, we create a default one to ensure it appears on the list. 
-            This logic from load_inventory is a bit unusual, but it works.
-            """
-            product = form.instance
-            default_variant = Variant(
-                name=product.name,
-                price=product.min_price,
-                stock=product.total_stock,
-                product=product,
-            )
-            default_variant.save()
-            form.instance.variants.add(default_variant)
-            form.instance.save()
-
-        retailer = Retailer.objects.filter(
-            email=request.user.email,
-            origin=form.instance.origin,
-        ).first()
-        if not retailer:
-            return
-        if form.instance.origin == Product.SQUARE:
-            return  # Not supported SQUARE yet
-
-        pos_instance = CloverInventory(retailer)
-        if change:
-            pos_instance.update_pos_item(form.instance, form, formset)
-        else:
-            pos_instance.create_pos_item(form.instance)
-
-    def delete_model(self, request, obj):
-        retailer = Retailer.objects.filter(
-            email=request.user.email,
-            origin=obj.origin,
-        ).first()
-        if not retailer:
-            return
-        if obj.origin == Product.SQUARE:
-            return  # Not supported SQUARE yet
-
-        pos_instance = CloverInventory(retailer)
-        pos_instance.delete_pos_product(obj)
-        super().delete_model(request, obj)
+    # def save_model(self, request, obj, form, change):
+    #     pass  # don't actually save the parent instance
+    #
+    # def save_formset(self, request, form, formset, change):
+    #     formset.save()  # this will save the children
+    #     form.instance.save()  # form.instance is the parent
+    #
+    #     retailer = Retailer.objects.filter(
+    #         email=request.user.email,
+    #         origin=form.instance.origin,
+    #     ).first()
+    #     if not retailer:
+    #         return
+    #     if form.instance.origin == Product.SQUARE:
+    #         return  # Not supported SQUARE yet
+    #
+    #     pos_instance = CloverInventory(retailer)
+    #     if change:
+    #         pos_instance.update_pos_item(form.instance, form, formset)
+    #     else:
+    #         pos_instance.create_pos_item(form.instance)
+    #
+    # def delete_model(self, request, obj):
+    #     retailer = Retailer.objects.filter(
+    #         email=request.user.email,
+    #         origin=obj.origin,
+    #     ).first()
+    #     if not retailer:
+    #         return
+    #     if obj.origin == Product.SQUARE:
+    #         return  # Not supported SQUARE yet
+    #
+    #     pos_instance = CloverInventory(retailer)
+    #     pos_instance.delete_pos_product(obj)
+    #     super().delete_model(request, obj)
 
     # def _clean_variant_name(self, product):
     #     product_name = product.name

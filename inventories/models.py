@@ -84,6 +84,13 @@ class Product(BaseTimeModel):
     def __str__(self):
         return f"{self.name}"
 
+    def is_single_product(self):
+        variants = self.variants.all()
+        if len(variants) > 1:
+            return False
+        return len(variants) == 0 or variants[0].origin_id == self.origin_id
+
+
 
 class Variant(BaseTimeModel):
     name = models.CharField(max_length=255)

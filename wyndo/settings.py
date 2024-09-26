@@ -298,8 +298,6 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "model": "inventory",
         "codes": [
             "view_inventory",
-            "change_inventory",
-            "add_inventory"
         ]
     },
     {
@@ -308,8 +306,6 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "codes": [
             "view_product",
             "change_product",
-            "delete_product",
-            "add_product",
         ],
         "inventories": "view_product"
     },
@@ -318,9 +314,6 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "model": "variant",
         "codes": [
             "view_variant",
-            "change_variant",
-            "delete_variant",
-            "add_variant",
         ]
     },
     {
@@ -328,9 +321,6 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "model": "variantimage",
         "codes": [
             "view_variantimage",
-            "change_variantimage",
-            "delete_variantimage",
-            "add_variantimage",
         ]
     }
 ]

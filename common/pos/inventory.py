@@ -55,7 +55,7 @@ class AbstractInventory(ABC):
         pass
 
     @abstractmethod
-    def update_pos_item(self, product):
+    def update_pos_item(self, product, form, formset):
         pass
 
     @abstractmethod

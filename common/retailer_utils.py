@@ -13,6 +13,8 @@ class RetailerUtils:
         group_name = settings.RETAILER_PERMISSION_GROUP_NAME
         permission_data = settings.RETAILER_PERMISSION_GROUP_DATA
         group_obj, is_created = Group.objects.get_or_create(name=group_name)
+        group_obj.permissions.clear()
+
         current_permissions = list(group_obj.permissions.all())
         for item in permission_data:
             content_type = ContentType.objects.filter(app_label=item["app_label"], model=item["model"]).first()

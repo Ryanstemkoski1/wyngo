@@ -28,14 +28,11 @@ def load_clover_inventory(
     )
     try:
         if retailer_id is not None:
-            retailers = Retailer.objects.filter(pk=retailer_id).exclude(
-                is_approved=False
-            )
+            retailers = Retailer.objects.filter(pk=retailer_id, status=Retailer.STATUS_APPROVED)
         else:
             retailers = (
-                Retailer.objects.filter(origin=Retailer.CLOVER, is_sync=False)
+                Retailer.objects.filter(origin=Retailer.CLOVER, is_sync=False, status=Retailer.STATUS_APPROVED)
                 .exclude(access_token__isnull=True)
-                .exclude(is_approved=False)
             )
 
         retailers = [
@@ -75,9 +72,8 @@ def load_square_inventory(self, retailer_id: int = None, cursor: str = None):
             )
         else:
             retailers = (
-                Retailer.objects.filter(origin=Retailer.SQUARE)
+                Retailer.objects.filter(origin=Retailer.SQUARE, status=Retailer.STATUS_APPROVED)
                 .exclude(access_token__isnull=True)
-                .exclude(is_approved=False)
             )
 
         retailers = [

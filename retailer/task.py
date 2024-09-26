@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from common.pos.square.square_oauth import SquareOauth
@@ -32,3 +33,17 @@ def refresh_token_task(self):
         SquareOauth.refresh_oauth_session(retailer=retailer)
 
     logger.info("End refresh token task")
+
+@app.task()
+def denied_retailer_email(email, business_name, note):
+    try:
+        message = render_to_string(
+            "email_template_denied_retailer.html",
+            {
+                "business_name": business_name,
+                "note": note,
+            },
+        )
+        Retailer.send_email(message, email, "Application denied")
+    except Exception as e:
+        logging.error(str(e))

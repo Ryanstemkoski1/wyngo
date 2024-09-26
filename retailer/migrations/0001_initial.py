@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
                 ('expires_at', models.DateTimeField(blank=True, null=True, verbose_name='Expiration Date')),
                 ('square_csrf', models.CharField(blank=True, max_length=50, null=True)),
                 ('category', models.ManyToManyField(to='retailer.category')),
-                ('shopping_center', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='retailer.shoppingcenter')),
+                ('shopping_center', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='retailer.shoppingcenter')),
             ],
             options={
                 'abstract': False,

@@ -1,0 +1,75 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+{% block content %}
+    <link rel="stylesheet" href='{% static "admin/css/forms.css" %}'>
+    <link rel="stylesheet" href='{% static "admin/css/responsive.css" %}'>
+    <form method="post">{% csrf_token %}
+        <div>
+            <div class="form-row field-project">
+                <p style="color:red">{{ error }}</p>
+                <h1>Denied Retailers</h1>
+                <h2>{{ retailer.name }}</h2>
+            </div>
+            <fieldset class="module aligned ">
+                <div style="padding:10px">
+                    <div class="form-row field-name">
+                        <div>
+                            <div class="flex-container">
+                                <label class="required" for="id_name">Name:</label>
+                                <div class="readonly">{{ retailer.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding:10px">
+                    <div class="form-row field-name">
+                        <div>
+                            <div class="flex-container">
+                                <label class="required" for="id_origin">Origin:</label>
+                                <div class="readonly">{{ retailer.origin }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding:10px">
+                    <div class="form-row field-name">
+                        <div>
+                            <div class="flex-container">
+                                <label class="required" for="id_email">Email address:</label>
+                                <div class="readonly">{{ retailer.email }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if retailer.status != 'requesting' %}
+                <div style="padding:10px">
+                    <div class="form-row field-name">
+                        <div>
+                            <div class="flex-container">
+                                <label class="required" for="id_status">Status:</label>
+                                <div class="readonly">{{ retailer.status }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <div style="padding:10px">
+                    <div class="form-row field-name">
+                        <div>
+                            <div class="flex-container">
+                                <label class="required" for="id_note">Notes:</label>
+                                <textarea {% if retailer.status != 'requesting' %}readonly{% endif %} rows="8" cols="35" id="id_note" required name="note">{% if retailer.note %}{{ retailer.note }}{% endif %}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if retailer.status == 'requesting' %}
+                    <div style="padding:10px">
+                        <input type="hidden" name="id" value="{{ retailer.id }}"/>
+                        <input type="submit" value="Confirm"/>
+                    </div>
+                {% endif %}
+            </fieldset>
+        </div>
+    </form>
+{% endblock %}

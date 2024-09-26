@@ -37,7 +37,7 @@ class CloverWebhook:
                 Retailer.objects.filter(origin=Retailer.CLOVER)
                 .filter(app_id=app_id)
                 .filter(merchant_id=merchant_id)
-                .exclude(is_approved=False)
+                .filter(status=Retailer.STATUS_APPROVED)
                 .first()
             )
             if not retailer:

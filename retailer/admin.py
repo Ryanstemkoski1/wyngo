@@ -1,12 +1,16 @@
+import logging
 from urllib.parse import urlencode
 
 from django.contrib import admin, messages
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
 from django.urls import reverse, path
 from django.utils.html import format_html
 
 from . import views
 from .forms import RetailerForm
 from .models import Retailer, Category, ShoppingCenter, Location
+from .task import denied_retailer_email
 
 
 class LocationInline(admin.TabularInline):
@@ -42,7 +46,7 @@ class RetailerAdmin(admin.ModelAdmin):
         "expires_at",
         "square_csrf",
         "is_sync",
-        "is_approved",
+        "status",
     )
     list_display = (
         "id",
@@ -50,9 +54,9 @@ class RetailerAdmin(admin.ModelAdmin):
         "origin",
         "created_at",
         "updated_at",
-        "is_approved",
+        "status",
         "connected",
-        "approve_retailer_button",
+        "action_retailer_buttons",
     )
     list_display_links = ("name",)
     form = RetailerForm
@@ -66,28 +70,58 @@ class RetailerAdmin(admin.ModelAdmin):
                 "approve_retailer/",
                 self.admin_site.admin_view(views.approve_retailer),
                 name="approve_retailer",
+            ),
+            path(
+                "deny_retailer/",
+                self.admin_site.admin_view(self.deny_retailer),
+                name="deny_retailer",
             )
         ]
         return custom_urls + urls
 
-    def approve_retailer_button(self, obj: Retailer):
+    def deny_retailer(self, request):
+        try:
+            if request.method == 'POST':
+                retailer_id: str = request.POST.get("id")
+                retailer = Retailer.objects.get(pk=retailer_id)
+                retailer.note = request.POST.get('note')
+                retailer.status = Retailer.STATUS_DENIED
+                retailer.save()
+                denied_retailer_email.delay(
+                    retailer.email, retailer.name, retailer.note
+                )
+                return redirect("admin:retailer_retailer_changelist")
+            retailer_id: str = request.GET.get("i")
+            retailer = Retailer.objects.get(pk=retailer_id)
+            if retailer.status != Retailer.STATUS_REQUESTING:
+                return redirect("admin:retailer_retailer_changelist")
+            context = self.admin_site.each_context(request)
+            context['retailer'] = retailer
+            return TemplateResponse(request, "deny_retailer.html", context)
+        except Exception as ex:
+            logging.exception(f'deny_retailer with ex={ex}')
+        return redirect("admin:retailer_retailer_changelist")
+    
+    def action_retailer_buttons(self, obj: Retailer):
         encoded_query_params = urlencode({"i": obj.pk})
-        url = f"{reverse('admin:approve_retailer')}?{encoded_query_params}"
-        active_button = (
+        approve_url = f"{reverse('admin:approve_retailer')}?{encoded_query_params}"
+        deny_url = f"{reverse('admin:deny_retailer')}?{encoded_query_params}"
+        action_buttons = (
+            "<a href='{}' style='padding-right: 10px;'><button id='btn_deny' type='button' class='button'>Deny</button></a>"
             "<a href='{}'><button id='btn_approve' type='button' class='button'>Approve</button></a>"
-            if not obj.is_approved
+            if obj.status == Retailer.STATUS_REQUESTING
             else ""
         )
         disabled_button = ""
-        return format_html(active_button, url)
+        return format_html(action_buttons, deny_url, approve_url)
 
     def connected(self, obj: Retailer):
         if obj.expires_at is None:
             return False
         return not obj.is_access_token_expired()
 
-    approve_retailer_button.short_description = "Action"
-    approve_retailer_button.allow_tags = True
+    action_retailer_buttons.short_description = "Actions"
+    action_retailer_buttons.allow_tags = True
 
     connected.boolean = True
     connected.sortable_by = True

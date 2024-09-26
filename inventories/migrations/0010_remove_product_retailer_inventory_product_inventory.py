@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created date')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated date')),
                 ('name', models.CharField(default=None, max_length=50, null=True)),
-                ('retailer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='retailer.retailer')),
+                ('retailer', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='retailer.retailer')),
             ],
             options={
                 'verbose_name': 'Inventory',
@@ -33,6 +33,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product',
             name='inventory',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='inventories.inventory'),
+            field=models.OneToOneField(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='inventories.inventory'),
         ),
     ]

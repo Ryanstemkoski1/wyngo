@@ -257,7 +257,7 @@ class InventoryAdmin(admin.ModelAdmin):
         qs: QuerySet = super().get_queryset(request)
         if not request.user.is_superuser:
             return qs.filter(location__in=RetailerUtils.get_retailer_locations(request.user.email))
-        return qs.filter(location__retailer__is_approved=True)
+        return qs.filter(location__retailer__status=Retailer.STATUS_APPROVED)
 
     class Media:
         js = (

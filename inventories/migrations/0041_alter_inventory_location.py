@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='inventory',
             name='location',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='retailer.location', unique=True),
+            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to='retailer.location', unique=True),
         ),
     ]

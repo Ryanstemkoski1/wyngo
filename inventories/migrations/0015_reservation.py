@@ -26,8 +26,8 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(default='SUCCESS', max_length=20)),
                 ('quantity', models.IntegerField(default=0)),
                 ('time_limit', models.DateTimeField(blank=True, null=True)),
-                ('product', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='inventories.product')),
-                ('user', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('product', models.OneToOneField(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='inventories.product')),
+                ('user', models.OneToOneField(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Reservation',

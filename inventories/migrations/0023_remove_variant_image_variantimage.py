@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created date')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated date')),
                 ('image', models.ImageField(blank=True, null=True, upload_to='')),
-                ('variant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventories.variant')),
+                ('variant', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='inventories.variant')),
             ],
             options={
                 'abstract': False,

@@ -9,7 +9,7 @@ from common.models import BaseTimeModel
 
 class Inventory(BaseTimeModel):
     name = models.CharField(max_length=50, null=True, default=None)
-    location = models.ForeignKey(
+    location = models.OneToOneField(
         "retailer.Location", null=True, on_delete=models.CASCADE, unique=True
     )
 
@@ -52,11 +52,11 @@ class Product(BaseTimeModel):
         max_length=10, choices=ORIGIN_CHOICES, null=True, default=None
     )
 
-    inventory = models.ForeignKey(
+    inventory = models.OneToOneField(
         Inventory, on_delete=models.CASCADE, null=True, default=None
     )
 
-    category = models.ForeignKey(
+    category = models.OneToOneField(
         Category, on_delete=models.SET_NULL, null=True, blank=True, default=None
     )
 
@@ -105,7 +105,7 @@ class Variant(BaseTimeModel):
 
     price = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
-    product = models.ForeignKey(
+    product = models.OneToOneField(
         Product,
         on_delete=models.CASCADE,
         null=True,
@@ -138,7 +138,7 @@ class Variant(BaseTimeModel):
 
 
 class VariantImage(BaseTimeModel):
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    variant = models.OneToOneField(Variant, on_delete=models.CASCADE)
 
     image = models.ImageField(upload_to="inventories", null=True, blank=True)
 
@@ -162,10 +162,10 @@ class Reservation(BaseTimeModel):
     status = models.CharField(max_length=20, default="SUCCESS")
     quantity = models.IntegerField(default=0)
     time_limit = models.DateTimeField(null=True, blank=True)
-    variant = models.ForeignKey(
+    variant = models.OneToOneField(
         Variant, on_delete=models.SET_NULL, null=True, blank=True, default=None
     )
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, default=None
     )
     reservation_code = models.CharField(max_length=100, null=True, blank=True)

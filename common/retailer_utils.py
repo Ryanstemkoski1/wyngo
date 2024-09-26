@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from accounts.models import User
 from inventories.models import Inventory
-from retailer.models import Location
+from retailer.models import Location, Retailer
 
 
 class RetailerUtils:
@@ -32,7 +32,7 @@ class RetailerUtils:
     def get_retailer_locations(retailer_email):
         return Location.objects.filter(
             retailer__email=retailer_email,
-            retailer__is_approved=True
+            retailer__status=Retailer.STATUS_APPROVED
         )
 
     @staticmethod
@@ -40,7 +40,7 @@ class RetailerUtils:
         return Inventory.objects.filter(
             location__in=Location.objects.filter(
                 retailer__email=retailer_email,
-                retailer__is_approved=True
+                retailer__status=Retailer.STATUS_APPROVED
             )
         )
 

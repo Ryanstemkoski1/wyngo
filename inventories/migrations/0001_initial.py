@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('quantity', models.IntegerField()),
                 ('price', models.DecimalField(decimal_places=3, default=0, max_digits=20)),
                 ('image', models.ImageField(blank=True, null=True, upload_to='')),
-                ('retailer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='retailer.retailer')),
+                ('retailer', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='retailer.retailer')),
             ],
             options={
                 'verbose_name': 'Inventory',

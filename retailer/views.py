@@ -80,7 +80,7 @@ def approve_retailer(request):
     retailer_id: str = request.GET.get("i")
     retailer = Retailer.objects.get(pk=retailer_id)
 
-    retailer.is_approved = True
+    retailer.status = Retailer.STATUS_APPROVED
     retailer.save()
 
     url = request.build_absolute_uri(

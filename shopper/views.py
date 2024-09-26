@@ -139,7 +139,7 @@ class HomePageView(TemplateView):
                 if res.variant.product.id == product.id:
                     just_added.remove(product)
 
-        retailers_query = Retailer.objects.filter(is_approved=True)
+        retailers_query = Retailer.objects.filter(status=Retailer.STATUS_APPROVED)
         retailers = []
 
         for retailer in retailers_query:

@@ -20,6 +20,15 @@ class Retailer(BaseTimeModel):
 
     ORIGIN_CHOICES = ((CLOVER, CLOVER), (SQUARE, SQUARE))
 
+    STATUS_REQUESTING = "requesting"
+    STATUS_APPROVED = "approved"
+    STATUS_DENIED = "denied"
+    STATUS_CHOICES = (
+        (STATUS_REQUESTING, STATUS_REQUESTING),
+        (STATUS_APPROVED, STATUS_APPROVED),
+        (STATUS_DENIED, STATUS_DENIED)
+    )
+
     name = models.CharField(max_length=30)
 
     email = models.EmailField(_("email address"), blank=True, db_index=True)
@@ -29,12 +38,14 @@ class Retailer(BaseTimeModel):
     image = models.ImageField(upload_to="retail")
 
     origin = models.CharField(max_length=7, choices=ORIGIN_CHOICES)
+    origin = models.CharField(max_length=7, choices=ORIGIN_CHOICES, db_index=True)
 
     category = models.ManyToManyField("retailer.Category")
 
     app_id = models.CharField(
         max_length=50,
         help_text="Please carefully review the entered value to ensure it is correct.",
+        db_index=True
     )
 
     app_secret = models.CharField(
@@ -42,13 +53,13 @@ class Retailer(BaseTimeModel):
         help_text="Please carefully review the entered value to ensure it is correct.",
     )
 
-    merchant_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    merchant_id = models.CharField(max_length=50, unique=True, null=True, blank=True, db_index=True)
 
-    access_token = encrypt(models.CharField(max_length=100, null=True, blank=True))
+    access_token = encrypt(models.CharField(max_length=100, null=True, blank=True, db_index=True))
 
-    refresh_token = encrypt(models.CharField(max_length=100, null=True, blank=True))
+    refresh_token = encrypt(models.CharField(max_length=100, null=True, blank=True, db_index=True))
 
-    token_type = models.CharField(max_length=50, null=True, blank=True)
+    token_type = models.CharField(max_length=50, null=True, blank=True, db_index=True)
 
     token_created_at = models.DateTimeField(
         verbose_name="Token Creation Date",
@@ -60,7 +71,7 @@ class Retailer(BaseTimeModel):
         verbose_name="Expiration Date", null=True, blank=True
     )
 
-    shopping_center = models.ForeignKey(
+    shopping_center = models.OneToOneField(
         "retailer.ShoppingCenter", null=True, blank=True, on_delete=models.SET_NULL
     )
 
@@ -68,7 +79,9 @@ class Retailer(BaseTimeModel):
 
     is_sync = models.BooleanField(default=False)
 
-    is_approved = models.BooleanField(default=False)
+    status = models.CharField(max_length=12, default=STATUS_REQUESTING, choices=STATUS_CHOICES, db_index=True)
+    
+    note = models.TextField(default=None, blank=True, null=True)
 
     # TODO: add a field indicating that it is successfully connected (is_connected=True|False)
 
@@ -164,7 +177,7 @@ class Location(BaseTimeModel):
     state = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=100)
     pos_id = models.CharField(max_length=100, null=True, blank=True)
-    retailer = models.ForeignKey(
+    retailer = models.OneToOneField(
         "retailer.Retailer", null=True, blank=True, on_delete=models.CASCADE
     )
 

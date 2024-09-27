@@ -335,6 +335,13 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "codes": [
             "view_variantimage",
         ]
+    },
+    {
+        "app_label": "inventories",
+        "model": "reservation",
+        "codes": [
+            "view_reservation",
+        ]
     }
 ]
 RETAILER_PERMISSION_GROUP_DATA = json.loads(getenv("RETAILER_PERMISSION_GROUP_CODES", "[]"))

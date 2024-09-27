@@ -613,14 +613,14 @@ class MakeReservationView(TemplateView):
 
         total = int(variation.price) * quantity
 
-        if quantity > 2 and total > 50:
-            messages.error(
-                request,
-                "We're sorry, but reservations for this product are currently limited to $50 total and 2 items per order. Please modify your reservation to stay within these limits.",
-                extra_tags="error",
-            )
-
-            return redirect(previous_url)
+        # if quantity > 2 and total > 50:
+        #     messages.error(
+        #         request,
+        #         "We're sorry, but reservations for this product are currently limited to $50 total and 2 items per order. Please modify your reservation to stay within these limits.",
+        #         extra_tags="error",
+        #     )
+        #
+        #     return redirect(previous_url)
 
         line_items = []
 

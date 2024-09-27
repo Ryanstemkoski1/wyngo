@@ -128,9 +128,6 @@ class LoginView(TemplateView):
 
         auth.login(request, user)
 
-        # Check retailer
-        RetailerUtils.check_and_promote_retailer_admin_account(user.email)
-
         return redirect("index")
 
     def get(self, request, *args, **kwargs):

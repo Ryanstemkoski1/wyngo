@@ -170,12 +170,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static/")]
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
+LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
     "handlers": {
         "console": {
-            "level": "INFO",
+            "level": LOG_LEVEL,
             "class": "logging.StreamHandler",
         },
         "db_log": {
@@ -187,7 +188,19 @@ LOGGING = {
         "": {
             "handlers": ["console", "db_log"],
             "propagate": False,
-        }
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": True,
+        },
+        "django.security": {
+            "handlers": [
+                "console",
+            ],  # 'mail_admins'
+            "level": LOG_LEVEL,
+            "propagate": True,
+        },
     },
 }
 

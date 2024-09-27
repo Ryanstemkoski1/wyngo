@@ -64,7 +64,7 @@ class Product(BaseTimeModel):
 
     total_stock = models.PositiveIntegerField(default=0)
 
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField("Active Status", default=True)
 
     is_modified_by_admin = models.BooleanField(
         "Modified by Wyndo",

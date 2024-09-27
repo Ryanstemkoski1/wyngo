@@ -318,9 +318,10 @@ class ReservationAdmin(admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
-        queryset = super(ReservationAdmin, self).get_queryset(request)
-
-        return queryset
+        qs: QuerySet = super().get_queryset(request)
+        if not request.user.is_superuser:
+            qs.filter(variant__product__inventory__in=RetailerUtils.get_retailer_inventories('apple@gmail.com'))
+        return qs
 
     def get_search_results(self, request, queryset, search_term):
         queryset, may_have_duplicates = super().get_search_results(

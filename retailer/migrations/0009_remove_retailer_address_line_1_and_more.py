@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('state', models.CharField(max_length=100)),
                 ('zip_code', models.CharField(max_length=100)),
                 ('pos_id', models.CharField(blank=True, max_length=100, null=True)),
-                ('retailer', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='retailer.retailer')),
+                ('retailer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='retailer.retailer')),
             ],
             options={
                 'abstract': False,

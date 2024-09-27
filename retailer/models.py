@@ -37,7 +37,6 @@ class Retailer(BaseTimeModel):
 
     image = models.ImageField(upload_to="retail")
 
-    origin = models.CharField(max_length=7, choices=ORIGIN_CHOICES)
     origin = models.CharField(max_length=7, choices=ORIGIN_CHOICES, db_index=True)
 
     category = models.ManyToManyField("retailer.Category")
@@ -71,7 +70,7 @@ class Retailer(BaseTimeModel):
         verbose_name="Expiration Date", null=True, blank=True
     )
 
-    shopping_center = models.OneToOneField(
+    shopping_center = models.ForeignKey(
         "retailer.ShoppingCenter", null=True, blank=True, on_delete=models.SET_NULL
     )
 
@@ -177,7 +176,7 @@ class Location(BaseTimeModel):
     state = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=100)
     pos_id = models.CharField(max_length=100, null=True, blank=True)
-    retailer = models.OneToOneField(
+    retailer = models.ForeignKey(
         "retailer.Retailer", null=True, blank=True, on_delete=models.CASCADE
     )
 

@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('origin_id', models.CharField(max_length=50)),
                 ('origin_parent_id', models.CharField(max_length=50)),
                 ('currency', models.CharField(default='USD', max_length=3)),
-                ('inventory', models.OneToOneField(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='inventories.inventory')),
+                ('inventory', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='inventories.inventory')),
             ],
             options={
                 'verbose_name': 'Variant',

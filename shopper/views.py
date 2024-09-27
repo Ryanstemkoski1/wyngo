@@ -176,7 +176,7 @@ class RetailerListView(ListView):
 
         qfilter = Q(
             id__isnull=False,
-            is_approved=True,
+            status=Retailer.STATUS_APPROVED
         )
 
         if category_name and category_name not in ["all", ""]:

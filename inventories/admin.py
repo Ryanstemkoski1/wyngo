@@ -100,6 +100,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "category",
+        "is_active",
         "min_price",
         "max_price",
         "inventory",

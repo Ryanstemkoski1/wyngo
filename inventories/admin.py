@@ -320,7 +320,7 @@ class ReservationAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs: QuerySet = super().get_queryset(request)
         if not request.user.is_superuser:
-            qs.filter(variant__product__inventory__in=RetailerUtils.get_retailer_inventories('apple@gmail.com'))
+            qs = qs.filter(variant__product__inventory__in=RetailerUtils.get_retailer_inventories(request.user.email))
         return qs
 
     def get_search_results(self, request, queryset, search_term):

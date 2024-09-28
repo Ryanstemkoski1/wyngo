@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 # Create your views here.
-@user_passes_test(lambda u: u.is_superuser)
+# @user_passes_test(lambda u: u.is_superuser)
 def connect_pos(request):
     retailer_id = request.GET.get("i")
     retailer = Retailer.objects.get(pk=retailer_id)
 
     if retailer.access_token is not None:
         # TODO: Log error
-        return redirect("admin:retailer_retailer_changelist")
+        return redirect("admin:index")
 
     if retailer.origin == Retailer.CLOVER:
         # Clover Oauth Flow
@@ -45,7 +45,7 @@ def connect_pos(request):
                 messages.success(request, result["message"])
             else:
                 messages.error(request, result["message"])
-            return redirect("admin:retailer_retailer_changelist")
+            return redirect("admin:index")
 
         return redirect(redirect_url)
 
@@ -64,15 +64,15 @@ def square_callback(request):
         retailer_id = result["retailer_id"]
         SquareLocation.fetch_locations(retailer_id=retailer_id)
         load_square_inventory.delay(retailer_id=retailer_id)
-        # load_square_inventory(retailer_id=retailer_id)
-        messages.warning(
-            request,
-            "Inventory processing is underway. Please check back in a few minutes.",
-        )
+        load_square_inventory(retailer_id=retailer_id)
+        # messages.warning(
+        #     request,
+        #     "Inventory processing is underway. Please check back in a few minutes.",
+        # )
         messages.success(request, result["message"])
     else:
         messages.error(request, result["message"])
-    return redirect("admin:retailer_retailer_changelist")
+    return redirect("admin:index")
 
 
 @user_passes_test(lambda u: u.is_superuser)

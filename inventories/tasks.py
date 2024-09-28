@@ -67,9 +67,7 @@ def load_square_inventory(self, retailer_id: int = None, cursor: str = None):
     )
     try:
         if retailer_id is not None:
-            retailers = Retailer.objects.filter(pk=retailer_id).exclude(
-                is_approved=False
-            )
+            retailers = Retailer.objects.filter(pk=retailer_id, status=Retailer.STATUS_APPROVED)
         else:
             retailers = (
                 Retailer.objects.filter(origin=Retailer.SQUARE, status=Retailer.STATUS_APPROVED)

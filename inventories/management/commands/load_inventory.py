@@ -1,8 +1,5 @@
 import logging
 
-from django.conf import settings
-from django.core.mail import send_mail
-
 from common.pos.square.square_inventory import SquareInventory
 
 from retailer.models import Retailer
@@ -32,29 +29,19 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logging.info("Starting inventory loading process")
 
-        send_mail(
-            "Test",
-            "hello donnie.patrick077@gmail.com",
-            "elliott@wyndoshop.com",
-            ["donnie.patrick077@gmail.com", "donnie.patrick077@example.com", "donnie.patrick078@example.com",
-             "donnie.patrick080@example.com"],
-            fail_silently=False,
+        retailers = Retailer.objects.exclude(access_token__isnull=True).exclude(
+            merchant_id__exact=""
         )
-        print('sent')
 
-        # retailers = Retailer.objects.exclude(access_token__isnull=True).exclude(
-        #     merchant_id__exact=""
-        # )
-        #
-        # if retailers:
-        #     for retailer in retailers:
-        #         origin = retailer.origin
-        #
-        #         if origin == "CLOVER":
-        #             clover_inventory = CloverInventory(retailer)
-        #             clover_inventory.run()
-        #         elif origin == "SQUARE":
-        #             square_inventory = SquareInventory(retailer)
-        #             square_inventory.run()
-        #         else:
-        #             continue
+        if retailers:
+            for retailer in retailers:
+                origin = retailer.origin
+
+                if origin == "CLOVER":
+                    clover_inventory = CloverInventory(retailer)
+                    clover_inventory.run()
+                elif origin == "SQUARE":
+                    square_inventory = SquareInventory(retailer)
+                    square_inventory.run()
+                else:
+                    continue

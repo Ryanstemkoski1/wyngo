@@ -10,13 +10,15 @@
                     <img src="{% static 'img/wyndo-logo-mobile.png' %}" alt="logo" class="sm:hidden">
                 </a>
                 <div class="flex items-center gap-3">
-                    <div class=" flex justify-end items-center align-middle relative">
-                        <input type="text" placeholder="Search Wyndo Inventory" name="search"
+                    <form action="{% url 'search-products' %}" class=" flex justify-end items-center align-middle relative">
+                        <input type="text" placeholder="Search Wyndo Products" name="search" {% if search %}value="{{ search }}"{% endif %}
                             class="input bg-white h-10 w-full text-sm rounded-full hidden focus:ring-transparent focus:ring-0"
                             id="searchInputMobile" />
                         <div
                             class="bg-neutral-400 h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center">
-                            <img src="{% static 'img/icons/icon-search.svg' %}" id="searchIcon" />
+                            <button>
+                                <img src="{% static 'img/icons/icon-search.svg' %}" id="searchIcon" />
+                            </button>
                             <div id="closeIcon" class="hidden">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-white">
@@ -24,7 +26,7 @@
                                 </svg>
                             </div>
                         </div>
-                    </div>
+                    </form>
                     <label for="my-drawer-3" class="btn btn-ghost p-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="w-6 h-6 text-white">
@@ -128,17 +130,20 @@
                     <img src="{% static 'img/wyndo-logo.png' %}" alt="logo" class="w-44">
                 </a>
             </div>
-            <div class="col-start-3 col-span-2 lg:col-start-5 lg:col-span-4 grow">
+            <form action="{% url 'search-products' %}" class="col-start-3 col-span-2 lg:col-start-5 lg:col-span-4 grow">
                 <div class="flex justify-end items-center align-middle relative sm:w-[152px] lg:w-full">
-                    <input type="text" placeholder="Search Wyndo Inventory" name="search"
+                    <input type="text" placeholder="Search Wyndo Products" name="search"
+                           {% if search %}value="{{ search }}"{% endif %}
                         class="input bg-white h-10 w-full text-sm rounded-full focus:ring-transparent focus:ring-0 placeholder-neutral-400"
                         id="searchInput" />
                     <div
                         class="bg-neutral-400 h-8 w-8 rounded-full cursor-pointer mr-1 flex justify-center items-center absolute">
-                        <img src="{% static 'img/icons/icon-search.svg' %}" class="" id="searchIcon" />
+                        <button type="submit">
+                            <img src="{% static 'img/icons/icon-search.svg' %}" class="" id="searchIcon" />
+                        </button>
                     </div>
                 </div>
-            </div>
+            </form>
             <div class="col-start-5 lg:col-start-9 col-span-4">
                 <div
                     class="flex text-right text-white {% if user.is_authenticated %} gap-1 {% else %} gap-2 {% endif %} justify-end items-center">
@@ -181,7 +186,9 @@
                     </details>
                     {% endif %}
                     <div class="flex items-center justify-between gap-4">
-                        <img src="{% static 'img/icons/icon-favorite.svg' %}">
+                        <a href="{% url 'wishlist' %}">
+                            <img src="{% static 'img/icons/icon-favorite.svg' %}">
+                        </a>
                         <div class="indicator">
                             <span
                                 class="indicator-item badge badge-error bg-red-500 text-white translate-x-1/4 -translate-y-1/4 text-[8px] py-0 pl-0 pr-px w-4 h-4">2</span>

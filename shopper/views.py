@@ -13,16 +13,19 @@ from django.db.models import (
     DecimalField,
 )
 from django.db.models import Q, Count
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.generic import TemplateView, ListView
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView, ListView, UpdateView
 from faker import Faker
 
 from common.pos.clover.clover_reservation import CloverReservation
 from common.pos.square.square_reservation import SquareReservation
 from inventories.models import Product, Variant, Reservation
 from retailer.models import Category, Retailer
+from shopper.models import ProductWishlist, RetailerWishlist
 
 # Create your views here.
 
@@ -154,6 +157,18 @@ class HomePageView(TemplateView):
         near_you = random.sample(near_you, len(near_you))[:16]
         just_added = random.sample(just_added, len(just_added))[:16]
 
+        user_product_wishlist = {}
+        if request.user.is_authenticated:
+            wishlist = ProductWishlist.objects.filter(user=request.user, product__in=products).all()
+            for wish in wishlist:
+                user_product_wishlist[wish.product.id] = True
+
+        user_retailers_wishlist = {}
+        if self.request.user.is_authenticated:
+            wishlist = RetailerWishlist.objects.filter(user=self.request.user).all()
+            for wish in wishlist:
+                user_retailers_wishlist[wish.retailer.id] = True
+
         return render(
             request,
             template_name,
@@ -162,6 +177,8 @@ class HomePageView(TemplateView):
                 "just_added": just_added,
                 "retailers": retailers,
                 "upcoming_reservations": upcoming_reservations,
+                "user_products_wishlist": user_product_wishlist,
+                "user_retailers_wishlist": user_retailers_wishlist,
             },
         )
 
@@ -217,6 +234,13 @@ class RetailerListView(ListView):
         )
         context["score"] = random.randint(1, 100)
         context["current_category"] = self.request.GET.get("category")
+
+        user_retailers_wishlist = {}
+        if self.request.user.is_authenticated:
+            wishlist = RetailerWishlist.objects.filter(user=self.request.user).all()
+            for wish in wishlist:
+                user_retailers_wishlist[wish.retailer.id] = True
+        context["user_retailers_wishlist"] = user_retailers_wishlist
 
         return context
 
@@ -275,6 +299,19 @@ class RetailerDetailsView(ListView):
         origin = self.request.GET.get("origin", previous_url)
         context["origin"] = origin
 
+        in_wishlist = self.request.user.is_authenticated and RetailerWishlist.objects.filter(
+            user=self.request.user,
+            retailer=retailer
+        ).exists()
+        context["in_wishlist"] = in_wishlist
+
+        user_product_wishlist = {}
+        if self.request.user.is_authenticated:
+            wishlist = ProductWishlist.objects.filter(user=self.request.user, product__in=products).all()
+            for wish in wishlist:
+                user_product_wishlist[wish.product.id] = True
+
+        context["user_products_wishlist"] = user_product_wishlist
         return context
 
 
@@ -568,6 +605,12 @@ class ProductDetailsPageView(TemplateView):
         if previous_url and "retailers" in previous_url:
             origin = reverse("retailers")
 
+        user_products_wishlist = {}
+        if self.request.user.is_authenticated:
+            wishlist = ProductWishlist.objects.filter(user=self.request.user).all()
+            for wish in wishlist:
+                user_products_wishlist[wish.product.id] = True
+
         return render(
             request,
             template_name,
@@ -579,6 +622,7 @@ class ProductDetailsPageView(TemplateView):
                 "variants_json": json.dumps(variant_images),
                 "previous_url": previous_url,
                 "origin": origin,
+                "user_products_wishlist": user_products_wishlist,
             },
         )
 
@@ -999,3 +1043,86 @@ class ReservationsListView(TemplateView):
                 "upcoming_reservations": upcoming_reservations,
             },
         )
+
+
+class ProductListSearchView(TemplateView):
+    def get(self, request, **kwargs):
+        template_name = "search-products.html"
+        search = request.GET.get("search", "").strip()
+
+        products = Product.objects.filter(name__icontains=search).prefetch_related(
+            "variants",
+            "variants__variantimage_set",
+            "wishlist",
+        ).all()
+
+        user_wishlist = {}
+        if request.user.is_authenticated:
+            wishlist = ProductWishlist.objects.filter(user=request.user, product__in=products).all()
+            for wish in wishlist:
+                user_wishlist[wish.product.id] = True
+
+        return render(
+            request,
+            template_name,
+            {
+                "products": products,
+                "search": search,
+                "user_products_wishlist": user_wishlist
+            },
+        )
+
+
+class WishlistView(TemplateView):
+    def get(self, request, **kwargs):
+        if request.user.is_anonymous:
+            return redirect("login")
+
+        template_name = "wishlist.html"
+
+        product_wishlist = Product.objects.filter(wishlist__user=request.user).all()
+        retailer_wishlist = Retailer.objects.filter(wishlist__user=request.user).all()
+
+        return render(
+            request,
+            template_name,
+            {
+                "product_wishlist": product_wishlist,
+                "retailer_wishlist": retailer_wishlist,
+                "user_products_wishlist": [product.id for product in product_wishlist],
+                "user_retailers_wishlist": [retailer.id for retailer in retailer_wishlist],
+            },
+        )
+
+
+@csrf_exempt
+def toggler_wishlist(request, **kwargs):
+    if request.user.is_anonymous:
+        return HttpResponseForbidden()
+    request_body = json.loads(request.body)
+    _type = request_body.get("type", "product")
+    added = False
+    if _type == "product":
+        product_id = request_body.get("id")
+        product = Product.objects.get(id=product_id)
+
+        if product.wishlist.filter(user=request.user).exists():
+            ProductWishlist.objects.filter(user=request.user, product=product).delete()
+            added = False
+        else:
+            ProductWishlist.objects.create(user=request.user, product=product)
+            added = True
+    elif _type == "retailer":
+        retailer_id = request_body.get("id")
+        retailer = Retailer.objects.get(id=retailer_id)
+
+        if retailer.wishlist.filter(user=request.user).exists():
+            RetailerWishlist.objects.filter(user=request.user, retailer=retailer).delete()
+            added = False
+        else:
+            RetailerWishlist.objects.create(user=request.user, retailer=retailer)
+            added = True
+
+    return JsonResponse({
+        "added": added
+    })

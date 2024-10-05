@@ -1,5 +1,7 @@
-from django.urls import path
+from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import path
+
 from .views import (
     HomePageView,
     RetailerListView,
@@ -12,8 +14,9 @@ from .views import (
     UpdateReservationView,
     CancelReservationView,
     ReservationsListView,
+    ProductListSearchView,
+    toggler_wishlist, WishlistView
 )
-from django.conf import settings
 
 urlpatterns = [
     path(
@@ -69,6 +72,21 @@ urlpatterns = [
         ReservationsListView.as_view(),
         name="reservations",
     ),
+    path(
+        "products/",
+        ProductListSearchView.as_view(),
+        name="search-products",
+    ),
+    path(
+        "wishlist/",
+        WishlistView.as_view(),
+        name="wishlist",
+    ),
+    path(
+        "api/toggle-wishlist/",
+        toggler_wishlist,
+        name="toggle-wishlist",
+    )
 ]
 
 if settings.DEBUG:

@@ -243,8 +243,8 @@ class Reservation(BaseTimeModel):
         return response
 
     class Meta:
-        verbose_name = "Reservation"
-        verbose_name_plural = "Reservations"
+        verbose_name = "Order"
+        verbose_name_plural = "Orders"
 
     def __str__(self):
         return f"{self.reservation_code}"

@@ -5,6 +5,8 @@ from django.db import transaction
 from common.pos.reservation import Reservation
 from common.pos.square.square_client import SquareRequestClient
 from common.pos.utils import format_price
+from inventories.models import Reservation as ReservationModel, Customer, Variant, ReservationItem
+from retailer.models import Location
 
 
 class SquareReservation(Reservation):
@@ -74,6 +76,51 @@ class SquareReservation(Reservation):
 
         except Exception as e:
             error_log("SQUARE ORDER: %s" % e)
+
+    def fetch_all_orders(self):
+        locations = Location.objects.filter(retailer=self._retailer).values_list(
+            'pos_id', flat=True
+        )
+        rs = self._request_client.list_orders(list(locations))
+        all_orders = rs.get("orders", [])
+        for order in all_orders:
+            order_id = order.get("order_id")
+            try:
+                self.sync_from_square(order_id, order)
+            except Exception as e:
+                error_log("SQUARE ORDER: %s" % e)
+
+    def sync_from_square(self, order_id, order=None):
+        order = self._request_client.get_order(order_id).get("order") if not order else order
+        if not order:
+            return
+
+        reservation, _created = ReservationModel.objects.get_or_create(
+            origin_id=order.get("id"), retailer=self._retailer
+        )
+        reservation.total = order["total_money"]["amount"]
+        reservation.status = order["state"]
+        reservation.retailer = self._retailer
+        reservation.origin = self.PLATFORM
+        reservation.reservation_code = "#{:06d}".format(reservation.id)
+        if order.get("customer_id"):
+            customer = Customer.objects.filter(origin_id=order.get("customer_id")).first()
+            if customer:
+                reservation.customer = customer
+
+        reservation.save()
+
+        for line_item in order.get("line_items", []):
+            item_id = line_item.get("catalog_object_id")
+            quantity = line_item.get("quantity")
+            variant = Variant.objects.filter(origin_id=item_id).first()
+            if variant:
+                ReservationItem.objects.get_or_create(
+                    reservation=reservation, variant=variant, quantity=quantity
+                )
+            else:
+                # todo fetch variant from square
+                pass
 
 
 class SquareOrderMapper:

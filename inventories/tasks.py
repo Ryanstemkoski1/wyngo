@@ -1,8 +1,12 @@
+import traceback
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
 from common.pos.clover import CloverInventory
 from common.pos.square import SquareInventory
+from common.pos.square.square_customer import SquareCustomer
+from common.pos.square.square_reservation import SquareReservation
 from retailer.models import Retailer
 from wyndo.celery import app
 from .models import Reservation
@@ -143,3 +147,39 @@ def run_go_upc_integration(self, retailer_id: int = None):
         raise self.retry(exc=exc)
     finally:
         logger.info("Ended Go UPC integration process")
+
+
+@app.task(bind=True, max_retries=3, default_retry_delay=300)
+def fetch_square_customer(self, retailer_id: int = None):
+    logger.info(f"[Celery] Fetching Square customers")
+    retailers = Retailer.objects.filter(pk=retailer_id) \
+        if retailer_id \
+        else Retailer.objects.filter(origin=Retailer.SQUARE).exclude(access_token__isnull=True)
+
+    for retailer in retailers:
+        try:
+            SquareCustomer.fetch_all_customers(retailer)
+        except Exception as exc:
+            logger.error(f"Error fetching Square customers: {str(exc)}")
+            raise self.retry(exc=exc)
+        finally:
+            logger.info(f"[Celery] Ended fetching Square customers for retailer: {retailer.merchant_id}")
+
+
+@app.task(bind=True, max_retries=3, default_retry_delay=300)
+def fetch_square_orders(self, retailer_id: int = None):
+    logger.info(f"[Celery] Fetching Square orders")
+    retailers = Retailer.objects.filter(pk=retailer_id) \
+        if retailer_id \
+        else Retailer.objects.filter(origin=Retailer.SQUARE).exclude(access_token__isnull=True)
+
+    for retailer in retailers:
+        try:
+            square_reservation = SquareReservation(retailer)
+            square_reservation.fetch_all_orders()
+        except Exception as exc:
+            logger.error(f"Error fetching Square orders: {str(exc)}")
+            print(traceback.format_exc())
+            raise self.retry(exc=exc)
+        finally:
+            logger.info(f"[Celery] Ended fetching Square orders for retailer: {retailer.merchant_id}")

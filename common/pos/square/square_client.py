@@ -53,6 +53,27 @@ class SquareRequestClient:
             return inventory_counts.body
         return None
 
+    def list_orders(self, locations):
+        orders = self.client.orders.search_orders(
+            body={"location_ids": locations}
+        )
+        if orders.is_error():
+            raise Exception("[REQUEST CLIENT] " + str(orders.errors))
+
+        if orders.is_success():
+            return orders.body
+        return None
+
+    def get_order(self, order_id):
+        order = self.client.orders.retrieve_order(order_id)
+        if order.is_error():
+            error = search(order.errors, "detail")
+            raise Exception("[REQUEST CLIENT] " + error)
+
+        if order.is_success():
+            return order.body
+        return None
+
     def create_order(self, body):
         order = self.client.orders.create_order(body)
 
@@ -74,3 +95,12 @@ class SquareRequestClient:
         if order.is_success():
             return order.body
         return None
+
+    def list_customers(self):
+        customers = self.client.customers.list_customers()
+        if customers.is_error():
+            error = search(customers.errors, "detail")
+            raise Exception("[REQUEST CLIENT] " + error)
+
+        if customers.is_success():
+            return customers.body

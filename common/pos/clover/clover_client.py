@@ -87,6 +87,10 @@ class CloverRequestClient:
         except Exception as e:
             raise e
 
+    def get_order(self, order_id):
+        path = f"{self._merchant_id}/orders/{order_id}?expand=lineItems,customer"
+        return self._request(path=path)
+
     def create_order(self, payload):
         path = f"{self._merchant_id}/atomic_order/orders/"
         return self._request(path=path, method="POST", json=payload)

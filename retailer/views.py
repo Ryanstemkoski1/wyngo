@@ -12,7 +12,7 @@ from common.pos.clover.clover_location import CloverLocation
 from common.pos.clover.clover_oauth import CloverOauth
 from common.pos.square.square_location import SquareLocation
 from common.pos.square.square_oauth import SquareOauth
-from inventories.tasks import load_clover_inventory, load_square_inventory
+from inventories.tasks import load_clover_inventory, load_square_inventory, fetch_square_customer, fetch_square_orders
 from retailer.models import Retailer, Category
 from .forms import RetailerSignupForm
 
@@ -64,7 +64,9 @@ def square_callback(request):
         retailer_id = result["retailer_id"]
         SquareLocation.fetch_locations(retailer_id=retailer_id)
         load_square_inventory.delay(retailer_id=retailer_id)
-        load_square_inventory(retailer_id=retailer_id)
+        fetch_square_customer.delay(retailer_id=retailer_id)
+        fetch_square_orders.delay(retailer_id=retailer_id)
+        # load_square_inventory(retailer_id=retailer_id)
         # messages.warning(
         #     request,
         #     "Inventory processing is underway. Please check back in a few minutes.",

@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import datetime
-from inventories.tasks import update_status_reservation
 from inventories.models import Reservation as ReservationModel, Variant as VariantModel
 from accounts.models import User as UserModel
 
@@ -47,7 +46,7 @@ class Reservation(AbstractReservation):
             )
 
             data = {"reservation": reservation.id, "status": "EXPIRED"}
-
+            from inventories.tasks import update_status_reservation
             update_status_reservation.apply_async(args=(data,), eta=time_limit)
 
             reservation.reservation_code = "#{:06d}".format(reservation.id)

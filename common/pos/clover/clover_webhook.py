@@ -4,7 +4,9 @@ from django.core.mail import EmailMessage
 
 from accounts.models import User
 from common.pos.clover import CloverInventory
+from common.pos.clover.clover_customer import CloverCustomer
 from common.pos.clover.clover_location import CloverLocation
+from common.pos.clover.clover_reservation import CloverReservation
 from inventories.tasks import run_go_upc_integration
 from retailer.models import Retailer
 
@@ -58,13 +60,19 @@ class CloverWebhook:
                         elif event["type"] == self.__TYPE_DELETE:
                             # Inventory Creation Event
                             clover_inventory.delete(item_id=object_id)
-
+                    case "Inventory Category":
+                        print(event)  # TODO: handle Inventory Category Event
                     case "Merchants":
                         if event["type"] == self.__TYPE_UPDATE:
                             # Merchant Update Event
                             # Update location
                             CloverLocation.fetch_locations(merchant_id=object_id)
-
+                    case "Customers":
+                        CloverCustomer.handle_event(event, event['type'])
+                    case "Orders":
+                        clover_reservation = CloverReservation(retailer)
+                        if event["type"] == self.__TYPE_UPDATE or event["type"] == self.__TYPE_CREATE:
+                            clover_reservation.sync_from_clover(object_id)
                     case _:
                         pass
 

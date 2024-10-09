@@ -15,7 +15,7 @@ from common.pos.clover import CloverInventory
 from common.retailer_utils import RetailerUtils
 from retailer.models import Retailer
 from .forms import CategoryForm, ProductForm, VariantForm
-from .models import Category, Product, Variant, Inventory, Reservation
+from .models import Category, Product, Variant, Inventory, Reservation, Customer, ReservationItem
 
 
 @admin.register(Category)
@@ -272,13 +272,34 @@ class RetailerFilter(AutocompleteFilter):
     field_name = "user"
 
 
+class ReservationItemInline(admin.TabularInline):
+    model = ReservationItem
+    extra = 0
+    verbose_name = "Reservation Item"
+    verbose_name_plural = "Reservation Items"
+    readonly_fields = (
+        "variant",
+        "quantity",
+    )
+    fields = (
+        "variant",
+        "quantity",
+    )
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
     list_filter = (
         ("created_at", DateRangeFilter),
         ("updated_at", DateRangeFilter),
         ("time_limit", DateRangeFilter),
-        "variant__product__inventory__location__retailer",
+        "retailer",
         "status",
     )
     readonly_fields = (
@@ -286,23 +307,17 @@ class ReservationAdmin(admin.ModelAdmin):
         "origin",
         "total",
         "status",
-        "quantity",
-        "time_limit",
-        "variant",
         "user",
         "reservation_code",
     )
     list_display = (
-        "origin_id",
+        "reservation_code",
         "origin",
         "total",
         "status",
-        "quantity",
-        "time_limit",
-        "variant",
-        "get_full_name",
+        "customer",
         "user",
-        "reservation_code",
+        "origin_id",
         "created_at",
         "updated_at",
     )
@@ -317,10 +332,13 @@ class ReservationAdmin(admin.ModelAdmin):
         "user__email",
     )
 
+    inlines = [ReservationItemInline]
+
+
     def get_queryset(self, request):
         qs: QuerySet = super().get_queryset(request)
         if not request.user.is_superuser:
-            qs = qs.filter(variant__product__inventory__in=RetailerUtils.get_retailer_inventories(request.user.email))
+            qs = qs.filter(retailer__email=request.user.email)
         return qs
 
     def get_search_results(self, request, queryset, search_term):
@@ -339,6 +357,8 @@ class ReservationAdmin(admin.ModelAdmin):
         return queryset, may_have_duplicates
 
     def get_full_name(self, obj):
+        if not obj.user:
+            return ""
         return (f"{obj.user.first_name} {obj.user.last_name}",)
 
     get_full_name.short_description = "Full Name"
@@ -370,14 +390,14 @@ class ReservationAdmin(admin.ModelAdmin):
         created_at_range_gte = request.GET.get("created_at__range__gte")
         created_at_range_lte = request.GET.get("created_at__range__lte")
         retailer = request.GET.get(
-            "variant__product__inventory__location__retailer__id__exact"
+            "retailer__id__exact"
         )
         status = request.GET.get("status")
 
         if retailer:
             qfilter.add(
                 Q(
-                    variant__product__inventory__location__retailer__id__exact=int(
+                    retailer__id__exact=int(
                         retailer
                     ),
                 ),
@@ -420,3 +440,24 @@ class ReservationAdmin(admin.ModelAdmin):
             "js/admin/jquery-3.3.1.min.js",
             "js/admin/filter_validation.js",
         )
+
+
+class ReservationInline(admin.TabularInline):
+    model = Reservation
+    extra = 0
+
+
+@admin.register(Customer)
+class CustomerAdmin(admin.ModelAdmin):
+
+    list_display = ("email", "first_name", "last_name", "phone", "city", "state", "country")
+    list_filter = ("city", "state", "country")
+    search_fields = ("email", "first_name", "last_name", "phone",)
+
+    inlines = [ReservationInline]
+
+    def get_queryset(self, request):
+        qs: QuerySet = super().get_queryset(request)
+        if not request.user.is_superuser:
+            qs = qs.filter(retailer=Retailer.objects.get(email=request.user.email))
+        return qs

@@ -173,21 +173,29 @@ MEDIA_URL = "/media/"
 LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": True,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {
+            "format": "%(levelname)s %(asctime)s %(name)s %(module)s %(message)s",
+        },
+    },
     "handlers": {
         "console": {
             "level": LOG_LEVEL,
             "class": "logging.StreamHandler",
+            "formatter": "default",
         },
         "db_log": {
             "level": "ERROR",
             "class": "django_db_logger.db_log_handler.DatabaseLogHandler",
+            "formatter": "default",
         },
     },
     "loggers": {
         "": {
-            "handlers": ["console", "db_log"],
-            "propagate": False,
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": True,
         },
         "django.request": {
             "handlers": ["console"],
@@ -342,7 +350,21 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "codes": [
             "view_reservation",
         ]
-    }
+    },
+    {
+        "app_label": "inventories",
+        "model": "customer",
+        "codes": [
+            "view_customer",
+        ]
+    },
+    {
+        "app_label": "inventories",
+        "model": "reservationitem",
+        "codes": [
+            "view_reservationitem",
+        ]
+    },
 ]
 RETAILER_PERMISSION_GROUP_DATA = json.loads(getenv("RETAILER_PERMISSION_GROUP_CODES", "[]"))
 if len(RETAILER_PERMISSION_GROUP_DATA) == 0:

@@ -37,7 +37,7 @@ def calculate_reliability_score(product):
             'id', flat=True)
 
     total_reserved = ReservationModel.objects.filter(
-        variant_id__in=variants, status='RESERVED'
+        reservation_items__variant__in=variants, status='RESERVED'
     ).aggregate(total=Sum('quantity')).get('total', None)
 
     if not total_reserved:

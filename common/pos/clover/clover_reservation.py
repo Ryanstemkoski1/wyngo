@@ -5,6 +5,7 @@ from django.db import transaction
 from common.pos.clover.clover_client import CloverRequestClient
 from common.pos.reservation import Reservation
 from common.pos.utils import format_price
+from inventories.models import Reservation as ReservationModel, Variant, ReservationItem
 
 
 class CloverReservation(Reservation):
@@ -39,6 +40,34 @@ class CloverReservation(Reservation):
         return self._request_client.delete_order(
             payload.get("reservation_params").get("origin_id")
         )
+
+    def sync_from_clover(self, order_id):
+        order = self._request_client.get_order(order_id)
+        reservation, _created = ReservationModel.objects.get_or_create(
+            origin_id=order.get("id"),
+        )
+        reservation.total = order["total"]
+        reservation.status = order["state"]
+        reservation.retailer = self._retailer
+        reservation.origin = self.PLATFORM
+
+        # TODO: save customer info
+        # reservation.save()
+        reservation.reservation_code = "#{:06d}".format(reservation.id)
+        reservation.save()
+
+        line_items = order["lineItems"]["elements"]
+        for line_item in line_items:
+            item_id = line_item["item"]["id"]
+            variant = Variant.objects.filter(origin_id=item_id).first()
+            if variant:
+                item, created = ReservationItem.objects.get_or_create(
+                    reservation=reservation, variant=variant, quantity=1
+                )
+                if not created:
+                    item.quantity = item.quantity + 1
+                    item.save()
+
 
     @transaction.atomic
     def store(self, reservation):
@@ -80,6 +109,7 @@ class CloverReservation(Reservation):
 
         except Exception as e:
             error_log("CLOVER ORDER: %s" % e)
+
 
 
 class CloverOrderMapper:

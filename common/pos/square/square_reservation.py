@@ -5,7 +5,7 @@ from django.db import transaction
 from common.pos.reservation import Reservation
 from common.pos.square.square_client import SquareRequestClient
 from common.pos.utils import format_price
-from inventories.models import Reservation as ReservationModel, Customer, Variant, ReservationItem
+from inventories.models import Reservation as ReservationModel, Customer, Variant, ReservationItem, ReservationPickup
 from retailer.models import Location
 
 
@@ -98,29 +98,56 @@ class SquareReservation(Reservation):
         reservation, _created = ReservationModel.objects.get_or_create(
             origin_id=order.get("id"), retailer=self._retailer
         )
-        reservation.total = order["total_money"]["amount"]
+        reservation.subtotal = order.get('total_money', {}).get('amount')
+        reservation.tax = order.get('total_tax_money', {}).get('amount')
+        net_amount = order.get('net_amounts', {}).get('total_money')
+        reservation.total = net_amount.get('amount')
+        reservation.currency = net_amount.get('currency')
         reservation.status = order["state"]
+        reservation.order_time = order.get('created_at')
         reservation.retailer = self._retailer
         reservation.origin = self.PLATFORM
+        reservation.version = order.get("version", 1)
         reservation.reservation_code = "#{:06d}".format(reservation.id)
         if order.get("customer_id"):
             customer = Customer.objects.filter(origin_id=order.get("customer_id")).first()
             if customer:
                 reservation.customer = customer
-
         reservation.save()
 
+        fulfillments = order.get("fulfillments", [])
+        for fulfillment in fulfillments:
+            if fulfillment.get("pickup_details"):
+                reservation_pickup, _created = ReservationPickup.objects.get_or_create(
+                    origin_id=fulfillment.get("uid"),
+                    reservation=reservation
+                )
+                pickup_details = fulfillment.get("pickup_details")
+                reservation_pickup.pickup_time = pickup_details.get("pickup_at")
+                reservation_pickup.recipient_name = pickup_details.get("recipient",{}).get("display_name")
+                reservation_pickup.save()
+
+        total_quantity = 0
         for line_item in order.get("line_items", []):
             item_id = line_item.get("catalog_object_id")
             quantity = line_item.get("quantity")
             variant = Variant.objects.filter(origin_id=item_id).first()
             if variant:
-                ReservationItem.objects.get_or_create(
+                item, _created = ReservationItem.objects.get_or_create(
                     reservation=reservation, variant=variant, quantity=quantity
                 )
+                item.unit_price = line_item.get("base_price_money", {}).get("amount")
+                item.variation_total = line_item.get("variation_total_price_money", {}).get("amount")
+                item.tax = line_item.get("total_tax_money", {}).get("amount")
+                item.total_price = line_item.get("total_money", {}).get("amount")
+                item.save()
             else:
                 # todo fetch variant from square
                 pass
+            total_quantity += int(quantity)
+
+        reservation.quantity = total_quantity
+        reservation.save()
 
 
 class SquareOrderMapper:

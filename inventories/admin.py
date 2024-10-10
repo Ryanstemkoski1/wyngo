@@ -15,7 +15,7 @@ from common.pos.clover import CloverInventory
 from common.retailer_utils import RetailerUtils
 from retailer.models import Retailer
 from .forms import CategoryForm, ProductForm, VariantForm
-from .models import Category, Product, Variant, Inventory, Reservation, Customer, ReservationItem
+from .models import Category, Product, Variant, Inventory, Reservation, Customer, ReservationItem, ReservationPickup
 
 
 @admin.register(Category)
@@ -278,12 +278,36 @@ class ReservationItemInline(admin.TabularInline):
     verbose_name = "Reservation Item"
     verbose_name_plural = "Reservation Items"
     readonly_fields = (
-        "variant",
-        "quantity",
+        "order_time",
     )
     fields = (
         "variant",
         "quantity",
+        "unit_price",
+        "variation_total",
+        "tax",
+        "total_price",
+        "order_time",
+    )
+
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+    can_delete = False
+
+
+class ReservationPickupInline(admin.TabularInline):
+    model = ReservationPickup
+    extra = 0
+    verbose_name = "Pickup"
+    verbose_name_plural = "Pickups"
+
+    exclude = ("origin_id",)
+    readonly_fields = (
+        "location",
     )
 
     def has_add_permission(self, request, obj=None):
@@ -296,30 +320,26 @@ class ReservationItemInline(admin.TabularInline):
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
     list_filter = (
-        ("created_at", DateRangeFilter),
+        ("order_time", DateRangeFilter),
         ("updated_at", DateRangeFilter),
-        ("time_limit", DateRangeFilter),
-        "retailer",
         "status",
     )
     readonly_fields = (
-        "origin_id",
-        "origin",
         "total",
         "status",
-        "user",
         "reservation_code",
+        "updated_at",
+        "created_at",
     )
     list_display = (
         "reservation_code",
-        "origin",
         "total",
+        "currency",
+        "quantity",
         "status",
         "customer",
-        "user",
-        "origin_id",
-        "created_at",
-        "updated_at",
+        "order_time",
+        "retailer",
     )
     search_fields = (
         "origin_id",
@@ -332,7 +352,21 @@ class ReservationAdmin(admin.ModelAdmin):
         "user__email",
     )
 
-    inlines = [ReservationItemInline]
+    fields = (
+        "reservation_code",
+        "customer",
+        "quantity",
+        "order_time",
+        "status",
+        "currency",
+        "subtotal",
+        "tax",
+        "total",
+        "retailer",
+        "updated_at",
+    )
+
+    inlines = [ReservationPickupInline, ReservationItemInline]
 
 
     def get_queryset(self, request):
@@ -446,6 +480,15 @@ class ReservationInline(admin.TabularInline):
     model = Reservation
     extra = 0
 
+    fields = (
+        'reservation_code',
+        'status',
+        'total',
+        'currency',
+        'quantity',
+        'order_time',
+    )
+
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -453,6 +496,7 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ("email", "first_name", "last_name", "phone", "city", "state", "country")
     list_filter = ("city", "state", "country")
     search_fields = ("email", "first_name", "last_name", "phone",)
+    exclude = ("origin_id",)
 
     inlines = [ReservationInline]
 

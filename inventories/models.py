@@ -135,7 +135,7 @@ class Variant(BaseTimeModel):
         verbose_name_plural = "Variations"
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.product.name} - {self.name}"
 
 
 class VariantImage(BaseTimeModel):
@@ -176,7 +176,10 @@ class Reservation(BaseTimeModel):
 
     ORIGIN_CHOICES = ((CLOVER, CLOVER), (SQUARE, SQUARE))
 
+    subtotal = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    tax = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    currency = models.CharField(max_length=3, default="USD")
     origin_id = models.CharField(max_length=50, null=True, default=None, unique=True)
     origin = models.CharField(
         max_length=10, choices=ORIGIN_CHOICES, null=True, default=None
@@ -196,6 +199,7 @@ class Reservation(BaseTimeModel):
     )
 
     version = models.PositiveIntegerField(default=1)
+    order_time = models.DateTimeField(null=True, blank=True)
 
     @staticmethod
     def generate_report_csv(reservations, created_at_range_gte, created_at_range_lte):
@@ -254,10 +258,36 @@ class ReservationItem(BaseTimeModel):
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="reservation_items")
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="reservation_items")
     quantity = models.IntegerField(default=0)
+    unit_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    variation_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    tax = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    total_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
     class Meta:
         verbose_name = "Reservation Item"
         verbose_name_plural = "Reservation Items"
 
+    @property
+    def order_time(self):
+        return self.reservation.order_time
+
     def __str__(self):
         return f"{self.reservation} - {self.variant}"
+
+
+class ReservationPickup(BaseTimeModel):
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="reservation_pickups")
+    recipient_name = models.CharField(max_length=255, null=True, blank=True)
+    pickup_time = models.DateTimeField(null=True, blank=True)
+    origin_id = models.CharField(max_length=50, null=True, default=None, unique=True)
+
+    class Meta:
+        verbose_name = "Pickup"
+        verbose_name_plural = "Pickup"
+
+    @property
+    def location(self):
+        return self.reservation.retailer.location_set.first()
+
+    def __str__(self):
+        return f"Pickup - {self.reservation} - {self.pickup_time}"

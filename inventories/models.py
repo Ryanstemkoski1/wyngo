@@ -137,6 +137,10 @@ class Variant(BaseTimeModel):
     def __str__(self):
         return f"{self.product.name} - {self.name}"
 
+    @property
+    def full_name(self):
+        return f"{self.product.name} - {self.name}"
+
 
 class VariantImage(BaseTimeModel):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
@@ -165,6 +169,22 @@ class Customer(BaseTimeModel):
         Retailer, on_delete=models.SET_NULL, null=True, default=None, related_name="customers"
     )
     origin_id = models.CharField(max_length=50, null=True, default=None, unique=True)
+
+    def full_address(self):
+        address = ""
+        if self.address1:
+            address += self.address1
+        if self.address2:
+            address += ", " + self.address2
+        if self.address3:
+            address += ", " + self.address3
+        if self.city:
+            address += ", " + self.city
+        if self.state:
+            address += ", " + self.state
+        if self.country:
+            address += ", " + self.country
+        return address
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -207,34 +227,45 @@ class Reservation(BaseTimeModel):
         writer = csv.writer(output)
 
         headers = [
-            "Origin ID",
+            "Order ID",
             "Origin",
             "Total",
             "Status",
             "Quantity",
-            "Time Limit",
-            "Variant",
-            "Full Name",
-            "User",
-            "Reservation Code",
-            "Created Date",
+            "Items",
+            "Customer Name",
+            "Customer Email",
+            "Customer Phone",
+            "Customer Address",
+            "Reserved Date",
             "Updated Date",
         ]
         writer.writerow(headers)
 
         for reservation in reservations:
+            customer = reservation.customer
+            customer_name = reservation.customer.first_name + " " + reservation.customer.last_name \
+                if reservation.customer else ""
+            line_items = reservation.reservation_items.all()
+            description = ""
+
+            for line_item in line_items:
+                description += f"{line_item.quantity} x {line_item.variant.full_name} = {line_item.variation_total} ({reservation.currency}) \n"
+            description = description.strip()
+
             row = [
-                reservation.origin_id,
+                reservation.reservation_code,
                 reservation.origin,
                 f"$ {reservation.total}",
                 reservation.status,
                 reservation.quantity,
-                reservation.time_limit.strftime("%d-%m-%y %H:%M:%S"),
-                str(reservation.variant),
-                f"{reservation.user.first_name} {reservation.user.last_name}",
-                f"{reservation.user.email}",
-                reservation.reservation_code,
-                reservation.created_at.strftime("%d-%m-%y %H:%M:%S"),
+                description,
+                customer_name,
+                customer.email if customer else "",
+                customer.phone if customer else "",
+                customer.full_address() if customer else "",
+                reservation.order_time.strftime("%d-%m-%y %H:%M:%S")
+                        if reservation.order_time else reservation.created_at.strftime("%d-%m-%y %H:%M:%S"),
                 reservation.updated_at.strftime("%d-%m-%y %H:%M:%S"),
             ]
             writer.writerow(row)

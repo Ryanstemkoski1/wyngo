@@ -4,6 +4,8 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 
 from common.pos.clover import CloverInventory
+from common.pos.clover.clover_customer import CloverCustomer
+from common.pos.clover.clover_reservation import CloverReservation
 from common.pos.square import SquareInventory
 from common.pos.square.square_customer import SquareCustomer
 from common.pos.square.square_reservation import SquareReservation
@@ -167,6 +169,24 @@ def fetch_square_customer(self, retailer_id: int = None):
 
 
 @app.task(bind=True, max_retries=3, default_retry_delay=300)
+def fetch_clover_customer(self, retailer_id: int = None):
+    logger.info(f"[Celery] Fetching Clover customers")
+    retailers = Retailer.objects.filter(pk=retailer_id) \
+        if retailer_id \
+        else Retailer.objects.filter(origin=Retailer.CLOVER).exclude(access_token__isnull=True)
+
+    for retailer in retailers:
+        try:
+            CloverCustomer.fetch_all_customers(retailer)
+        except Exception as exc:
+            logger.error(f"Error fetching Clover customers: {str(exc)}")
+            traceback.print_exc()
+            raise self.retry(exc=exc)
+        finally:
+            logger.info(f"[Celery] Ended fetching Clover customers for retailer: {retailer.merchant_id}")
+
+
+@app.task(bind=True, max_retries=3, default_retry_delay=300)
 def fetch_square_orders(self, retailer_id: int = None):
     logger.info(f"[Celery] Fetching Square orders")
     retailers = Retailer.objects.filter(pk=retailer_id) \
@@ -183,3 +203,22 @@ def fetch_square_orders(self, retailer_id: int = None):
             raise self.retry(exc=exc)
         finally:
             logger.info(f"[Celery] Ended fetching Square orders for retailer: {retailer.merchant_id}")
+
+
+@app.task(bind=True, max_retries=3, default_retry_delay=300)
+def fetch_clover_orders(self, retailer_id: int = None):
+    logger.info(f"[Celery] Fetching Clover orders")
+    retailers = Retailer.objects.filter(pk=retailer_id) \
+        if retailer_id \
+        else Retailer.objects.filter(origin=Retailer.CLOVER).exclude(access_token__isnull=True)
+
+    for retailer in retailers:
+        try:
+            clover_reservation = CloverReservation(retailer)
+            clover_reservation.fetch_all_orders()
+        except Exception as exc:
+            logger.error(f"Error fetching Clover orders: {str(exc)}")
+            print(traceback.format_exc())
+            raise self.retry(exc=exc)
+        finally:
+            logger.info(f"[Celery] Ended fetching Clover orders for retailer: {retailer.merchant_id}")

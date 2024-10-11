@@ -3,8 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitButton = document.querySelector('#created-date-form .button[type="submit"]');
 
     function updateSubmitButtonStatus() {
-        let startDateElement = document.getElementById('id_created_at__range__gte');
-        let endDateElement = document.getElementById('id_created_at__range__lte');
+        let startDateElement = document.getElementById('id_order_time__range__gte');
+        let endDateElement = document.getElementById('id_order_time__range__lte');
 
         if (startDateElement.value && endDateElement.value) {
             submitButton.removeAttribute('disabled');
@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    document.getElementById('id_created_at__range__gte').addEventListener('blur', updateSubmitButtonStatus);
-    document.getElementById('id_created_at__range__lte').addEventListener('blur', updateSubmitButtonStatus);
+    document.getElementById('id_order_time__range__gte').addEventListener('blur', updateSubmitButtonStatus);
+    document.getElementById('id_order_time__range__lte').addEventListener('blur', updateSubmitButtonStatus);
 
     updateSubmitButtonStatus();
 
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let existingError = event.target.closest('.date').querySelector('.custom-error');
         if (existingError) existingError.remove();
 
-        if (event.target.id === 'id_created_at__range__gte') {
+        if (event.target.id === 'id_order_time__range__gte') {
             let dateValue = new Date(event.target.value);
             if (dateValue > currentDate) {
                 showError(event.target, 'The start date cannot be in the future.');

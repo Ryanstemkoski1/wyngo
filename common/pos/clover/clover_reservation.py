@@ -1,7 +1,8 @@
 from logging import error as error_log
-
+from datetime import datetime
 from django.db import transaction
 
+from common.pos.clover import CloverInventory
 from common.pos.clover.clover_client import CloverRequestClient
 from common.pos.reservation import Reservation
 from common.pos.utils import format_price
@@ -41,32 +42,50 @@ class CloverReservation(Reservation):
             payload.get("reservation_params").get("origin_id")
         )
 
-    def sync_from_clover(self, order_id):
-        order = self._request_client.get_order(order_id)
+    def sync_from_clover(self, order_id, order=None):
+        order = self._request_client.get_order(order_id) if not order else order
         reservation, _created = ReservationModel.objects.get_or_create(
             origin_id=order.get("id"),
         )
-        reservation.total = order["total"]
+        reservation.subtotal = format_price(order["total"])
+        reservation.total = format_price(order["total"])
         reservation.status = order["state"]
         reservation.retailer = self._retailer
         reservation.origin = self.PLATFORM
+        reservation.order_time = datetime.fromtimestamp(int(order.get("createdTime") / 1000))
+        reservation.quantity = len(order.get("lineItems").get("elements", []))
 
         # TODO: save customer info
-        # reservation.save()
         reservation.reservation_code = "#{:06d}".format(reservation.id)
         reservation.save()
 
         line_items = order["lineItems"]["elements"]
         for line_item in line_items:
+            if "item" not in line_item:
+                continue
             item_id = line_item["item"]["id"]
             variant = Variant.objects.filter(origin_id=item_id).first()
+            if not variant:
+                clover_inventory = CloverInventory(self._retailer, limit=100, offset=0)
+                clover_inventory.run()
+                variant = Variant.objects.filter(origin_id=item_id).first()
             if variant:
                 item, created = ReservationItem.objects.get_or_create(
-                    reservation=reservation, variant=variant, quantity=1
+                    reservation=reservation,
+                    variant=variant,
+                    quantity=1,
                 )
                 if not created:
                     item.quantity = item.quantity + 1
-                    item.save()
+
+                item.unit_price = format_price(line_item["price"])
+                item.variation_total = format_price(line_item["price"] * item.quantity)
+                item.save()
+
+    def fetch_all_orders(self):
+        all_orders = self._request_client.get_orders()
+        for order in all_orders.get("elements", []):
+            self.sync_from_clover(order.get("id"), order)
 
 
     @transaction.atomic

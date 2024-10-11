@@ -12,7 +12,8 @@ from common.pos.clover.clover_location import CloverLocation
 from common.pos.clover.clover_oauth import CloverOauth
 from common.pos.square.square_location import SquareLocation
 from common.pos.square.square_oauth import SquareOauth
-from inventories.tasks import load_clover_inventory, load_square_inventory, fetch_square_customer, fetch_square_orders
+from inventories.tasks import load_clover_inventory, load_square_inventory, fetch_square_customer, fetch_square_orders, \
+    fetch_clover_customer, fetch_clover_orders
 from retailer.models import Retailer, Category
 from .forms import RetailerSignupForm
 
@@ -98,6 +99,8 @@ def approve_retailer(request):
     # The approval email is sent
     if retailer.origin == Retailer.CLOVER:
         load_clover_inventory.delay(retailer_id=retailer_id)
+        fetch_clover_customer.delay(retailer_id=retailer_id)
+        fetch_clover_orders.delay(retailer_id=retailer_id)
 
     return redirect("admin:retailer_retailer_changelist")
 

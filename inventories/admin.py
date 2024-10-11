@@ -421,8 +421,8 @@ class ReservationAdmin(admin.ModelAdmin):
 
     def report_service(self, request, *args, **kwargs):
         qfilter = Q(id__isnull=False)
-        created_at_range_gte = request.GET.get("created_at__range__gte")
-        created_at_range_lte = request.GET.get("created_at__range__lte")
+        created_at_range_gte = request.GET.get("order_time__range__gte")
+        created_at_range_lte = request.GET.get("order_time__range__lte")
         retailer = request.GET.get(
             "retailer__id__exact"
         )
@@ -465,6 +465,8 @@ class ReservationAdmin(admin.ModelAdmin):
             )
 
         stocks = Reservation.objects.filter(qfilter).order_by("-id")
+        if not request.user.is_superuser:
+            stocks = stocks.filter(retailer__email=request.user.email)
         return Reservation.generate_report_csv(
             stocks, created_at_range_gte, created_at_range_lte
         )

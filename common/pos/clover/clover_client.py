@@ -88,7 +88,11 @@ class CloverRequestClient:
             raise e
 
     def get_order(self, order_id):
-        path = f"{self._merchant_id}/orders/{order_id}?expand=lineItems,customer"
+        path = f"{self._merchant_id}/orders/{order_id}?expand=lineItems,customer,orderFulfillmentEvent"
+        return self._request(path=path)
+
+    def get_orders(self, limit=100, offset=0):
+        path = f"{self._merchant_id}/orders?expand=lineItems,customer,orderFulfillmentEvent"
         return self._request(path=path)
 
     def create_order(self, payload):
@@ -151,3 +155,7 @@ class CloverRequestClient:
             method="POST",
             json=payload
         )
+
+    def list_customers(self):
+        path = f"{self._merchant_id}/customers?expand=addresses,emailAddresses,phoneNumbers"
+        return self._request(path=path)

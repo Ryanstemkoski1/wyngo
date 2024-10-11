@@ -98,9 +98,9 @@ class SquareReservation(Reservation):
         reservation, _created = ReservationModel.objects.get_or_create(
             origin_id=order.get("id"), retailer=self._retailer
         )
-        reservation.subtotal = order.get('total_money', {}).get('amount')
-        reservation.tax = order.get('total_tax_money', {}).get('amount')
-        net_amount = order.get('net_amounts', {}).get('total_money')
+        reservation.subtotal = format_price(order.get('total_money', {}).get('amount'))
+        reservation.tax = format_price(order.get('total_tax_money', {}).get('amount'))
+        net_amount = format_price(order.get('net_amounts', {}).get('total_money'))
         reservation.total = net_amount.get('amount')
         reservation.currency = net_amount.get('currency')
         reservation.status = order["state"]
@@ -136,10 +136,10 @@ class SquareReservation(Reservation):
                 item, _created = ReservationItem.objects.get_or_create(
                     reservation=reservation, variant=variant, quantity=quantity
                 )
-                item.unit_price = line_item.get("base_price_money", {}).get("amount")
-                item.variation_total = line_item.get("variation_total_price_money", {}).get("amount")
-                item.tax = line_item.get("total_tax_money", {}).get("amount")
-                item.total_price = line_item.get("total_money", {}).get("amount")
+                item.unit_price = format_price(line_item.get("base_price_money", {}).get("amount"))
+                item.variation_total = format_price(line_item.get("variation_total_price_money", {}).get("amount"))
+                item.tax = format_price(line_item.get("total_tax_money", {}).get("amount"))
+                item.total_price = format_price(line_item.get("total_money", {}).get("amount"))
                 item.save()
             else:
                 # todo fetch variant from square

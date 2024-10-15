@@ -3,6 +3,7 @@ from logging import error as error_log
 from django.db import transaction
 
 from common.pos.reservation import Reservation
+from common.pos.square import SquareInventory
 from common.pos.square.square_client import SquareRequestClient
 from common.pos.utils import format_price
 from inventories.models import Reservation as ReservationModel, Customer, Variant, ReservationItem, ReservationPickup
@@ -128,10 +129,15 @@ class SquareReservation(Reservation):
                 reservation_pickup.save()
 
         total_quantity = 0
+        reservation.reservation_items.all().delete()
         for line_item in order.get("line_items", []):
             item_id = line_item.get("catalog_object_id")
             quantity = line_item.get("quantity")
             variant = Variant.objects.filter(origin_id=item_id).first()
+            if not variant:
+                square_inventory = SquareInventory(self._retailer)
+                square_inventory.run()
+                variant = Variant.objects.filter(origin_id=item_id).first()
             if variant:
                 item, _created = ReservationItem.objects.get_or_create(
                     reservation=reservation, variant=variant, quantity=quantity
@@ -141,9 +147,6 @@ class SquareReservation(Reservation):
                 item.tax = format_price(line_item.get("total_tax_money", {}).get("amount"))
                 item.total_price = format_price(line_item.get("total_money", {}).get("amount"))
                 item.save()
-            else:
-                # todo fetch variant from square
-                pass
             total_quantity += int(quantity)
 
         reservation.quantity = total_quantity

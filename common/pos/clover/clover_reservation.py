@@ -59,6 +59,7 @@ class CloverReservation(Reservation):
         reservation.reservation_code = "#{:06d}".format(reservation.id)
         reservation.save()
 
+        reservation.reservation_items.all().delete()
         line_items = order["lineItems"]["elements"]
         for line_item in line_items:
             if "item" not in line_item:

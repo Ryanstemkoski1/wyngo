@@ -100,8 +100,8 @@ class SquareReservation(Reservation):
         )
         reservation.subtotal = format_price(order.get('total_money', {}).get('amount'))
         reservation.tax = format_price(order.get('total_tax_money', {}).get('amount'))
-        net_amount = format_price(order.get('net_amounts', {}).get('total_money'))
-        reservation.total = net_amount.get('amount')
+        net_amount = order.get('net_amounts', {}).get('total_money')
+        reservation.total = format_price(net_amount.get('amount'))
         reservation.currency = net_amount.get('currency')
         reservation.status = order["state"]
         reservation.order_time = order.get('created_at')

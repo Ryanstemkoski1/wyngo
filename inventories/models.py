@@ -269,7 +269,7 @@ class Order(BaseTimeModel):
             customer = reservation.customer
             customer_name = reservation.customer.first_name + " " + reservation.customer.last_name \
                 if reservation.customer else ""
-            line_items = reservation.reservation_items.all()
+            line_items = reservation.order_items.all()
             description = ""
 
             for line_item in line_items:

@@ -153,6 +153,29 @@ class VariantImage(BaseTimeModel):
         return f"{self.image}"
 
 
+class Reservation(BaseTimeModel):
+    CLOVER = "CLOVER"
+    SQUARE = "SQUARE"
+
+    ORIGIN_CHOICES = ((CLOVER, CLOVER), (SQUARE, SQUARE))
+
+    total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    origin_id = models.CharField(max_length=50, null=True, default=None)
+    origin = models.CharField(
+        max_length=10, choices=ORIGIN_CHOICES, null=True, default=None
+    )
+    status = models.CharField(max_length=20, default="SUCCESS")
+    quantity = models.IntegerField(default=0)
+    time_limit = models.DateTimeField(null=True, blank=True)
+    variant = models.ForeignKey(
+        Variant, on_delete=models.SET_NULL, null=True, blank=True, default=None
+    )
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, default=None
+    )
+    reservation_code = models.CharField(max_length=100, null=True, blank=True)
+
+
 class Customer(BaseTimeModel):
     last_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
@@ -190,7 +213,7 @@ class Customer(BaseTimeModel):
         return f"{self.first_name} {self.last_name}"
 
 
-class Reservation(BaseTimeModel):
+class Order(BaseTimeModel):
     CLOVER = "CLOVER"
     SQUARE = "SQUARE"
 
@@ -213,7 +236,7 @@ class Reservation(BaseTimeModel):
     customer = models.ForeignKey(
         Customer, on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name="reservations"
     )
-    reservation_code = models.CharField(max_length=100, null=True, blank=True, unique=True)
+    order_code = models.CharField(max_length=100, null=True, blank=True, unique=True)
     retailer = models.ForeignKey(
         Retailer, on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name="reservations"
     )
@@ -254,7 +277,7 @@ class Reservation(BaseTimeModel):
             description = description.strip()
 
             row = [
-                reservation.reservation_code,
+                reservation.order_code,
                 reservation.origin,
                 f"$ {reservation.total}",
                 reservation.status,
@@ -282,12 +305,12 @@ class Reservation(BaseTimeModel):
         verbose_name_plural = "Orders"
 
     def __str__(self):
-        return f"{self.reservation_code}"
+        return f"{self.order_code}"
 
 
-class ReservationItem(BaseTimeModel):
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="reservation_items")
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="reservation_items")
+class OrderItem(BaseTimeModel):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="order_items")
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     variation_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
@@ -300,14 +323,14 @@ class ReservationItem(BaseTimeModel):
 
     @property
     def order_time(self):
-        return self.reservation.order_time
+        return self.order.order_time
 
     def __str__(self):
-        return f"{self.reservation} - {self.variant}"
+        return f"{self.order} - {self.variant}"
 
 
-class ReservationPickup(BaseTimeModel):
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="reservation_pickups")
+class OrderPickup(BaseTimeModel):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="reservation_pickups")
     recipient_name = models.CharField(max_length=255, null=True, blank=True)
     pickup_time = models.DateTimeField(null=True, blank=True)
     origin_id = models.CharField(max_length=50, null=True, default=None, unique=True)
@@ -318,7 +341,7 @@ class ReservationPickup(BaseTimeModel):
 
     @property
     def location(self):
-        return self.reservation.retailer.location_set.first()
+        return self.order.retailer.location_set.first()
 
     def __str__(self):
-        return f"Pickup - {self.reservation} - {self.pickup_time}"
+        return f"Pickup - {self.order} - {self.pickup_time}"

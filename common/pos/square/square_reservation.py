@@ -6,7 +6,7 @@ from common.pos.reservation import Reservation
 from common.pos.square import SquareInventory
 from common.pos.square.square_client import SquareRequestClient
 from common.pos.utils import format_price
-from inventories.models import Reservation as ReservationModel, Customer, Variant, ReservationItem, ReservationPickup
+from inventories.models import Order as OrderModel, Customer, Variant, OrderItem, OrderPickup
 from retailer.models import Location
 
 
@@ -96,32 +96,32 @@ class SquareReservation(Reservation):
         if not order:
             return
 
-        reservation, _created = ReservationModel.objects.get_or_create(
+        new_order, _created = OrderModel.objects.get_or_create(
             origin_id=order.get("id"), retailer=self._retailer
         )
-        reservation.subtotal = format_price(order.get('total_money', {}).get('amount'))
-        reservation.tax = format_price(order.get('total_tax_money', {}).get('amount'))
+        new_order.subtotal = format_price(order.get('total_money', {}).get('amount'))
+        new_order.tax = format_price(order.get('total_tax_money', {}).get('amount'))
         net_amount = order.get('net_amounts', {}).get('total_money')
-        reservation.total = format_price(net_amount.get('amount'))
-        reservation.currency = net_amount.get('currency')
-        reservation.status = order["state"]
-        reservation.order_time = order.get('created_at')
-        reservation.retailer = self._retailer
-        reservation.origin = self.PLATFORM
-        reservation.version = order.get("version", 1)
-        reservation.reservation_code = "#{:06d}".format(reservation.id)
+        new_order.total = format_price(net_amount.get('amount'))
+        new_order.currency = net_amount.get('currency')
+        new_order.status = order["state"]
+        new_order.order_time = order.get('created_at')
+        new_order.retailer = self._retailer
+        new_order.origin = self.PLATFORM
+        new_order.version = order.get("version", 1)
+        new_order.order_code = "#{:06d}".format(new_order.id)
         if order.get("customer_id"):
             customer = Customer.objects.filter(origin_id=order.get("customer_id")).first()
             if customer:
-                reservation.customer = customer
-        reservation.save()
+                new_order.customer = customer
+        new_order.save()
 
         fulfillments = order.get("fulfillments", [])
         for fulfillment in fulfillments:
             if fulfillment.get("pickup_details"):
-                reservation_pickup, _created = ReservationPickup.objects.get_or_create(
+                reservation_pickup, _created = OrderPickup.objects.get_or_create(
                     origin_id=fulfillment.get("uid"),
-                    reservation=reservation
+                    order=new_order
                 )
                 pickup_details = fulfillment.get("pickup_details")
                 reservation_pickup.pickup_time = pickup_details.get("pickup_at")
@@ -129,7 +129,7 @@ class SquareReservation(Reservation):
                 reservation_pickup.save()
 
         total_quantity = 0
-        reservation.reservation_items.all().delete()
+        new_order.order_items.all().delete()
         for line_item in order.get("line_items", []):
             item_id = line_item.get("catalog_object_id")
             quantity = line_item.get("quantity")
@@ -139,8 +139,8 @@ class SquareReservation(Reservation):
                 square_inventory.run()
                 variant = Variant.objects.filter(origin_id=item_id).first()
             if variant:
-                item, _created = ReservationItem.objects.get_or_create(
-                    reservation=reservation, variant=variant, quantity=quantity
+                item, _created = OrderItem.objects.get_or_create(
+                    order=new_order, variant=variant, quantity=quantity
                 )
                 item.unit_price = format_price(line_item.get("base_price_money", {}).get("amount"))
                 item.variation_total = format_price(line_item.get("variation_total_price_money", {}).get("amount"))
@@ -149,8 +149,8 @@ class SquareReservation(Reservation):
                 item.save()
             total_quantity += int(quantity)
 
-        reservation.quantity = total_quantity
-        reservation.save()
+        new_order.quantity = total_quantity
+        new_order.save()
 
 
 class SquareOrderMapper:

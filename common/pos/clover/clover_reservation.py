@@ -6,7 +6,7 @@ from common.pos.clover import CloverInventory
 from common.pos.clover.clover_client import CloverRequestClient
 from common.pos.reservation import Reservation
 from common.pos.utils import format_price
-from inventories.models import Reservation as ReservationModel, Variant, ReservationItem
+from inventories.models import Order as OrderModel, Variant, OrderItem
 
 
 class CloverReservation(Reservation):
@@ -44,22 +44,22 @@ class CloverReservation(Reservation):
 
     def sync_from_clover(self, order_id, order=None):
         order = self._request_client.get_order(order_id) if not order else order
-        reservation, _created = ReservationModel.objects.get_or_create(
+        new_order, _created = OrderModel.objects.get_or_create(
             origin_id=order.get("id"),
         )
-        reservation.subtotal = format_price(order["total"])
-        reservation.total = format_price(order["total"])
-        reservation.status = order["state"]
-        reservation.retailer = self._retailer
-        reservation.origin = self.PLATFORM
-        reservation.order_time = datetime.fromtimestamp(int(order.get("createdTime") / 1000))
-        reservation.quantity = len(order.get("lineItems").get("elements", []))
+        new_order.subtotal = format_price(order["total"])
+        new_order.total = format_price(order["total"])
+        new_order.status = order["state"]
+        new_order.retailer = self._retailer
+        new_order.origin = self.PLATFORM
+        new_order.order_time = datetime.fromtimestamp(int(order.get("createdTime") / 1000))
+        new_order.quantity = len(order.get("lineItems").get("elements", []))
 
         # TODO: save customer info
-        reservation.reservation_code = "#{:06d}".format(reservation.id)
-        reservation.save()
+        new_order.order_code = "#{:06d}".format(new_order.id)
+        new_order.save()
 
-        reservation.reservation_items.all().delete()
+        new_order.order_items.all().delete()
         line_items = order["lineItems"]["elements"]
         for line_item in line_items:
             if "item" not in line_item:
@@ -71,8 +71,8 @@ class CloverReservation(Reservation):
                 clover_inventory.run()
                 variant = Variant.objects.filter(origin_id=item_id).first()
             if variant:
-                item, created = ReservationItem.objects.get_or_create(
-                    reservation=reservation,
+                item, created = OrderItem.objects.get_or_create(
+                    order=new_order,
                     variant=variant,
                     quantity=1,
                 )

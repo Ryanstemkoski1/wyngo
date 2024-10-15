@@ -346,9 +346,9 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
     },
     {
         "app_label": "inventories",
-        "model": "reservation",
+        "model": "order",
         "codes": [
-            "view_reservation",
+            "view_order",
         ]
     },
     {
@@ -360,16 +360,16 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
     },
     {
         "app_label": "inventories",
-        "model": "reservationitem",
+        "model": "orderitem",
         "codes": [
-            "view_reservationitem",
+            "view_orderitem",
         ]
     },
     {
         "app_label": "inventories",
-        "model": "reservationpickup",
+        "model": "orderpickup",
         "codes": [
-            "view_reservationpickup",
+            "view_orderpickup",
         ]
     },
 ]

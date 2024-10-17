@@ -19,23 +19,6 @@ from .models import Category, Product, Variant, Inventory, Customer, OrderItem, 
     Order
 
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    search_fields = ["name"]
-    list_filter = (
-        "name",
-        ("created_at", DateRangeFilter),
-    )
-    list_display = ("name", "created_at")
-    form = CategoryForm
-
-    class Media:
-        js = (
-            "js/admin/jquery-3.3.1.min.js",
-            "js/admin/filter_validation.js",
-        )
-
-
 class VariantInline(admin.TabularInline):
     model = Variant
     form = VariantForm
@@ -235,6 +218,45 @@ class ProductInline(TabularInlinePaginated):
     class Media:
         css = {"all": ("css/admin/admin.css",)}
 
+
+class CategoryVariantInline(admin.TabularInline):
+    model = Category.variants.through
+    verbose_name = "Product"
+    verbose_name_plural = "Products"
+    extra = 1
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    search_fields = ["name"]
+    list_filter = (
+        "name",
+        ("created_at", DateRangeFilter),
+    )
+    list_display = ("name", "created_at", "items")
+    exclude = ("variants",)
+    inlines = [CategoryVariantInline]
+    # form = CategoryForm
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(
+            retailer__email=request.user.email
+        )
+
+    class Media:
+        js = (
+            "js/admin/jquery-3.3.1.min.js",
+            "js/admin/filter_validation.js",
+        )
 
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):

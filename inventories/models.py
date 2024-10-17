@@ -24,6 +24,11 @@ class Inventory(BaseTimeModel):
 
 class Category(BaseTimeModel):
     name = models.CharField(max_length=100)
+    origin_id = models.CharField(max_length=50, null=True, default=None, unique=True)
+    retailer = models.ForeignKey(
+        Retailer, on_delete=models.CASCADE, related_name="categories",
+    )
+    variants = models.ManyToManyField("Variant", blank=True, related_name="categories")
 
     def __str__(self):
         return f"{self.name}"
@@ -31,6 +36,10 @@ class Category(BaseTimeModel):
     class Meta:
         verbose_name = "Category"
         verbose_name_plural = "Categories"
+
+    @property
+    def items(self):
+        return self.variants.all().count()
 
 
 class Product(BaseTimeModel):
@@ -57,9 +66,9 @@ class Product(BaseTimeModel):
         Inventory, on_delete=models.CASCADE, null=True, default=None
     )
 
-    category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, null=True, blank=True, default=None
-    )
+    # category = models.ForeignKey(
+    #     Category, on_delete=models.SET_NULL, null=True, blank=True, default=None
+    # )
 
     origin_id = models.CharField(max_length=50, null=True, default=None)
 
@@ -85,12 +94,16 @@ class Product(BaseTimeModel):
     def __str__(self):
         return f"{self.name}"
 
+    @property
+    def category(self):
+        all_categories = self.variants.first().categories.all()
+        return ", ".join([category.name for category in all_categories])
+
     def is_single_product(self):
         variants = self.variants.all()
         if len(variants) > 1:
             return False
         return len(variants) == 0 or variants[0].origin_id == self.origin_id
-
 
 
 class Variant(BaseTimeModel):

@@ -1,3 +1,4 @@
+import json
 import logging
 import traceback
 from datetime import datetime
@@ -13,7 +14,7 @@ from common.pos.repositories import (
 )
 from common.pos.square.square_client import SquareRequestClient
 from common.pos.utils import format_price
-from inventories.models import Product, Variant
+from inventories.models import Product, Variant, Category
 from retailer.models import Retailer as RetailerModel
 from .square_mapper import Item, ItemVariation, SquareInventoryMapper
 from ...goupc import GoUPC
@@ -54,7 +55,8 @@ class SquareInventory:
             name=product.name,
             inventory=inventory,
         )
-        return self.product_repository.update_or_create(product_obj)
+        product = self.product_repository.update_or_create(product_obj)
+        return product
 
     def create_or_update_variant(self, variant: ItemVariation, product: Product):
         variant_obj = Variant(
@@ -102,6 +104,37 @@ class SquareInventory:
             }
         )
 
+    def fetch_all_categories(self):
+        categories = self._request_client.get_catalogs_by_type("CATEGORY")
+        print(json.dumps(categories, indent=4))
+        objects = categories.get("objects", [])
+        for _object in objects:
+            category = self.create_or_update_category(_object)
+
+    def handle_categories_update(self, categories):
+        for category in categories:
+            self.create_or_update_category(category)
+
+    def create_or_update_category(self, category_data: dict):
+        _id = category_data.get("id")
+        data = category_data.get("category_data", {})
+        category, created = Category.objects.update_or_create(
+            origin_id=_id,
+            retailer=self._retailer,
+            defaults={
+                "name": data.get("name"),
+            }
+        )
+        return category
+
+    def retrieve_category_by_id(self, category_id):
+        category = Category.objects.filter(origin_id=category_id, retailer=self._retailer).first()
+        if not category:
+            square_category = self._request_client.retrieve_catalog(category_id)
+            category_data = square_category.get("object", {})
+            category = self.create_or_update_category(category_data)
+        return category
+
     def store(self, products: list[Item]):
         self.create_inventories()
         with transaction.atomic():
@@ -126,6 +159,8 @@ class SquareInventory:
                                 )
 
                         self.create_or_update_variant(variant, product_exists)
+
+                    self._process_variant_category(variant, product)
 
                 if len(product.variants) > 1:
                     self.product_repository.update_min_max_price(
@@ -164,6 +199,7 @@ class SquareInventory:
                                 )
 
                         self.create_or_update_variant(variant, product_exists)
+                    self._process_variant_category(variant, product)
                 variant_ids = [variant.origin_id for variant in product.variants]
                 self.variant_repository.delete_missing_variants(
                     product=product, variant_ids=variant_ids
@@ -177,6 +213,19 @@ class SquareInventory:
             self.update_variant_stock(retailer_id=self._retailer.id)
 
             self.product_repository.update_total_stock(self._retailer.id)
+
+    def _process_variant_category(self, variant, product):
+        variant_db = Variant.objects.filter(
+            origin_id=variant.origin_id,
+        ).first()
+        variant_db.categories.clear()
+        category_id = product.category_id
+        category = None
+        if category_id:
+            category = self.retrieve_category_by_id(category_id)
+        if category:
+            category.variants.add(variant_db)
+            category.save()
 
     def map_data(self, products):
         locations = self.get_locations()
@@ -206,6 +255,7 @@ class SquareInventory:
             if not data:
                 return {"result": True, "fetch_next": False}
 
+            print(json.dumps(data, indent=4))
             self.process(data)
 
             if cursor is not None:
@@ -235,6 +285,10 @@ class SquareInventory:
             )
             logging.info(f"New parsed date: {parsed_date}")
             data = self.fetch(updated_at=parsed_date)
+            logging.info(json.dumps(data, indent=4))
+            objects = data.get("objects", [])
+            categories = [o for o in objects if o.get("type") == "CATEGORY"]
+            self.handle_categories_update(categories)
             self.process(data, update=True)
         except Exception as e:
             traceback.print_exc()

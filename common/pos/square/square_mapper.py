@@ -8,6 +8,7 @@ class Item:
         self.name = item_data.get("name")
         self.is_deleted = data.get("is_deleted", False)
         self.variants = [ItemVariation(var) for var in variations]
+        self.category_id = item_data.get("category_id")
 
     def __str__(self):
         return f"""
@@ -17,6 +18,7 @@ class Item:
             - name: {self.name}
             - is_deleted: {self.is_deleted}
             - variants: {self.variants}
+            - category_id: {self.category_id}
         """
 
     def __repr__(self):

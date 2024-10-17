@@ -46,7 +46,6 @@ class RetailerAdmin(admin.ModelAdmin):
         "expires_at",
         "square_csrf",
         "is_sync",
-        "status",
     )
     list_display = (
         "id",

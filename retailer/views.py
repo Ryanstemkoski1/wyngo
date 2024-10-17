@@ -3,6 +3,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import TemplateView
@@ -13,7 +14,7 @@ from common.pos.clover.clover_oauth import CloverOauth
 from common.pos.square.square_location import SquareLocation
 from common.pos.square.square_oauth import SquareOauth
 from inventories.tasks import load_clover_inventory, load_square_inventory, fetch_square_customer, fetch_square_orders, \
-    fetch_clover_customer, fetch_clover_orders
+    fetch_clover_customer, fetch_clover_orders, fetch_clover_categories, fetch_square_categories, init_retailer
 from retailer.models import Retailer, Category
 from .forms import RetailerSignupForm
 
@@ -63,15 +64,7 @@ def square_callback(request):
     result = SquareOauth.create_oauth_session(state=state, code=code)
     if result["status"] == 0:
         retailer_id = result["retailer_id"]
-        SquareLocation.fetch_locations(retailer_id=retailer_id)
-        load_square_inventory.delay(retailer_id=retailer_id)
-        fetch_square_customer.delay(retailer_id=retailer_id)
-        fetch_square_orders.delay(retailer_id=retailer_id)
-        # load_square_inventory(retailer_id=retailer_id)
-        # messages.warning(
-        #     request,
-        #     "Inventory processing is underway. Please check back in a few minutes.",
-        # )
+        init_retailer.delay(retailer_id=retailer_id, origin=Retailer.SQUARE)
         messages.success(request, result["message"])
     else:
         messages.error(request, result["message"])
@@ -98,13 +91,12 @@ def approve_retailer(request):
 
     # The approval email is sent
     if retailer.origin == Retailer.CLOVER:
-        load_clover_inventory.delay(retailer_id=retailer_id)
-        fetch_clover_customer.delay(retailer_id=retailer_id)
-        fetch_clover_orders.delay(retailer_id=retailer_id)
+        init_retailer.delay(retailer_id=retailer_id, origin=Retailer.CLOVER)
 
     return redirect("admin:retailer_retailer_changelist")
 
 
+@transaction.atomic
 def connect_retailer(request):
     form = RetailerSignupForm(request.POST, request.FILES)
     code = request.POST.get("code")

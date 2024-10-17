@@ -61,7 +61,10 @@ class CloverWebhook:
                             # Inventory Creation Event
                             clover_inventory.delete(item_id=object_id)
                     case "Inventory Category":
-                        print(event)  # TODO: handle Inventory Category Event
+                        if event["type"] in [self.__TYPE_CREATE, self.__TYPE_UPDATE]:
+                            clover_inventory.create_or_update_category(event.get("object", {}))
+                        elif event["type"] == self.__TYPE_DELETE:
+                            clover_inventory.delete_category(category_id=object_id)
                     case "Merchants":
                         if event["type"] == self.__TYPE_UPDATE:
                             # Merchant Update Event

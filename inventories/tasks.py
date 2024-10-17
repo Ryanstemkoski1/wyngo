@@ -8,6 +8,7 @@ from common.pos.clover.clover_customer import CloverCustomer
 from common.pos.clover.clover_reservation import CloverReservation
 from common.pos.square import SquareInventory
 from common.pos.square.square_customer import SquareCustomer
+from common.pos.square.square_location import SquareLocation
 from common.pos.square.square_reservation import SquareReservation
 from retailer.models import Retailer
 from wyndo.celery import app
@@ -222,3 +223,62 @@ def fetch_clover_orders(self, retailer_id: int = None):
             raise self.retry(exc=exc)
         finally:
             logger.info(f"[Celery] Ended fetching Clover orders for retailer: {retailer.merchant_id}")
+
+
+@app.task(bind=True, max_retries=3, default_retry_delay=300)
+def fetch_square_categories(self, retailer_id: int = None):
+    logger.info(f"[Celery] Fetching Square categories")
+    retailers = Retailer.objects.filter(pk=retailer_id) \
+        if retailer_id \
+        else Retailer.objects.filter(origin=Retailer.SQUARE).exclude(access_token__isnull=True)
+
+    for retailer in retailers:
+        try:
+            square_inventory = SquareInventory(retailer)
+            square_inventory.fetch_all_categories()
+        except Exception as exc:
+            logger.error(f"Error fetching Square inventories: {str(exc)}")
+            print(traceback.format_exc())
+            raise self.retry(exc=exc)
+        finally:
+            logger.info(f"[Celery] Ended fetching Square inventories for retailer: {retailer.merchant_id}")
+
+
+@app.task(bind=True, max_retries=3, default_retry_delay=300)
+def fetch_clover_categories(self, retailer_id: int = None):
+    logger.info(f"[Celery] Fetching Clover categories")
+    retailers = Retailer.objects.filter(pk=retailer_id) \
+        if retailer_id \
+        else Retailer.objects.filter(origin=Retailer.CLOVER).exclude(access_token__isnull=True)
+
+    for retailer in retailers:
+        try:
+            clover_inventory = CloverInventory(retailer)
+            clover_inventory.fetch_all_categories()
+        except Exception as exc:
+            logger.error(f"Error fetching Clover inventories: {str(exc)}")
+            print(traceback.format_exc())
+            raise self.retry(exc=exc)
+        finally:
+            logger.info(f"[Celery] Ended fetching Clover inventories for retailer: {retailer.merchant_id}")
+
+
+@app.task(bind=True, max_retries=3, default_retry_delay=300)
+def init_retailer(self, retailer_id: int, origin: str):
+    try:
+        if origin == Retailer.CLOVER:
+            fetch_clover_categories.delay(retailer_id=retailer_id)
+            load_clover_inventory.delay(retailer_id=retailer_id)
+            fetch_clover_customer.delay(retailer_id=retailer_id)
+            fetch_clover_orders.delay(retailer_id=retailer_id)
+        else:
+            SquareLocation.fetch_locations(retailer_id=retailer_id)
+            fetch_square_categories(retailer_id=retailer_id)
+            load_square_inventory(retailer_id=retailer_id)
+            fetch_square_customer(retailer_id=retailer_id)
+            fetch_square_orders(retailer_id=retailer_id)
+    except Exception as exc:
+        logger.error(f"Error initializing retailer: {str(exc)}")
+        print(traceback.format_exc())
+        raise self.retry(exc=exc)
+

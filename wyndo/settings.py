@@ -372,6 +372,13 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
             "view_orderpickup",
         ]
     },
+    {
+        "app_label": "inventories",
+        "model": "category",
+        "codes": [
+            "view_category",
+        ]
+    },
 ]
 RETAILER_PERMISSION_GROUP_DATA = json.loads(getenv("RETAILER_PERMISSION_GROUP_CODES", "[]"))
 if len(RETAILER_PERMISSION_GROUP_DATA) == 0:

@@ -159,3 +159,7 @@ class CloverRequestClient:
     def list_customers(self):
         path = f"{self._merchant_id}/customers?expand=addresses,emailAddresses,phoneNumbers"
         return self._request(path=path)
+
+    def get_categories(self):
+        path = f"{self._merchant_id}/categories?expand=items"
+        return self._request(path=path)

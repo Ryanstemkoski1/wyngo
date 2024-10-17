@@ -524,8 +524,6 @@ class ProductDetailsPageView(TemplateView):
                 | Q(variants__upc__isnull=True)
                 | Q(variants__upc=""),
                 variant_count=1,
-                category=product.category,
-                category__isnull=False,
             )
             .order_by("lowest_variant_price")
             .exclude(id=product.id)
@@ -534,8 +532,6 @@ class ProductDetailsPageView(TemplateView):
         products_with_empty_upc_variants = (
             Product.objects.filter(
                 Q(variants__upc__isnull=True) | Q(variants__upc=""),
-                category=product.category,
-                category__isnull=False,
             )
             .annotate(variant_count=Count("variants"))
             .exclude(id=product.id)

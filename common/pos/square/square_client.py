@@ -11,7 +11,7 @@ class SquareRequestClient:
 
     def get_catalog(self):
         catalog = self.client.catalog.list_catalog(
-            types="IMAGE,ITEM", cursor=self.cursor
+            types="IMAGE,ITEM,CATEGORY", cursor=self.cursor
         )
 
         if catalog.is_error():
@@ -21,6 +21,16 @@ class SquareRequestClient:
         if catalog.is_success():
             return catalog.body
         return None
+
+    def get_catalogs_by_type(self, types: str):
+        catalog = self.client.catalog.list_catalog(types=types, cursor=self.cursor)
+
+        if catalog.is_error():
+            error = search(catalog.errors, "detail")
+            raise Exception("[REQUEST CLIENT] " + error)
+
+        if catalog.is_success():
+            return catalog.body
 
     def search_catalog_by_date(self, updated_at):
         catalog = self.client.catalog.search_catalog_objects(
@@ -36,6 +46,15 @@ class SquareRequestClient:
         if catalog.is_success():
             return catalog.body
         return None
+
+    def retrieve_catalog(self, catalog_id):
+        catalog = self.client.catalog.retrieve_catalog_object(catalog_id)
+        if catalog.is_error():
+            error = search(catalog.errors, "detail")
+            raise Exception("[REQUEST CLIENT] " + error)
+
+        if catalog.is_success():
+            return catalog.body
 
     def get_stock(self, catalog_id, location_id):
         inventory_counts = self.client.inventory.batch_retrieve_inventory_counts(

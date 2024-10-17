@@ -9,7 +9,7 @@ from django.db import transaction
 from common.pos.clover.clover_client import CloverRequestClient
 from common.pos.inventory import Inventory
 from common.pos.utils import format_price, get_product_prices
-from inventories.models import Variant, Product
+from inventories.models import Variant, Product, Category
 
 
 class CloverInventory(Inventory):
@@ -97,6 +97,20 @@ class CloverInventory(Inventory):
                     },
                     created_product,
                 )
+                categories = product.get("categories", [])
+
+                new_variant.categories.clear()
+                for category in categories:
+                    new_category, created = Category.objects.update_or_create(
+                        origin_id=category["id"],
+                        retailer=self._retailer,
+                        defaults={"name": category["name"]},
+                    )
+                    if category['deleted']:
+                        new_variant.categories.remove(new_category)
+                    else:
+                        new_variant.categories.add(new_category)
+                new_variant.save()
 
             variants = Variant.objects.filter(
                 product__origin_id=created_product.origin_id
@@ -162,6 +176,36 @@ class CloverInventory(Inventory):
                 "result": False,
                 "fetch_next": False,
             }
+
+    def fetch_all_categories(self):
+        inventories = self._request_client.get_categories()
+        print(json.dumps(inventories, indent=4))
+        elements = inventories.get("elements", [])
+        for element in elements:
+            category = self.create_or_update_category(element)
+            items = element.get("items", {}).get("elements", [])
+            for item in items:
+                item_id = item.get("id")
+                variant = Variant.objects.filter(origin_id=item_id).first()
+                if variant is not None:
+                    variant.categories.add(category)
+                variant.save()
+
+    def create_or_update_category(self, category_data: dict):
+        """
+        {'object': {'id': '54PVFM41X408T', 'name': 'test cate'}}
+        """
+        _id = category_data.get("id")
+        name = category_data.get("name", {})
+        category, created = Category.objects.update_or_create(
+            origin_id=_id, retailer=self._retailer, defaults={
+                "name": name,
+            }
+        )
+        return category
+
+    def delete_category(self, category_id: str):
+        return Category.objects.filter(origin_id=category_id).delete()
 
     @transaction.atomic
     def map_go_upc(self) -> None:
@@ -507,12 +551,14 @@ class CloverProductMapper:
                     result.append(group)
 
                 grouped_items[group_id]["variations"].append(item)
+                grouped_items[group_id]["categories"] = item.get("categories", {}).get("elements", [])
 
             else:
                 result.append(
                     {
                         "id": item["id"],
                         "name": item["name"],
+                        "categories":  item.get("categories", {}).get("elements", []),
                         "variations": [
                             {
                                 "itemGroup": {
@@ -538,6 +584,7 @@ class CloverProductMapper:
             "images": [],  # TODO: create method to retrieve image urls
             "variants": variants,
             "total_stock": 0,
+            "categories": item.get("categories", []),
             **prices,
         }
         return product

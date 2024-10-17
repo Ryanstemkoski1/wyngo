@@ -4,6 +4,6 @@
 {% block object-tools-items %}
     {{ block.super }}
     <li>
-        <a href="{% url 'admin:report-export-reservation' %}{{ cl.get_query_string }}" class="link">Export</a>
+        <a href="{% url 'admin:report-export-order' %}{{ cl.get_query_string }}" class="link">Export</a>
     </li>
 {% endblock %}

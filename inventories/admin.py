@@ -346,6 +346,7 @@ class OrderAdmin(admin.ModelAdmin):
         ("order_time", DateRangeFilter),
         ("updated_at", DateRangeFilter),
         "status",
+        "retailer",
     )
     readonly_fields = (
         "total",
@@ -436,7 +437,7 @@ class OrderAdmin(admin.ModelAdmin):
             path(
                 "emit/",
                 self.admin_site.admin_view(self.report_service),
-                name="report-export-reservation",
+                name="report-export-order",
             ),
         ]
 

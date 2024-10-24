@@ -11,6 +11,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
 from common.retailer_utils import RetailerUtils
+from retailer.models import Retailer
 from .forms import UserForm, LoginForm, UserProfileUpdateForm
 from .models import User
 
@@ -164,6 +165,11 @@ class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 class UserProfileView(TemplateView):
     template_name = "edit_profile.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["retailers"] = Retailer.objects.filter(email=self.request.user.email).all()
+        return context
+
     def post(self, request, *args, **kwargs):
         form = UserProfileUpdateForm(request.POST)
 
@@ -189,6 +195,15 @@ class UserProfileView(TemplateView):
                     return redirect("profile")
 
             request.user.save()
+
+            # save pos access token
+            for field in form.data.keys():
+                if field.startswith("retailer_token"):
+                    _, retailer_id = field.split("retailer_token_")
+                    retailer = Retailer.objects.get(id=int(retailer_id))
+                    retailer.access_token = form.data.get(field)
+                    retailer.save()
+
             messages.success(
                 request, "Your data was updated successfully", extra_tags="success"
             )

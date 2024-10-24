@@ -18,6 +18,7 @@ const confirm_password = document.querySelectorAll('[name="confirm_password"]');
 const first_name = document.querySelectorAll('[name="first_name"]');
 const last_name = document.querySelectorAll('[name="last_name"]');
 const button = document.querySelector(".save");
+const access_token_inputs = document.querySelectorAll(".access-token-input");
 
 let isValidName = true;
 let isValidLastName = true;
@@ -290,19 +291,30 @@ const editBtn = document.querySelector(".edit-btn");
 const cancelBtn = document.querySelector(".cancel-btn");
 
 editBtn.addEventListener("click", function (e) {
-  document.querySelector(".actions").classList.remove("hidden");
+  document.querySelectorAll(".actions").forEach((node) => {
+      node.classList.remove("hidden")
+  });
   first_name[0].removeAttribute("disabled");
   last_name[0].removeAttribute("disabled");
   password[0].removeAttribute("disabled");
   confirm_password[0].removeAttribute("disabled");
+
+  access_token_inputs.forEach((node) => {
+    node.removeAttribute("disabled");
+  })
 });
 
 cancelBtn.addEventListener("click", function (e) {
-  document.querySelector(".actions").classList.add("hidden");
+  document.querySelectorAll(".actions").forEach((node) => {
+      node.classList.add("hidden")
+  });
   first_name[0].setAttribute("disabled", true);
   last_name[0].setAttribute("disabled", true);
   password[0].setAttribute("disabled", true);
   confirm_password[0].setAttribute("disabled", true);
+  access_token_inputs.forEach((node) => {
+    node.setAttribute("disabled", true);
+  })
 });
 
 const closeAlert = document.querySelector(".close-alert");

@@ -35,7 +35,7 @@
                         <div class="grid grid-cols-4 sm:grid-cols-2 sm:gap-6">
                             <div class="form-control w-full col-span-4 sm:col-span-1">
                                 <label for="first_name" class="label font-normal text-sm px-3 pb-1">Name*</label>
-                                <input type="text" placeholder="Enter your first name" name="first_name" disabled
+                                <input type="text" placeholder="Enter your first name" id="first_name" name="first_name" disabled
                                     value="{{ user.first_name }}"
                                     class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm disabled:text-neutral-400 disabled:bg-white disabled:border-neutral-400" />
                                 <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Required</span>
@@ -43,7 +43,7 @@
                             </div>
                             <div class="form-control w-full col-span-4 sm:col-span-1">
                                 <label for="name" class="label font-normal text-sm px-3 pb-1">Last Name*</label>
-                                <input type="text" placeholder="Enter your last name" name="last_name" disabled
+                                <input type="text" placeholder="Enter your last name" id="name" name="last_name" disabled
                                     value="{{ user.last_name }}"
                                     class="input bg-white input-bordered h-10 border-neutral-800 w-full text-sm disabled:text-neutral-400 disabled:bg-white disabled:border-neutral-400" />
                                 <span class="message hidden text-red-500 font-normal text-xs pt-2 px-3">Required</span>
@@ -134,8 +134,33 @@
                                     </span>
                                 </div>
                             </div>
+                        </div>
+
+                        {% if retailers|length > 0 %}
+                            <div class="form-control mt-5">
+                                <span class="font-medium text-neutral-800 text-xl mt-4 sm:text-2xl">
+                                    Auth Tokens
+                                </span>
+                            </div>
+
+                            {% for retailer in retailers %}
+                                <div class="form-control w-full">
+                                    <label class="label font-normal text-sm px-3 pb-1">{{ retailer.origin|title }}</label>
+                                    <div class="flex justify-end items-center align-middle relative">
+                                        <input type="password" placeholder="Your access token" name="retailer_token_{{ retailer.id }}" disabled
+                                            class="input access-token-input bg-white input-bordered h-10 border-neutral-800 w-full text-sm disabled:text-neutral-400 disabled:bg-white disabled:border-neutral-400 disabled:placeholder-neutral-400"
+                                            value="{{ retailer.access_token }}"
+                                        />
+                                        <img src="{% static 'img/icons/icon-eye-hide.svg' %}"
+                                            class="absolute w-6 mr-2 cursor-pointer eye-icon" />
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <div class="form-control pt-4 space-y-8 hidden actions">
                             <div class="space-y-4 sm:flex sm:justify-end sm:space-y-0 sm:gap-4">
-                                <button type="submit" class="disabled:bg-w-light-gray bg-w-primary text-white btn-block disabled:text-neutral-400 text-sm font-semibold 
+                                <button type="submit" class="disabled:bg-w-light-gray bg-w-primary text-white btn-block disabled:text-neutral-400 text-sm font-semibold
                                     capitalize border-w-light-gray rounded-md h-10 sm:w-1/6 save">Save</button>
                                 <button type="button" class=" bg-white border border-w-primary text-w-primary btn-block text-sm font-semibold
                                      capitalize rounded-md h-10 sm:w-1/6 cancel-btn">

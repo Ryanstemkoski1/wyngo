@@ -1,6 +1,7 @@
 import logging
 
 from common.pos.square.square_client import SquareRequestClient
+from inventories.models import Customer
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +15,11 @@ class SquareCustomer:
     @staticmethod
     def store(raw_customer, retailer):
         _id = raw_customer["id"]
-        customer = retailer.customers.filter(origin_id=_id, retailer=retailer).first()
+        customer = Customer.objects.filter(origin_id=_id).first()
         if not customer:
-            customer = retailer.customers.create(origin_id=_id, retailer=retailer)
+            customer = retailer.customers.create(origin_id=_id)
 
+        customer.retailer = retailer
         customer.first_name = raw_customer.get("given_name")
         customer.last_name = raw_customer.get("family_name")
         customer.origin_id = _id
@@ -56,4 +58,4 @@ class SquareCustomer:
                 SquareCustomer.store(customer, retailer)
             except Exception as e:
                 logger.error(f"Error parsing customer {customer['id']} for Square,"
-                             f" retailer id {retailer.id}, exception", e)
+                             f" retailer id {retailer.id}, exception {e}")

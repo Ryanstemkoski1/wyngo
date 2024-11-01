@@ -72,6 +72,7 @@ class RetailerSignupForm(forms.ModelForm):
         user = self.create_retailer_admin(data["email"], data["password"])
         if user is None:
             raise forms.ValidationError("Cannot create user for this email address")
+
         instance: Retailer = super(RetailerSignupForm, self).save(commit=False)
         if instance is not None:
             instance.merchant_id = (

@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -66,6 +67,20 @@ def square_callback(request):
         retailer_id = result["retailer_id"]
         init_retailer.delay(retailer_id=retailer_id, origin=Retailer.SQUARE)
         messages.success(request, result["message"])
+        messages.warning(request, "You will not be able to see your inventory data until the Wyndo admin "
+                                  "checks and approves your retailer account.")
+
+        # After oauth success, send emails to retailer and admin
+        retailer = Retailer.objects.get(id=retailer_id)
+        request_number = f"#{'{:06d}'.format(retailer_id)}"
+        Retailer.register_retailer_email(request_number, retailer.email)
+
+        super_email = (
+            User.objects.filter(is_superuser=True).order_by("date_joined").first()
+        ).email
+        Retailer.register_admin_email(
+            super_email, request.build_absolute_uri("/admin/retailer/retailer/")
+        )
     else:
         messages.error(request, result["message"])
     return redirect("admin:index")
@@ -81,18 +96,13 @@ def approve_retailer(request):
 
     url = request.build_absolute_uri(
         reverse("index")
-        if retailer.origin == Retailer.CLOVER
-        else f"{reverse('connect_pos')}?i={retailer_id}"
     )
 
     Retailer.approved_retailer_email(
         retailer.origin, retailer.email, url, retailer.name
     )
 
-    # The approval email is sent
-    if retailer.origin == Retailer.CLOVER:
-        init_retailer.delay(retailer_id=retailer_id, origin=Retailer.CLOVER)
-
+    init_retailer.delay(retailer_id=retailer_id, origin=retailer.origin)
     return redirect("admin:retailer_retailer_changelist")
 
 
@@ -108,15 +118,22 @@ def connect_retailer(request):
         try:
             retailer = form.save()
         except ValidationError as e:
+            logger.error(f"Error on validating retailer: {str(e)}")
             messages.error(request, str(e), extra_tags="error")
-            return False
+            return False, None
         except Exception as e:
-            return False
+            logger.error(f"Error saving retailer: {str(e)}")
+            return False, None
     else:
         logger.info(f"Errors {form.errors}")
-        return False
+        return False, None
 
     email = request.POST.get("email")
+
+    # Log user in
+    created_retailer_user = User.objects.get(email=email)
+    login(request, created_retailer_user)
+
     origin = request.POST.get("origin")
     super_email = (
         User.objects.filter(is_superuser=True).order_by("date_joined").first()
@@ -138,19 +155,15 @@ def connect_retailer(request):
             Retailer.register_admin_email(
                 super_email, request.build_absolute_uri("/admin/retailer/retailer/")
             )
-            return True
+            return True, None
         else:
-            return False
+            return False, None
 
     elif origin == Retailer.SQUARE:
-        Retailer.register_retailer_email(request_number, email)
-        Retailer.register_admin_email(
-            super_email, request.build_absolute_uri("/admin/retailer/retailer/")
-        )
-        return True
-
+        url = f"{reverse('connect_pos')}?i={retailer.id}"
+        return True, url
     else:
-        return False
+        return False, None
 
 
 class RetailerSignupView(TemplateView):
@@ -203,13 +216,13 @@ class RetailerSignupView(TemplateView):
         )
 
     def post(self, request, *args, **kwargs):
-        connected = connect_retailer(request)
+        connected, redirect_url = connect_retailer(request)
 
         if connected:
             messages.success(
                 request, "Retailer created successfully.", extra_tags="success"
             )
-            return redirect("login")
+            return redirect(redirect_url if redirect_url else "login")
         else:
             messages.error(request, "Retailer creation failed.", extra_tags="error")
             return redirect("sign_up", origin=request.POST.get("origin"))

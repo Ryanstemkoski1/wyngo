@@ -171,10 +171,10 @@ class Location(BaseTimeModel):
     address1 = models.CharField(max_length=255)
     address2 = models.CharField(max_length=255, null=True, blank=True)
     address3 = models.CharField(max_length=255, null=True, blank=True)
-    city = models.CharField(max_length=100)
-    country = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    zip_code = models.CharField(max_length=100, null=True, blank=True)
     pos_id = models.CharField(max_length=100, null=True, blank=True)
     retailer = models.ForeignKey(
         "retailer.Retailer", null=True, blank=True, on_delete=models.CASCADE

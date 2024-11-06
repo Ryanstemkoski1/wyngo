@@ -168,7 +168,7 @@ class Retailer(BaseTimeModel):
 
 class Location(BaseTimeModel):
     name = models.CharField(max_length=100, null=True, blank=True)
-    address1 = models.CharField(max_length=255)
+    address1 = models.CharField(max_length=255, null=True)
     address2 = models.CharField(max_length=255, null=True, blank=True)
     address3 = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)

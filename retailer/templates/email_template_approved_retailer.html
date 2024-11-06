@@ -161,22 +161,8 @@
                             Application Approved!
                           </div>
                           <div class="space-y-5" style="text-align: left; font-size: 16px; font-weight: 400; color: #262626; --tw-space-y-reverse: 0; margin-top: calc(24px * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(24px * var(--tw-space-y-reverse))">
-                            {% if origin == 'SQUARE' %}
-                              <p>
-                                Congratulations! We have successfully verified and approved your company “{{ business_name }}” in our system. Enter <a href="{{ url }}" style="cursor: pointer; font-size: 16px; color: #4852b3; text-decoration-line: underline">here</a> to complete the integration and be able to view your inventory on Wyndo
-                              </p>
-                            {% else %}
-                              <p>
-                                Congratulations! We have successfully verified and approved your company “{{ business_name }}” in our system. Your inventory is now available to view on <a href="{{ url }}" style="cursor: pointer; font-size: 16px; color: #4852b3; text-decoration-line: underline">Wyndo</a>
-                              </p>
-                            {% endif %}
-                          </div>
-                          <div class="space-y-5" style="text-align: left; font-size: 16px; font-weight: 400; color: #262626; --tw-space-y-reverse: 0; margin-top: calc(24px * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(24px * var(--tw-space-y-reverse));">
                             <p>
-                              If you did not make a request, communicate it <a href style="cursor: pointer; font-size: 16px; color: #4852b3; text-decoration-line: underline">here</a>. In any case, ignoring this message will not change your password either. It is possible that someone entered your email address by mistake.
-                            </p>
-                            <p style="--tw-space-y-reverse: 0; margin-top: calc(20px * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(20px * var(--tw-space-y-reverse));">
-                              Wyndo team.
+                              Congratulations! Your company “{{ business_name }}” has been successfully verified and approved in our system. Your inventory is now available to view on Wyndo. Visit <a href="{{ url }}" style="cursor: pointer; font-size: 16px; color: #4852b3; text-decoration-line: underline">Wyndo</a> today!
                             </p>
                           </div>
                         </div>

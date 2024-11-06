@@ -976,74 +976,73 @@ class CancelReservationView(TemplateView):
 
         reservation_id = self.kwargs.get("reservation_id")
 
-        reservation = Reservation.objects.filter(id=reservation_id).last()
+        reservation = Reservation.objects.filter(id=reservation_id).last().delete()
 
-        retailer = (
-            Retailer.objects.exclude(access_token__isnull=True)
-            .exclude(merchant_id__exact="")
-            .filter(
-                merchant_id=reservation.variant.product.inventory.location.retailer.merchant_id
-            )
-            .first()
+        messages.success(
+            request,
+            "Reservation cancelled successfully.",
+            extra_tags="success",
         )
 
-        if reservation.variant.product.origin == "CLOVER":
-            data = {
-                "reservation_params": {
-                    "origin_id": reservation.origin_id,
-                },
-            }
+        return redirect("index")
 
-            try:
-                clover_reservation = CloverReservation(retailer)
-                clover_reservation.run(data, "delete")
-
-                messages.success(
-                    request,
-                    "Reservation cancelled successfully.",
-                    extra_tags="success",
-                )
-
-                return redirect("index")
-            except Exception as e:
-                print(e)
-
-        else:
-            data = {
-                "order_params": {
-                    "order": {
-                        "location_id": reservation.variant.product.inventory.location.pos_id,
-                        "line_items": [
-                            {
-                                "quantity": str(reservation.quantity),
-                                "catalog_object_id": reservation.variant.origin_id,
-                            }
-                        ],
-                        "version": reservation.version,
-                    },
-                    "idempotency_key": str(uuid.uuid4()),
-                },
-                "reservation_params": {
-                    "order_id": reservation.origin_id,
-                    "quantity": reservation.quantity,
-                    "product": reservation.variant.id,
-                },
-            }
-
-            try:
-                retailer = reservation.variant.product.inventory.location.retailer
-                square_reservation = SquareReservation(retailer)
-                square_reservation.run(data, "delete")
-
-                messages.success(
-                    request,
-                    "Reservation cancelled successfully.",
-                    extra_tags="success",
-                )
-
-                return redirect("index")
-            except Exception as e:
-                print(e)
+        # if reservation.variant.product.origin == "CLOVER":
+        #     data = {
+        #         "reservation_params": {
+        #             "origin_id": reservation.origin_id,
+        #         },
+        #     }
+        #
+        #     try:
+        #         clover_reservation = CloverReservation(retailer)
+        #         clover_reservation.run(data, "delete")
+        #
+        #         messages.success(
+        #             request,
+        #             "Reservation cancelled successfully.",
+        #             extra_tags="success",
+        #         )
+        #
+        #         return redirect("index")
+        #     except Exception as e:
+        #         print(e)
+        #
+        # else:
+        #     data = {
+        #         "order_params": {
+        #             "order": {
+        #                 "location_id": reservation.variant.product.inventory.location.pos_id,
+        #                 "line_items": [
+        #                     {
+        #                         "quantity": str(reservation.quantity),
+        #                         "catalog_object_id": reservation.variant.origin_id,
+        #                     }
+        #                 ],
+        #                 "version": reservation.version,
+        #             },
+        #             "idempotency_key": str(uuid.uuid4()),
+        #         },
+        #         "reservation_params": {
+        #             "order_id": reservation.origin_id,
+        #             "quantity": reservation.quantity,
+        #             "product": reservation.variant.id,
+        #         },
+        #     }
+        #
+        #     try:
+        #         retailer = reservation.variant.product.inventory.location.retailer
+        #         square_reservation = SquareReservation(retailer)
+        #         square_reservation.run(data, "delete")
+        #
+        #         messages.success(
+        #             request,
+        #             "Reservation cancelled successfully.",
+        #             extra_tags="success",
+        #         )
+        #
+        #         return redirect("index")
+        #     except Exception as e:
+        #         print(e)
 
 
 class ReservationsListView(TemplateView):

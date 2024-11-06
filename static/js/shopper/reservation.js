@@ -598,6 +598,7 @@ document.addEventListener("click", closeAllSelect);
 
 function timeLimitCountdown() {
   const countDownDate = new Date(timeLimit);
+  console.log(timeLimit)
   const x = setInterval(function () {
     const now = new Date();
 

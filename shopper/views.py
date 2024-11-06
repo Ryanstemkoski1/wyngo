@@ -653,6 +653,30 @@ class MakeReservationView(TemplateView):
 
         total = int(variation.price) * quantity
 
+        reservation = Reservation(
+            user=request.user,
+            variant=variation,
+            origin=variation.product.origin,
+            total=total,
+            quantity=quantity,
+            status="RESERVED",
+            time_limit=datetime.datetime.now() + datetime.timedelta(minutes=45),
+        )
+        reservation.save()
+        reservation.reservation_code = "#{:06d}".format(reservation.id)
+        reservation.save()
+
+        messages.success(
+            request,
+            "Successful reservation, you have 45 min to go for your product.",
+            extra_tags="success",
+        )
+
+        return (
+            redirect("reservation-details", reservation_id=reservation.id)
+        )
+
+
         # if quantity > 2 and total > 50:
         #     messages.error(
         #         request,
@@ -664,112 +688,112 @@ class MakeReservationView(TemplateView):
 
         line_items = []
 
-        if variation.product.origin == "CLOVER":
-            for i in range(int(quantity)):
-                line_items.append({"item": {"id": variation.origin_id}})
-
-            order_data = {
-                "orderCart": {
-                    "lineItems": line_items,
-                    "note": "Order created on Wyndo App",
-                    "title": "Wyndo Order",
-                }
-            }
-
-            reservation_data = {
-                "product": variation.id,
-                "user": request.user.id,
-                "quantity": quantity,
-                "status": "RESERVED",
-            }
-
-            data = {
-                "order_params": order_data,
-                "reservation_params": reservation_data,
-            }
-
-            try:
-                clover_reservation = CloverReservation(retailer)
-                reservation = clover_reservation.run(data, "create")
-
-                if reservation is None:
-                    messages.error(
-                        request,
-                        "We're currently unable to process your reservation. Please try again later",
-                        extra_tags="error",
-                    )
-                    return redirect(previous_url)
-
-                messages.success(
-                    request,
-                    "Successful reservation, you have 45 min to go for your product.",
-                    extra_tags="success",
-                )
-
-                return (
-                    redirect("reservation-details", reservation_id=reservation.id)
-                    if "product" in previous_url.lower()
-                    else redirect(previous_url)
-                )
-
-            except Exception as e:
-                print(e)
-
-        else:
-            line_items.append(
-                {
-                    "quantity": str(quantity),
-                    "catalog_object_id": variation.origin_id,
-                }
-            )
-
-            order_data = {
-                "location_id": variation.product.inventory.location.pos_id,
-                "line_items": line_items,
-            }
-
-            reservation_data = {
-                "product": variation.id,
-                "user": request.user.id,
-                "quantity": quantity,
-                "status": "RESERVED",
-            }
-
-            data = {
-                "order_params": {
-                    "order": order_data,
-                    "idempotency_key": str(uuid.uuid4()),
-                },
-                "reservation_params": reservation_data,
-            }
-
-            try:
-                retailer = variation.product.inventory.location.retailer
-                square_reservation = SquareReservation(retailer)
-                reservation = square_reservation.run(data, "create")
-
-                if reservation is None:
-                    messages.error(
-                        request,
-                        "We're currently unable to process your reservation. Please try again later",
-                        extra_tags="error",
-                    )
-                    return redirect(previous_url)
-
-                messages.success(
-                    request,
-                    "Successful reservation, you have 45 min to go for your product.",
-                    extra_tags="success",
-                )
-
-                return (
-                    redirect("reservation-details", reservation_id=reservation.id)
-                    if "product" in previous_url.lower()
-                    else redirect(previous_url)
-                )
-
-            except Exception as e:
-                print(e)
+        # if variation.product.origin == "CLOVER":
+        #     for i in range(int(quantity)):
+        #         line_items.append({"item": {"id": variation.origin_id}})
+        #
+        #     order_data = {
+        #         "orderCart": {
+        #             "lineItems": line_items,
+        #             "note": "Order created on Wyndo App",
+        #             "title": "Wyndo Order",
+        #         }
+        #     }
+        #
+        #     reservation_data = {
+        #         "product": variation.id,
+        #         "user": request.user.id,
+        #         "quantity": quantity,
+        #         "status": "RESERVED",
+        #     }
+        #
+        #     data = {
+        #         "order_params": order_data,
+        #         "reservation_params": reservation_data,
+        #     }
+        #
+        #     try:
+        #         clover_reservation = CloverReservation(retailer)
+        #         reservation = clover_reservation.run(data, "create")
+        #
+        #         if reservation is None:
+        #             messages.error(
+        #                 request,
+        #                 "We're currently unable to process your reservation. Please try again later",
+        #                 extra_tags="error",
+        #             )
+        #             return redirect(previous_url)
+        #
+        #         messages.success(
+        #             request,
+        #             "Successful reservation, you have 45 min to go for your product.",
+        #             extra_tags="success",
+        #         )
+        #
+        #         return (
+        #             redirect("reservation-details", reservation_id=reservation.id)
+        #             if "product" in previous_url.lower()
+        #             else redirect(previous_url)
+        #         )
+        #
+        #     except Exception as e:
+        #         print(e)
+        #
+        # else:
+        #     line_items.append(
+        #         {
+        #             "quantity": str(quantity),
+        #             "catalog_object_id": variation.origin_id,
+        #         }
+        #     )
+        #
+        #     order_data = {
+        #         "location_id": variation.product.inventory.location.pos_id,
+        #         "line_items": line_items,
+        #     }
+        #
+        #     reservation_data = {
+        #         "product": variation.id,
+        #         "user": request.user.id,
+        #         "quantity": quantity,
+        #         "status": "RESERVED",
+        #     }
+        #
+        #     data = {
+        #         "order_params": {
+        #             "order": order_data,
+        #             "idempotency_key": str(uuid.uuid4()),
+        #         },
+        #         "reservation_params": reservation_data,
+        #     }
+        #
+        #     try:
+        #         retailer = variation.product.inventory.location.retailer
+        #         square_reservation = SquareReservation(retailer)
+        #         reservation = square_reservation.run(data, "create")
+        #
+        #         if reservation is None:
+        #             messages.error(
+        #                 request,
+        #                 "We're currently unable to process your reservation. Please try again later",
+        #                 extra_tags="error",
+        #             )
+        #             return redirect(previous_url)
+        #
+        #         messages.success(
+        #             request,
+        #             "Successful reservation, you have 45 min to go for your product.",
+        #             extra_tags="success",
+        #         )
+        #
+        #         return (
+        #             redirect("reservation-details", reservation_id=reservation.id)
+        #             if "product" in previous_url.lower()
+        #             else redirect(previous_url)
+        #         )
+        #
+        #     except Exception as e:
+        #         print(e)
 
 
 class ReservationDetailsView(TemplateView):
@@ -860,86 +884,89 @@ class UpdateReservationView(TemplateView):
 
         total = quantity * variant.price
 
-        if quantity > 2 and total > 50:
-            messages.error(
-                request,
-                "We're sorry, but reservations for this product are currently limited to $50 total and 2 items per order. Please modify your reservation to stay within these limits.",
-                extra_tags="error",
-            )
+        reservation.quantity = quantity
+        reservation.total = total
+        reservation.save()
 
-            return redirect(previous_url)
+        messages.success(
+            request,
+            "Reservation updated successfully.",
+            extra_tags="success",
+        )
 
-        if reservation.variant.product.origin == "CLOVER":
-            line_items = []
+        return redirect(previous_url)
 
-            for i in range(int(quantity)):
-                line_items.append({"item": {"id": variant.origin_id}})
-
-            data = {
-                "line_item_params": line_items,
-                "order_params": {
-                    "order_id": reservation.origin_id,
-                    "total": float(variant.price) * int(quantity) * 100,
-                    "note": "Order updated on Wyndo App",
-                    "title": "Wyndo Order",
-                },
-                "reservation_params": {
-                    "quantity": quantity,
-                    "product": variant.id,
-                },
-            }
-
-            try:
-                clover_reservation = CloverReservation(retailer)
-                clover_reservation.run(data, "update")
-
-                messages.success(
-                    request,
-                    "Reservation updated successfully.",
-                    extra_tags="success",
-                )
-
-                return redirect(previous_url)
-            except Exception as e:
-                print(e)
-
-        else:
-            data = {
-                "order_params": {
-                    "order": {
-                        "location_id": variant.product.inventory.location.pos_id,
-                        "line_items": [
-                            {
-                                "quantity": str(quantity),
-                                "catalog_object_id": variant.origin_id,
-                            }
-                        ],
-                        "version": reservation.version,
-                    },
-                    "idempotency_key": str(uuid.uuid4()),
-                    "fields_to_clear": ["line_items"],
-                },
-                "reservation_params": {
-                    "order_id": reservation.origin_id,
-                    "quantity": quantity,
-                    "product": variant.id,
-                },
-            }
-
-            try:
-                retailer = variant.product.inventory.location.retailer
-                square_reservation = SquareReservation(retailer)
-                square_reservation.run(data, "update")
-
-                messages.success(
-                    request,
-                    "Reservation updated successfully.",
-                    extra_tags="success",
-                )
-
-                return redirect(previous_url)
-            except Exception as e:
-                print(e)
+        # if reservation.variant.product.origin == "CLOVER":
+        #     line_items = []
+        #
+        #     for i in range(int(quantity)):
+        #         line_items.append({"item": {"id": variant.origin_id}})
+        #
+        #     data = {
+        #         "line_item_params": line_items,
+        #         "order_params": {
+        #             "order_id": reservation.origin_id,
+        #             "total": float(variant.price) * int(quantity) * 100,
+        #             "note": "Order updated on Wyndo App",
+        #             "title": "Wyndo Order",
+        #         },
+        #         "reservation_params": {
+        #             "quantity": quantity,
+        #             "product": variant.id,
+        #         },
+        #     }
+        #
+        #     try:
+        #         clover_reservation = CloverReservation(retailer)
+        #         clover_reservation.run(data, "update")
+        #
+        #         messages.success(
+        #             request,
+        #             "Reservation updated successfully.",
+        #             extra_tags="success",
+        #         )
+        #
+        #         return redirect(previous_url)
+        #     except Exception as e:
+        #         print(e)
+        #
+        # else:
+        #     data = {
+        #         "order_params": {
+        #             "order": {
+        #                 "location_id": variant.product.inventory.location.pos_id,
+        #                 "line_items": [
+        #                     {
+        #                         "quantity": str(quantity),
+        #                         "catalog_object_id": variant.origin_id,
+        #                     }
+        #                 ],
+        #                 "version": reservation.version,
+        #             },
+        #             "idempotency_key": str(uuid.uuid4()),
+        #             "fields_to_clear": ["line_items"],
+        #         },
+        #         "reservation_params": {
+        #             "order_id": reservation.origin_id,
+        #             "quantity": quantity,
+        #             "product": variant.id,
+        #         },
+        #     }
+        #
+        #     try:
+        #         retailer = variant.product.inventory.location.retailer
+        #         square_reservation = SquareReservation(retailer)
+        #         square_reservation.run(data, "update")
+        #
+        #         messages.success(
+        #             request,
+        #             "Reservation updated successfully.",
+        #             extra_tags="success",
+        #         )
+        #
+        #         return redirect(previous_url)
+        #     except Exception as e:
+        #         print(e)
 
 
 class CancelReservationView(TemplateView):

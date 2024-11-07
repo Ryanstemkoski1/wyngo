@@ -5,6 +5,7 @@ from celery.utils.log import get_task_logger
 
 from common.pos.clover import CloverInventory
 from common.pos.clover.clover_customer import CloverCustomer
+from common.pos.clover.clover_location import CloverLocation
 from common.pos.clover.clover_reservation import CloverReservation
 from common.pos.square import SquareInventory
 from common.pos.square.square_customer import SquareCustomer
@@ -267,6 +268,7 @@ def fetch_clover_categories(self, retailer_id: int = None):
 def init_retailer(self, retailer_id: int, origin: str):
     try:
         if origin == Retailer.CLOVER:
+            CloverLocation.fetch_locations(retailer_id=retailer_id)
             fetch_clover_categories.delay(retailer_id=retailer_id)
             load_clover_inventory.delay(retailer_id=retailer_id)
             fetch_clover_customer.delay(retailer_id=retailer_id)

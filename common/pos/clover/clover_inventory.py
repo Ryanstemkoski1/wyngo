@@ -189,7 +189,7 @@ class CloverInventory(Inventory):
                 variant = Variant.objects.filter(origin_id=item_id).first()
                 if variant is not None:
                     variant.categories.add(category)
-                variant.save()
+                    variant.save()
 
     def create_or_update_category(self, category_data: dict):
         """

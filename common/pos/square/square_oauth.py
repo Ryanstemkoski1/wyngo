@@ -60,6 +60,7 @@ class SquareOauth:
             return {
                 "status": -1,
                 "message": "Error processing the request: Invalid Square response",
+                "retailer_id": retailer.id,
             }
 
         client: Client = Client(environment=settings.SQUARE_ENVIRONMENT)
@@ -75,6 +76,7 @@ class SquareOauth:
             return {
                 "status": -3,
                 "message": "Error processing the request: Invalid Square Token response",
+                "retailer_id": retailer.id,
             }
 
         if not SquareOauth.run_health_check(
@@ -83,6 +85,7 @@ class SquareOauth:
             return {
                 "status": -2,
                 "message": "Error processing the request: Invalid Square status response",
+                "retailer_id": retailer.id,
             }
 
         retailer.access_token = oauth_response_body.body["access_token"]

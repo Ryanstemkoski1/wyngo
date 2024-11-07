@@ -147,8 +147,33 @@
                             </div>
                         </div>
                     </form>
+
+                    {% if not user.is_superuser %}
+                        <div class="form-control mt-5">
+                            <span class="font-medium text-neutral-800 text-xl mt-4 sm:text-2xl">
+                                Delete Your Account
+                            </span>
+                            <span class=" text-neutral-400 text-sm pt-2">
+                            Your account and all associated data will be permanently deleted. This action cannot be undone.
+                            </span>
+                        </div>
+                        <div class="form-control pt-2 space-y-8 actions">
+                            <div class="space-y-4 sm:flex sm:justify-start sm:space-y-0 sm:gap-4">
+                                <button type="button" class=" bg-white border border-red-500 text-red-500 text-sm font-semibold
+                                     capitalize rounded-md h-10 p-2 cancel-btn" onclick="location.href='{% url 'delete_retailer' %}'">
+                                    <div class="flex items-center gap-2">
+                                        <span>Delete account</span>
+                                        <span class="material-icons-outlined text-w-red-500 check-match">
+                                            delete
+                                        </span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
+
         </div>
     </div>
 </div>

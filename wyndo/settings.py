@@ -32,7 +32,6 @@ SECRET_KEY = getenv("SECRET_KEY")
 DEBUG = getenv("DEBUG")
 
 ALLOWED_HOSTS = getenv("DJANGO_ALLOWED_HOSTS").split(" ")
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -257,9 +256,9 @@ CLOVER_HEADERS = headers = {
     "accept": "application/json",
     "authorization": "Bearer {bearer_token}",
 }
-CLOVER_OAUTH_PATH = "/oauth/authorize"
+CLOVER_OAUTH_PATH = "/oauth/v2/authorize"
 CLOVER_MERCHANT_INFO_PATH = "/v3/merchants/{mId}"
-CLOVER_TOKEN_PATH = "/oauth/token"
+CLOVER_TOKEN_PATH = "/oauth/v2/token"
 CLOVER_LOCATION_PATH = "/v3/merchants/{mId}/address"
 
 # Square Settings

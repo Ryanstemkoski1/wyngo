@@ -50,7 +50,7 @@ class RetailerSignupForm(forms.ModelForm):
     merchant_id = forms.CharField(max_length=128, required=False)
     app_id = forms.CharField(max_length=128, required=False)
     origin = forms.CharField(max_length=128, required=True)
-    image = forms.ImageField(required=True)
+    image = forms.ImageField(required=False)
     category = forms.ModelMultipleChoiceField(
         queryset=Category.objects.all(), widget=forms.CheckboxSelectMultiple
     )

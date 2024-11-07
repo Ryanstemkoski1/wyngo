@@ -17,7 +17,7 @@
         <a href="{% url 'retailer-details' retailer_id=retailer.id %}">
             <div class="absolute -top-[120px] left-1/2 transform -translate-x-1/2 -mt-4 z-10" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
                 <div class=" rounded-full w-[140px]">
-                    {% if retailer.image.url %}
+                    {% if retailer.image and retailer.image.url %}
                     <img src="{{ retailer.image.url }}" alt="Shoes" class="w-36 h-36 object-cover rounded-full" />
                     {% else %}
                     <img src="{% static 'img/no-image.png' %}" alt="Shoes"

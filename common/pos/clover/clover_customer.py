@@ -1,6 +1,7 @@
 import logging
 
 from common.pos.clover.clover_client import CloverRequestClient
+from inventories.models import Customer
 from retailer.models import Retailer
 
 logger = logging.getLogger(__name__)
@@ -66,10 +67,10 @@ class CloverCustomer:
         customers = client.list_customers()
         for element in customers.get("elements", []):
             _id = element["id"]
-            customer = retailer.customers.filter(origin_id=_id).first()
+            customer = Customer.objects.filter(origin_id=_id).first()
 
             if not customer:
-                customer = retailer.customers.create(origin_id=_id)
+                customer = Customer.objects.create(origin_id=_id, retailer=retailer)
 
             customer.first_name = element["firstName"]
             customer.last_name = element["lastName"]

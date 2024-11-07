@@ -17,7 +17,6 @@ const email = document.querySelectorAll('[name="email"]');
 const name = document.querySelectorAll('[name="name"]');
 const terms_conditions = document.querySelectorAll('[name="terms_conditions"]');
 const description = document.querySelectorAll('[name="description"]');
-const image = document.querySelectorAll('[name="image"]');
 const category = document.querySelectorAll('[name="category"]');
 const formats = document.querySelectorAll('[name="formats"]');
 const button = document.querySelector("button");
@@ -29,7 +28,6 @@ let isValidName = false;
 let isValidTermsConditions = false;
 let isValidDescription = false;
 let isValidCategory = false;
-let isValidImage = false;
 let can_continue = document.querySelector('[name="continue"]').value;
 
 email.forEach((input) => {
@@ -49,7 +47,6 @@ const validate = () => {
         terms_conditions[0].checked &&
         isValidCategory &&
         isValidDescription &&
-        isValidImage &&
         can_continue !== "False") {
     button.disabled = false;
   } else {
@@ -128,16 +125,6 @@ password[0].addEventListener("keyup", function () {
     this.parentNode.nextElementSibling.classList.remove("hidden");
   }
 
-  if (confirm_password[0].value !== "" && !validator.equals(this.value, confirm_password[0].value)) {
-    isValidConfirmPassword = false;
-    confirm_password[0].classList.add("input__error");
-    confirm_password[0].parentNode.nextElementSibling.classList.remove("hidden");
-  } else if(validator.equals(this.value, confirm_password[0].value)) {
-    isValidConfirmPassword = true;
-    confirm_password[0].classList.remove("input__error");
-    confirm_password[0].parentNode.nextElementSibling.classList.add("hidden");
-  }
-
   validate();
 });
 
@@ -194,23 +181,23 @@ category[0].addEventListener("change", function () {
   validate();
 });
 
-image[0].addEventListener("change", function () {
-  let file = this.files[0];
-
-  if (file && /.(gif|jpeg|jpg|png)$/i.test(file.name)) {
-    isValidImage = true;
-    this.classList.remove("text-neutral-400");
-    this.parentNode.classList.remove("input__error");
-    formats[0].classList.add("hidden");
-  } else {
-    isValidImage = false;
-    formats[0].classList.remove("hidden");
-    this.classList.add("text-neutral-400");
-    this.parentNode.classList.add("input__error");
-  }
-
-  validate();
-});
+//image[0].addEventListener("change", function () {
+//  let file = this.files[0];
+//
+//  if (file && /.(gif|jpeg|jpg|png)$/i.test(file.name)) {
+//    isValidImage = true;
+//    this.classList.remove("text-neutral-400");
+//    this.parentNode.classList.remove("input__error");
+//    formats[0].classList.add("hidden");
+//  } else {
+//    isValidImage = false;
+//    formats[0].classList.remove("hidden");
+//    this.classList.add("text-neutral-400");
+//    this.parentNode.classList.add("input__error");
+//  }
+//
+//  validate();
+//});
 
 terms_conditions[0].addEventListener("change", function () {
   validate();

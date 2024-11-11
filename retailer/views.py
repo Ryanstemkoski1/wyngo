@@ -176,7 +176,7 @@ def connect_retailer(request):
 class RetailerSignupView(TemplateView):
     template_name = "register.html"
 
-    def get(self, request, origin, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
 
         merchant_id = request.GET.get("merchant_id", "")
@@ -184,6 +184,7 @@ class RetailerSignupView(TemplateView):
         code = request.GET.get("code", "")
         state = request.GET.get("state", "")
         can_continue = True
+        origin = request.POST.get("origin", "")
 
         if origin.upper() == Retailer.CLOVER:
             retailer = Retailer.objects.filter(
@@ -232,7 +233,7 @@ class RetailerSignupView(TemplateView):
             return redirect(redirect_url if redirect_url else "login")
         else:
             messages.error(request, "Retailer creation failed.", extra_tags="error")
-            return redirect("sign_up", origin=request.POST.get("origin"))
+            return redirect("sign_up")
 
 
 def delete_retailer(request):

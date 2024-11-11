@@ -19,7 +19,7 @@ const terms_conditions = document.querySelectorAll('[name="terms_conditions"]');
 const description = document.querySelectorAll('[name="description"]');
 const category = document.querySelectorAll('[name="category"]');
 const formats = document.querySelectorAll('[name="formats"]');
-const button = document.querySelector("button");
+const button = document.querySelector("#submit");
 const password = document.querySelectorAll('[name="password"]');
 
 let isValidEmail = false;

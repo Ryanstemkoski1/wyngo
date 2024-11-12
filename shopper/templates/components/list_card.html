@@ -20,7 +20,7 @@
         <a href="{% url 'retailer-details' item.id %}?origin=retailers" class="space-y-2 lg:space-y-2">
             <div class="absolute -top-[65px] transform -translate-x-1/2 -mt-4 sm:-top-[120px] left-1/2">
                 <div class="rounded-full w-24 sm:w-36" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
-                    {% if item.image.url %}
+                    {% if item.image %}
                     <img src="{{ item.image.url }}" alt="Logo"
                         class="w-24 h-24 sm:w-36 sm:h-36 rounded-full object-cover" />
                     {% elif item.image %}

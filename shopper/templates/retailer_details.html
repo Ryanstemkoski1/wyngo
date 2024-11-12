@@ -46,8 +46,13 @@
             <div class="relative">
                 <div class="absolute -top-[120px] left-1/2 transform -translate-x-1/2 -mt-4" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
                     <div class=" rounded-full w-[140px]">
-                        <img src="{{ retailer.image.url }}" alt="Shoes"
-                            class="rounded-full object-cover w-[140px] h-[140px]" />
+                        {% if retailer.image and retailer.image.url %}
+                        <img src="{{ retailer.image.url }}"
+                            class="rounded-full w-[140px] h-[140px] object-cover" />
+                        {% else %}
+                        <img src="{% static 'img/no-image.png' %}"
+                            class="rounded-full w-[140px] h-[140px] object-cover" />
+                        {% endif %}
                     </div>
                 </div>
                 <span class="absolute -top-[57px] right-0 mt-2 mr-2 rounded-full bg-w-light-smooth-gray p-1 cursor-pointer"
@@ -410,8 +415,13 @@
         <div class="flex items-center mt-6 gap-6">
             <div class="w-3/12">
                 <div class=" rounded-full w-[152px]" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
-                    <img src="{{ retailer.image.url }}" alt="Shoes"
-                        class="rounded-full w-[152px] h-[152px] object-cover" />
+                    {% if retailer.image and retailer.image.url %}
+                    <img src="{{ retailer.image.url }}"
+                        class="rounded-full w-[140px] h-[140px] object-cover" />
+                    {% else %}
+                    <img src="{% static 'img/no-image.png' %}"
+                        class="rounded-full w-[140px] h-[140px] object-cover" />
+                    {% endif %}
                 </div>
             </div>
             <div class="card bg-white border border-neutral-200 px-4 py-5 cursor-pointer hover:shadow-md w-full">
@@ -573,7 +583,7 @@
                     <div class="relative">
                         <div class="absolute -top-[120px] left-1/2 transform -translate-x-1/2 -mt-4" style="border: .5px solid rgb(128,128,128); border-radius: 75px;">
                             <div class=" rounded-full w-[140px]">
-                                {% if retailer.image %}
+                                {% if retailer.image and retailer.image.url %}
                                 <img src="{{ retailer.image.url }}"
                                     class="rounded-full w-[140px] h-[140px] object-cover" />
                                 {% else %}

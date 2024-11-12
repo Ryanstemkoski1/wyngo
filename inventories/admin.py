@@ -28,6 +28,14 @@ class VariantInline(admin.TabularInline):
     exclude = ("currency", "origin_id", "origin_parent_id")
     readonly_fields = (
         "display_images",
+        "name",
+        "price",
+        "sku",
+        "upc",
+        "stock",
+        "display_images",
+        "description",
+        "is_modified_by_admin",
     )
     fields = (
         "name",
@@ -49,8 +57,14 @@ class VariantInline(admin.TabularInline):
         return format_html(
             "<br>".join(
                 [
-                    f'<a href="{image.image.url}" target="_blank">View image #{i + 1}</a>'
-                    #<a href="#" class="delete-image"><span class="material-symbols-outlined delete-red" data-image-id="{image.id}">highlight_off</span></a>
+                    f'''
+                        <div style="display: flex; align-items: center; gap: 2px">
+                            <a href="{image.image.url}" target="_blank">View image #{i + 1}</a> \
+                            <a href="#" style="width: 15px; height: 15px" class="delete-image"><span class="material-symbols-outlined delete-red" 
+                                data-image-id="{image.id}">highlight_off</span>
+                            </a>
+                        </div>
+                    '''
                     for i, image in enumerate(images)
                 ]
             )

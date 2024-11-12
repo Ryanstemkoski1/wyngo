@@ -334,6 +334,7 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "model": "variant",
         "codes": [
             "view_variant",
+            "change_variant",
         ]
     },
     {
@@ -341,6 +342,9 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
         "model": "variantimage",
         "codes": [
             "view_variantimage",
+            "add_variantimage",
+            "change_variantimage",
+            "delete_variantimage",
         ]
     },
     {

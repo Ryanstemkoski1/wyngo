@@ -6,6 +6,7 @@ from django.db.models import Q, QuerySet
 from django.db.models import Value as V
 from django.db.models.functions import Concat
 from django.urls import path
+from django.utils import timezone
 from django.utils.html import format_html
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 from rangefilter.filters import DateRangeFilter
@@ -16,7 +17,7 @@ from common.retailer_utils import RetailerUtils
 from retailer.models import Retailer
 from .forms import CategoryForm, ProductForm, VariantForm
 from .models import Category, Product, Variant, Inventory, Customer, OrderItem, OrderPickup, \
-    Order
+    Order, Reservation
 
 
 class VariantInline(admin.TabularInline):
@@ -545,3 +546,70 @@ class CustomerAdmin(admin.ModelAdmin):
         if not request.user.is_superuser:
             qs = qs.filter(retailer=Retailer.objects.get(email=request.user.email))
         return qs
+
+
+@admin.register(Reservation)
+class ReservationAdmin(admin.ModelAdmin):
+    list_filter = (
+        ("created_at", DateRangeFilter),
+        ("updated_at", DateRangeFilter),
+        "status",
+    )
+    readonly_fields = (
+        "reservation_code",
+        "user",
+        "quantity",
+        "created_at",
+        "total",
+        "variant",
+        "updated_at",
+        "remaining_time",
+    )
+    list_display = (
+        "reservation_code",
+        "total",
+        "quantity",
+        "status",
+        "user",
+        "time_limit",
+        "created_at",
+    )
+    search_fields = (
+        "origin_id",
+        "origin",
+        "total",
+        "status",
+        "quantity",
+        "reservation_code",
+        "variant__name",
+        "user__email",
+    )
+
+    fields = (
+        "reservation_code",
+        "user",
+        "quantity",
+        "created_at",
+        "status",
+        "total",
+        "variant",
+        'time_limit',
+        "updated_at",
+        "remaining_time",
+    )
+
+    def remaining_time(self, obj):
+        time_delta = obj.time_limit - timezone.now()
+        return int(time_delta.total_seconds())
+
+    def get_queryset(self, request):
+        qs: QuerySet = super().get_queryset(request)
+        if not request.user.is_superuser:
+            qs = qs.filter(variant__product__inventory__in=RetailerUtils.get_retailer_inventories(request.user.email))
+        return qs
+
+    class Media:
+        js = (
+            "js/admin/jquery-3.3.1.min.js",
+            "js/admin/reservation.js",
+        )

@@ -356,6 +356,14 @@ DEFAULT_RETAILER_PERMISSION_GROUP_DATA = [
     },
     {
         "app_label": "inventories",
+        "model": "reservation",
+        "codes": [
+            "view_reservation",
+            "delete_reservation",
+        ]
+    },
+    {
+        "app_label": "inventories",
         "model": "customer",
         "codes": [
             "view_customer",

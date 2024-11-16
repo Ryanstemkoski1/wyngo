@@ -48,4 +48,9 @@ app.conf.beat_schedule = {
         "task": "retailer.task.refresh_token_task",
         "schedule": crontab(minute="0", hour="0"),
     },
+
+    "delete_abaandoned_reservations": {
+        "task": "inventories.tasks.delete_abandoned_reservations",
+        "schedule": crontab(minute="*/1"),
+    },
 }

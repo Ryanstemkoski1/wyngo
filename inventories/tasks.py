@@ -2,6 +2,8 @@ import traceback
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from django.db.models import Q
+from django.utils import timezone
 
 from common.pos.clover import CloverInventory
 from common.pos.clover.clover_customer import CloverCustomer
@@ -284,3 +286,12 @@ def init_retailer(self, retailer_id: int, origin: str):
         print(traceback.format_exc())
         raise self.retry(exc=exc)
 
+
+@app.task(bind=True, max_retries=1, default_retry_delay=300)
+def delete_abandoned_reservations(self):
+    logger.info(f"[Celery] Deleting abandoned reservations")
+    Reservation.objects.filter(
+        Q(time_limit__lt=timezone.now()) | Q(time_limit__isnull=True),
+    ).delete()
+
+    logger.info(f"[Celery] Ended deleting abandoned reservations")

@@ -206,7 +206,8 @@ class Location(BaseTimeModel):
         self.name = name
 
     def __str__(self):
-        return f"{self.id} {self.address1}"
+        values = [self.address1, self.city, self.state, self.country]
+        return ", ".join([i for i in values if i])
 
 
 class Category(BaseTimeModel):

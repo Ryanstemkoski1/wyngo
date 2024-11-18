@@ -55,3 +55,7 @@ class LoginForm(forms.Form):
     email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput, required=True)
     remember_me = forms.BooleanField(required=False)
+
+    def clean_email(self):
+        data = self.cleaned_data['email']
+        return data.lower()

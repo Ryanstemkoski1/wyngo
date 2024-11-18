@@ -191,6 +191,10 @@ class Reservation(BaseTimeModel):
     def __str__(self):
         return f"Reservation {self.reservation_code}"
 
+    class Meta:
+        ordering = ["-created_at"]
+
+
 class Customer(BaseTimeModel):
     last_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
@@ -318,6 +322,7 @@ class Order(BaseTimeModel):
     class Meta:
         verbose_name = "Order"
         verbose_name_plural = "Orders"
+        ordering = ["-order_time"]
 
     def __str__(self):
         return f"{self.order_code}"

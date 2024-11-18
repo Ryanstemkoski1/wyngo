@@ -66,6 +66,10 @@ class RetailerSignupForm(forms.ModelForm):
                 raise forms.ValidationError("Invalid file. Error: {}".format(e))
         return image
 
+    def clean_email(self):
+        data = self.cleaned_data['email']
+        return data.lower()
+
     @transaction.atomic
     def save(self, commit=True):
         data = self.cleaned_data

@@ -35,7 +35,7 @@ class Retailer(BaseTimeModel):
 
     description = models.TextField(max_length=280)
 
-    image = models.ImageField(upload_to="retail")
+    image = models.ImageField(upload_to="retail", null=True, blank=True)
 
     origin = models.CharField(max_length=7, choices=ORIGIN_CHOICES, db_index=True)
 

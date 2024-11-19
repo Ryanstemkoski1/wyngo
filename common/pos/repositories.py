@@ -56,7 +56,7 @@ class ProductRepository:
         for product in queryset:
             total_stock = product.variants.aggregate(Sum("stock")).get("stock__sum")
 
-            if not total_stock:
+            if not total_stock or total_stock < 0:
                 total_stock = 0
 
             self.model.objects.filter(id=product.id).update(total_stock=total_stock)

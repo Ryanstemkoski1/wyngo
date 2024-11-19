@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "django_celery_results",
     "django_admin_inline_paginator",
+    "django_extensions",
     "rangefilter",
     "admin_auto_filters",
     "django_db_logger",

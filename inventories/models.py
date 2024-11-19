@@ -109,9 +109,9 @@ class Product(BaseTimeModel):
 class Variant(BaseTimeModel):
     name = models.CharField(max_length=255)
 
-    sku = models.CharField(max_length=20, null=True, blank=True)
+    sku = models.CharField(max_length=255, null=True, blank=True)
 
-    upc = models.CharField(max_length=20, null=True, blank=True)
+    upc = models.CharField(max_length=255, null=True, blank=True)
 
     description = models.TextField(null=True, blank=True, default="")
 

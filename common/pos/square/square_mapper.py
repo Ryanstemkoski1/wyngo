@@ -9,6 +9,10 @@ class Item:
         self.is_deleted = data.get("is_deleted", False)
         self.variants = [ItemVariation(var) for var in variations]
         self.category_id = item_data.get("category_id")
+        self.image_ids = item_data.get("image_ids", [])
+
+        if len(self.variants) > 0:
+            self.variants[0].image_ids += self.image_ids
 
     def __str__(self):
         return f"""
@@ -41,7 +45,7 @@ class ItemVariation:
         self.locations = data.get("locations")
         self.is_deleted = data.get("is_deleted", False)
         self.location_overrides = variation_data.location_overrides
-        self.images = []
+        self.image_ids = variation_data.image_ids
 
     def __str__(self):
         return f"""
@@ -57,7 +61,7 @@ class ItemVariation:
             - locations: {self.locations}
             - is_deleted: {self.is_deleted}
             - location_overrides: {self.location_overrides}
-            - images: {self.images}
+            - images: {self.image_ids}
         """
 
     def __repr__(self):
@@ -74,6 +78,7 @@ class ItemVariationData:
         self.price = self.get_price(data)
         self.currency = self.get_currency(data)
         self.location_overrides = data.get("location_overrides", [])
+        self.image_ids = data.get("image_ids", [])
 
     def __str__(self):
         return f"""

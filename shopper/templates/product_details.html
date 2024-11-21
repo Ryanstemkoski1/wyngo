@@ -130,7 +130,7 @@
                 class="border border-w-light-gray bg-white p-4 lg:p-6 text-neutral-800 rounded-xl my-6 {% if product.variants.first.description|length == 0 %} hidden sm:block {% endif %}">
                 <div
                     class="flex items-center justify-between {% if product.variants.first.description|length > 0 %} border-b border-w-light-gray pb-4 {% endif %}">
-                    <span class="text-2xl font-medium" id="product_name_2">
+                    <span class="text-2xl font-medium capitalize" id="product_name_2">
                         {% if product_variants|length > 1 %}
                         {{ product_variants.first.name }}
                         {% else %}
@@ -155,7 +155,7 @@
             <div class="border border-w-light-gray bg-white px-4 py-3 sm:p-6 text-neutral-800 rounded-xl">
                 <div class="border-b border-w-light-gray pb-4">
                     <div class="flex items-center justify-between">
-                        <span class="text-2xl font-medium" id="product_name">
+                        <span class="text-2xl font-medium capitalize" id="product_name">
                             {% if product_variants|length > 1 %}
                             {{ product_variants.first.name }}
                             {% else %}

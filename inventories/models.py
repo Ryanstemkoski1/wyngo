@@ -1,6 +1,10 @@
 import csv
+import os
 from io import StringIO
 
+import requests
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 from django.db import models
 from django.http import HttpResponse
 
@@ -158,12 +162,28 @@ class Variant(BaseTimeModel):
 class VariantImage(BaseTimeModel):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
-    image = models.ImageField(upload_to="inventories", null=True, blank=True)
+    image = models.ImageField(upload_to="inventories", null=True, blank=True, max_length=511)
 
-    image_id = models.CharField(max_length=100, null=True, blank=True, default=None)
+    image_id = models.CharField(null=True, blank=True, default=None)
 
     def __str__(self):
         return f"{self.image}"
+
+    def get_image_from_url(self, url):
+        r = requests.get(url)
+        if r.status_code == 200:
+            img_temp = NamedTemporaryFile(delete=True)
+            img_temp.write(r.content)
+            img_temp.flush()
+
+            try:
+                file_name = f"{self.image_id}-{os.path.basename(url)}"
+                self.image.save(file_name, File(img_temp), save=True)
+            except:
+                print("Failed downloading image from " + url)
+                return False
+            else:
+                return True
 
 
 class Reservation(BaseTimeModel):

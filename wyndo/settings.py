@@ -398,3 +398,8 @@ if len(RETAILER_PERMISSION_GROUP_DATA) == 0:
 
 
 LOGIN_URL = "/login/"
+
+SHELL_PLUS_IMPORTS = [
+    'from inventories.tasks import *',
+    'from retailer.tasks import *',
+]

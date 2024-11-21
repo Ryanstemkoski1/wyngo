@@ -95,6 +95,7 @@ def load_square_inventory(self, retailer_id: int = None, cursor: str = None):
                 load_result = square_inventory.run()
                 retailer.update_sync(False)
                 if load_result["result"] and load_result["fetch_next"]:
+                    print(f"============Load next: =============== {load_result['cursor']}")
                     load_square_inventory.delay(
                         retailer_id=load_result["retailer_id"],
                         cursor=load_result["cursor"],
@@ -277,10 +278,10 @@ def init_retailer(self, retailer_id: int, origin: str):
             fetch_clover_orders.delay(retailer_id=retailer_id)
         else:
             SquareLocation.fetch_locations(retailer_id=retailer_id)
-            fetch_square_categories(retailer_id=retailer_id)
-            load_square_inventory(retailer_id=retailer_id)
-            fetch_square_customer(retailer_id=retailer_id)
-            fetch_square_orders(retailer_id=retailer_id)
+            fetch_square_categories.delay(retailer_id=retailer_id)
+            load_square_inventory.delay(retailer_id=retailer_id)
+            fetch_square_customer.delay(retailer_id=retailer_id)
+            fetch_square_orders.delay(retailer_id=retailer_id)
     except Exception as exc:
         logger.error(f"Error initializing retailer: {str(exc)}")
         print(traceback.format_exc())

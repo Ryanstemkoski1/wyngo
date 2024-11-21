@@ -11,7 +11,7 @@ class SquareRequestClient:
 
     def get_catalog(self):
         catalog = self.client.catalog.list_catalog(
-            types="IMAGE,ITEM,CATEGORY", cursor=self.cursor
+            types="ITEM", cursor=self.cursor
         )
 
         if catalog.is_error():
@@ -24,6 +24,21 @@ class SquareRequestClient:
 
     def get_catalogs_by_type(self, types: str):
         catalog = self.client.catalog.list_catalog(types=types, cursor=self.cursor)
+
+        if catalog.is_error():
+            error = search(catalog.errors, "detail")
+            raise Exception("[REQUEST CLIENT] " + error)
+
+        if catalog.is_success():
+            return catalog.body
+
+    def batch_retrieve_catalog_objects(self, object_ids):
+        catalog = self.client.catalog.batch_retrieve_catalog_objects(
+            body={
+                "object_ids": object_ids,
+                "include_related_objects": False
+            }
+        )
 
         if catalog.is_error():
             error = search(catalog.errors, "detail")

@@ -135,9 +135,10 @@ class SquareReservation(Reservation):
             quantity = line_item.get("quantity")
             variant = Variant.objects.filter(origin_id=item_id).first()
             if not variant:
-                square_inventory = SquareInventory(self._retailer)
-                square_inventory.run()
-                variant = Variant.objects.filter(origin_id=item_id).first()
+                pass
+                # square_inventory = SquareInventory(self._retailer)
+                # square_inventory.run()
+                # variant = Variant.objects.filter(origin_id=item_id).first()
             if variant:
                 item, _created = OrderItem.objects.get_or_create(
                     order=new_order, variant=variant, quantity=quantity

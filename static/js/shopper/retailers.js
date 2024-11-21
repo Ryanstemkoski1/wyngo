@@ -35,6 +35,7 @@ function infiniteScroll() {
   if (mobileContainer || tabletContainer) {
     var mobileComputedStyle = window.getComputedStyle(mobileContainer);
     var tabletComputedStyle = window.getComputedStyle(tabletContainer);
+    var loading = document.querySelector('.loading-indicator');
 
     var infiniteList = new Waypoint.Infinite({
       element:
@@ -56,17 +57,31 @@ function infiniteScroll() {
           ? ".infinite-more-link-tablet"
           : ".infinite-more-link-desktop",
       onlyOnScroll: true,
+      loadingClass: 'infinite-loading',
+      onBeforePageLoad: function () {
+        loading.classList.remove('hidden');
+      },
+      onAfterPageLoad: function () {
+        loading.classList.add('hidden');
+      }
     });
   } else {
     var infinite = new Waypoint.Infinite({
       element: $(".infinite-container")[0],
       offset: "bottom-in-view",
+      loadingClass: 'infinite-loading',
+      onBeforePageLoad: function () {
+        loading.classList.remove('hidden');
+      },
+      onAfterPageLoad: function () {
+        loading.classList.add('hidden');
+      }
     });
   }
 }
 
 window.addEventListener("load", infiniteScroll);
-window.addEventListener("resize", infiniteScroll);
+//window.addEventListener("resize", infiniteScroll);
 
 let valueCount;
 

@@ -398,3 +398,12 @@ select[disabled] {
 .bg-w-light-smooth-gray{
   background-color: #f5f5f5
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

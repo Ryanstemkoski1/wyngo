@@ -35,75 +35,6 @@ fake = Faker()
 class HomePageView(TemplateView):
     def get(self, request, **kwargs):
         template_name = "index.html"
-
-        near_you = []
-        just_added = []
-        upcoming_reservations = []
-        product_id = 0
-
-        lowest_variant_price_upc_subquery = (
-            Variant.objects.filter(upc=OuterRef("variants__upc"), price__gt=0.00)
-            .values("upc")
-            .annotate(lowest_variant_price=Min("price"))
-            .values("lowest_variant_price")[:1]
-        )
-        lowest_variant_price_sku_subquery = (
-            Variant.objects.filter(sku=OuterRef("variants__sku"), price__gt=0.00)
-            .values("sku")
-            .annotate(lowest_variant_price=Min("price"))
-            .values("lowest_variant_price")[:1]
-        )
-
-        products_with_ordered_variants_upc = (
-            Product.objects.annotate(
-                variant_count=Count("variants"),
-                lowest_variant_price_upc=Subquery(
-                    lowest_variant_price_upc_subquery, output_field=DecimalField()
-                ),
-            )
-            .filter(
-                Q(variants__price=F("lowest_variant_price_upc"))
-                | Q(variants__upc="") & Q(variants__price__gt=0.00),
-                variant_count=1,
-            )
-            .order_by("lowest_variant_price_upc")
-        )
-        products_with_ordered_variants_sku = (
-            Product.objects.annotate(
-                variant_count=Count("variants"),
-                lowest_variant_price_sku=Subquery(
-                    lowest_variant_price_sku_subquery, output_field=DecimalField()
-                ),
-            )
-            .filter(
-                Q(variants__price=F("lowest_variant_price_sku"))
-                | Q(variants__sku="") & Q(variants__price__gt=0.00),
-                variant_count=1,
-            )
-            .order_by("lowest_variant_price_sku")
-        )
-
-        products_with_empty_upc_variants = Product.objects.filter(
-            Q(variants__price__gt=0.00) & (Q(variants__upc="")
-            | Q(
-                variants__upc__isnull=True,
-            ))
-        ).annotate(variant_count=Count("variants"))
-
-        products_with_empty_sku_variants = Product.objects.filter(
-            Q(variants__price__gt=0.00) & (Q(variants__sku="")
-            | Q(
-                variants__sku__isnull=True,
-            ))
-        ).annotate(variant_count=Count("variants"))
-
-        products = (
-            products_with_ordered_variants_upc
-            | products_with_ordered_variants_sku
-            | products_with_empty_upc_variants
-            | products_with_empty_sku_variants
-        )
-
         if request.user.is_authenticated:
             upcoming_reservations = Reservation.objects.filter(
                 user=request.user,
@@ -113,53 +44,24 @@ class HomePageView(TemplateView):
         else:
             upcoming_reservations = []
 
-        upc_set = set()
-        for product in products.order_by("variants__price"):
-            if product_id != product.id and product.is_active:
-                can_continue = True
-                for variant in product.variants.all():
-                    if variant.upc in upc_set or variant.sku in upc_set:
-                        can_continue = False
-                        break
-                    else:
-                        can_continue = True
-            
-                    if variant.upc:
-                        upc_set.add(variant.upc)
-                    if variant.sku:
-                        upc_set.add(variant.sku)
-                if can_continue:
-                    near_you.append(product)
-                    just_added.append(product)
-                    product_id = product.id
+        retailers = Retailer.objects.filter(
+            status=Retailer.STATUS_APPROVED,
+        )
 
-        for res in upcoming_reservations:
-            for product in near_you:
-                if res.variant.product.id == product.id:
-                    near_you.remove(product)
+        just_added = Product.objects.filter(
+            is_active=True,
+        ).order_by("-created_at")[:16]
 
-            for product in just_added:
-                if res.variant.product.id == product.id:
-                    just_added.remove(product)
-
-        retailers_query = Retailer.objects.filter(status=Retailer.STATUS_APPROVED)
-        retailers = []
-
-        for retailer in retailers_query:
-            variants = Variant.objects.filter(
-                product__inventory__location__retailer=retailer,
-                price__gt=0.00,
-            ).count()
-
-            if variants > 0:
-                retailers.append(retailer)
-
-        near_you = random.sample(near_you, len(near_you))[:16]
-        just_added = random.sample(just_added, len(just_added))[:16]
+        # TODO: check user address for near you
+        near_you = Product.objects.filter(
+            is_active=True,
+        ).exclude(
+            id__in=[p.id for p in just_added] + [p.id for p in upcoming_reservations],
+        ).order_by("-total_stock")[:16]
 
         user_product_wishlist = {}
         if request.user.is_authenticated:
-            wishlist = ProductWishlist.objects.filter(user=request.user, product__in=products).all()
+            wishlist = ProductWishlist.objects.filter(user=request.user).all()
             for wish in wishlist:
                 user_product_wishlist[wish.product.id] = True
 
@@ -269,8 +171,6 @@ class RetailerDetailsView(ListView):
             ).order_by("name")
         )
 
-        upcoming_reservations = []
-
         if self.request.user.is_authenticated:
             upcoming_reservations = Reservation.objects.filter(
                 user=self.request.user,
@@ -284,7 +184,7 @@ class RetailerDetailsView(ListView):
                         if res.variant.product.id == product.id:
                             products.remove(product)
 
-        paginator = Paginator(products, 80)
+        paginator = Paginator(products, 9)
 
         page_number = self.request.GET.get("page")
 

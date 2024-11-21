@@ -7,28 +7,28 @@
         {% if reserved %}
         <a href="{% url 'reservation-details' reservation_id=reserved.id %}" class="flex justify-center w-full">
             {% if reserved.variant.variantimage_set.first.image %}
-            <img src=" {{ reserved.variant.variantimage_set.first.image.url }}" class="w-auto h-full" />
+            <img src=" {{ reserved.variant.variantimage_set.first.image.url }}" class="w-full h-full" />
             {% elif reserved.variant.image %}
-            <img src="{{ reserved.variant.image.url }}" class="w-auto h-full" />
+            <img src="{{ reserved.variant.image.url }}" class="w-full h-full" />
             {% else %}
-            <img src="{% static 'img/no-image.png' %}" class="w-auto h-full" />
+            <img src="{% static 'img/no-image.png' %}" class="w-full h-full" />
             {% endif %}
         </a>
         {% else %}
         {% if 'shopping' in request.path %}
         <div class="w-full flex justify-center">
             {% if product.image %}
-            <img src="{% static 'img/shopping_center/'|add:product.image.url %}" class="w-auto h-full" />
+            <img src="{% static 'img/shopping_center/'|add:product.image.url %}" class="w-full h-full" />
             {% else %}
-            <img src="{% static 'img/no-image.png' %}" class="w-auto h-full" />
+            <img src="{% static 'img/no-image.png' %}" class="w-full h-full" />
             {% endif %}
         </div>
         {%else%}
         <a href="{% url 'products' product_id=product.id %}" class="w-full flex justify-center">
             {% if product.variants.first.variantimage_set.first.image %}
-            <img src="{{ product.variants.first.variantimage_set.first.image.url }}" class="w-auto h-full" />
+            <img src="{{ product.variants.first.variantimage_set.first.image.url }}" class="w-full h-full" />
             {% else %}
-            <img src="{% static 'img/no-image.png' %}" class="w-auto h-full" />
+            <img src="{% static 'img/no-image.png' %}" class="w-full h-full" />
             {% endif %}
         </a>
         {% endif %}

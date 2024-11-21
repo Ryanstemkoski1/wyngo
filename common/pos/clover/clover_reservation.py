@@ -68,7 +68,7 @@ class CloverReservation(Reservation):
             variant = Variant.objects.filter(origin_id=item_id).first()
             if not variant:
                 clover_inventory = CloverInventory(self._retailer, limit=100, offset=0)
-                clover_inventory.run()
+                clover_inventory.run(item_id=item_id)
                 variant = Variant.objects.filter(origin_id=item_id).first()
             if variant:
                 item, created = OrderItem.objects.get_or_create(

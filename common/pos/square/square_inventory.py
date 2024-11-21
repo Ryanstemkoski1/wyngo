@@ -14,7 +14,7 @@ from common.pos.repositories import (
 )
 from common.pos.square.square_client import SquareRequestClient
 from common.pos.utils import format_price
-from inventories.models import Product, Variant, Category
+from inventories.models import Product, Variant, Category, VariantImage
 from retailer.models import Retailer as RetailerModel
 from .square_mapper import Item, ItemVariation, SquareInventoryMapper
 from ...goupc import GoUPC
@@ -70,6 +70,30 @@ class SquareInventory:
             product=product,
         )
         return self.variant_repository.update_or_create(variant_obj)
+
+    def create_or_update_variant_images(self, variant_item: ItemVariation):
+        image_ids = variant_item.image_ids
+        variant = Variant.objects.filter(origin_id=variant_item.origin_id).first()
+        unsaved_images = []
+        for image_id in image_ids:
+            image = VariantImage.objects.filter(image_id=image_id).first()
+            if image:
+                image.variant = variant
+                image.save()
+            else:
+                unsaved_images.append(image_id)
+
+        if len(unsaved_images) == 0:
+            return
+        catalog_response = self._request_client.batch_retrieve_catalog_objects(unsaved_images)
+        for obj in catalog_response.get("objects", []):
+            new_image = VariantImage(
+                variant=variant,
+                image_id=obj.get("id"),
+            )
+            # new_image.save()
+            new_image.get_image_from_url(obj.get("image_data", {}).get("url"))
+            new_image.save()
 
     def update_variant_stock(
         self, retailer_id: str = "", origin_id: str = "", location_id: str = ""
@@ -137,39 +161,41 @@ class SquareInventory:
 
     def store(self, products: list[Item]):
         self.create_inventories()
-        with transaction.atomic():
-            for product in products:
-                for location_id in product.locations:
-                    self.create_or_update_product(product, location_id)
+        for product in products:
+            logging.info(f"Processing for product: {product.name},"
+                         f" id: {product.origin_id}, "
+                         f"variants: {len(product.variants)}")
+            for location_id in product.locations:
+                self.create_or_update_product(product, location_id)
 
-                for variant in product.variants:
-                    for location_id in variant.locations:
-                        logging.info(f"variant: {variant.name}")
-                        logging.info(f"variant_location: {location_id}")
-                        product_exists = self.product_repository.check_product_exists(
-                            variant.origin_parent_id, location_id
-                        )
-
-                        for location in variant.location_overrides:
-                            if location.get(
-                                "location_id"
-                            ) == location_id and location.get("price_money"):
-                                variant.price = format_price(
-                                    location.get("price_money").get("amount")
-                                )
-
-                        self.create_or_update_variant(variant, product_exists)
-
-                    self._process_variant_category(variant, product)
-
-                if len(product.variants) > 1:
-                    self.product_repository.update_min_max_price(
-                        self._retailer.id, product.origin_id
+            for variant in product.variants:
+                for location_id in variant.locations:
+                    product_exists = self.product_repository.check_product_exists(
+                        variant.origin_parent_id, location_id
                     )
 
-            self.update_variant_stock(retailer_id=self._retailer.id)
+                    for location in variant.location_overrides:
+                        if location.get(
+                            "location_id"
+                        ) == location_id and location.get("price_money"):
+                            variant.price = format_price(
+                                location.get("price_money").get("amount")
+                            )
 
-            self.product_repository.update_total_stock(self._retailer.id)
+                    self.create_or_update_variant(variant, product_exists)
+                    self.create_or_update_variant_images(variant)
+
+                self._process_variant_category(variant, product)
+
+            if len(product.variants) > 1:
+                self.product_repository.update_min_max_price(
+                    self._retailer.id, product.origin_id
+                )
+
+        self.update_variant_stock(retailer_id=self._retailer.id)
+
+        self.product_repository.update_total_stock(self._retailer.id)
+        logging.info("Products stored successfully")
 
     def store_update(self, products: list[Item]):
         self.create_inventories()
@@ -255,7 +281,6 @@ class SquareInventory:
             if not data:
                 return {"result": True, "fetch_next": False}
 
-            print(json.dumps(data, indent=4))
             self.process(data)
 
             if cursor is not None:

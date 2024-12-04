@@ -387,7 +387,7 @@ class OrderAdmin(admin.ModelAdmin):
         "status",
         "quantity",
         "order_code",
-        "variant__name",
+        "order_items__variant__name",
         "user__email",
     )
 

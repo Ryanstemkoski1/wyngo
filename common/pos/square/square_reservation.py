@@ -131,6 +131,8 @@ class SquareReservation(Reservation):
         total_quantity = 0
         new_order.order_items.all().delete()
         for line_item in order.get("line_items", []):
+            if line_item.get("item_type") != "ITEM":
+                continue
             item_id = line_item.get("catalog_object_id")
             quantity = line_item.get("quantity")
             variant = Variant.objects.filter(origin_id=item_id).first()

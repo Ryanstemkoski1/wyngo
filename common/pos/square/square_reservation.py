@@ -131,25 +131,26 @@ class SquareReservation(Reservation):
         total_quantity = 0
         new_order.order_items.all().delete()
         for line_item in order.get("line_items", []):
-            if line_item.get("item_type") != "ITEM":
-                continue
             item_id = line_item.get("catalog_object_id")
             quantity = line_item.get("quantity")
             variant = Variant.objects.filter(origin_id=item_id).first()
-            if not variant:
-                pass
-                # square_inventory = SquareInventory(self._retailer)
-                # square_inventory.run()
-                # variant = Variant.objects.filter(origin_id=item_id).first()
-            if variant:
+            item_type = line_item.get('item_type')
+            if item_type == "CUSTOM_AMOUNT":
+                item, _created = OrderItem.objects.get_or_create(
+                    order=new_order, item_type=OrderItem.TYPE_CUSTOM_AMOUNT
+                )
+                item.quantity = quantity
+            elif variant and item_type == "ITEM":
                 item, _created = OrderItem.objects.get_or_create(
                     order=new_order, variant=variant, quantity=quantity
                 )
-                item.unit_price = format_price(line_item.get("base_price_money", {}).get("amount"))
-                item.variation_total = format_price(line_item.get("variation_total_price_money", {}).get("amount"))
-                item.tax = format_price(line_item.get("total_tax_money", {}).get("amount"))
-                item.total_price = format_price(line_item.get("total_money", {}).get("amount"))
-                item.save()
+            else:
+                continue
+            item.unit_price = format_price(line_item.get("base_price_money", {}).get("amount"))
+            item.variation_total = format_price(line_item.get("variation_total_price_money", {}).get("amount"))
+            item.tax = format_price(line_item.get("total_tax_money", {}).get("amount"))
+            item.total_price = format_price(line_item.get("total_money", {}).get("amount"))
+            item.save()
             total_quantity += int(quantity)
 
         new_order.quantity = total_quantity

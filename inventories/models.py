@@ -312,7 +312,7 @@ class Order(BaseTimeModel):
             description = ""
 
             for line_item in line_items:
-                description += f"{line_item.quantity} x {line_item.variant.full_name} = {line_item.variation_total} ({reservation.currency}) \n"
+                description += f"{line_item.quantity} x {line_item.name} = {line_item.variation_total} ({reservation.currency}) \n"
             description = description.strip()
 
             row = [
@@ -349,13 +349,18 @@ class Order(BaseTimeModel):
 
 
 class OrderItem(BaseTimeModel):
+    TYPE_ITEM = 1
+    TYPE_CUSTOM_AMOUNT = 2
+    ITEM_TYPES = ((TYPE_ITEM, "Item"), (TYPE_CUSTOM_AMOUNT, "Custom Amount"))
+
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="order_items")
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="order_items", null=True)
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     variation_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     tax = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     total_price = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    item_type = models.PositiveSmallIntegerField(max_length=20, choices=ITEM_TYPES, default=TYPE_ITEM)
 
     class Meta:
         verbose_name = "Reservation Item"
@@ -364,6 +369,14 @@ class OrderItem(BaseTimeModel):
     @property
     def order_time(self):
         return self.order.order_time
+
+    @property
+    def name(self):
+        if self.item_type == self.TYPE_CUSTOM_AMOUNT:
+            return "Custom Amount"
+        if self.item_type == self.TYPE_ITEM:
+            return str(self.variant.full_name) if self.variant else "Unknown"
+        return None
 
     def __str__(self):
         return f"{self.order} - {self.variant}"

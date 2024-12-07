@@ -317,9 +317,10 @@ class OrderItemInline(admin.TabularInline):
     verbose_name_plural = "Order Items"
     readonly_fields = (
         "order_time",
+        "name",
     )
     fields = (
-        "variant",
+        "name",
         "quantity",
         "unit_price",
         "variation_total",
@@ -327,7 +328,6 @@ class OrderItemInline(admin.TabularInline):
         "total_price",
         "order_time",
     )
-
 
     def has_add_permission(self, request, obj=None):
         return False

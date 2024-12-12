@@ -284,13 +284,14 @@ class Order(BaseTimeModel):
     order_time = models.DateTimeField(null=True, blank=True)
 
     @staticmethod
-    def generate_report_csv(reservations, created_at_range_gte, created_at_range_lte):
+    def generate_report_csv(orders, created_at_range_gte, created_at_range_lte):
         output = StringIO()
         writer = csv.writer(output)
 
         headers = [
             "Order ID",
             "Origin",
+            "Retailer",
             "Total",
             "Status",
             "Quantity",
@@ -304,38 +305,39 @@ class Order(BaseTimeModel):
         ]
         writer.writerow(headers)
 
-        for reservation in reservations:
-            customer = reservation.customer
-            customer_name = reservation.customer.first_name + " " + reservation.customer.last_name \
-                if reservation.customer else ""
-            line_items = reservation.order_items.all()
+        for order in orders:
+            customer = order.customer
+            customer_name = order.customer.first_name + " " + order.customer.last_name \
+                if order.customer else ""
+            line_items = order.order_items.all()
             description = ""
 
             for line_item in line_items:
-                description += f"{line_item.quantity} x {line_item.name} = {line_item.variation_total} ({reservation.currency}) \n"
+                description += f"{line_item.quantity} x {line_item.name} = {line_item.variation_total} ({order.currency}) \n"
             description = description.strip()
 
             row = [
-                reservation.order_code,
-                reservation.origin,
-                f"$ {reservation.total}",
-                reservation.status,
-                reservation.quantity,
+                order.order_code,
+                order.origin,
+                order.retailer.name if order.retailer else "",
+                f"$ {order.total}",
+                order.status,
+                order.quantity,
                 description,
                 customer_name,
                 customer.email if customer else "",
                 customer.phone if customer else "",
                 customer.full_address() if customer else "",
-                reservation.order_time.strftime("%d-%m-%y %H:%M:%S")
-                        if reservation.order_time else reservation.created_at.strftime("%d-%m-%y %H:%M:%S"),
-                reservation.updated_at.strftime("%d-%m-%y %H:%M:%S"),
+                order.order_time.strftime("%d-%m-%y %H:%M:%S")
+                        if order.order_time else order.created_at.strftime("%d-%m-%y %H:%M:%S"),
+                order.updated_at.strftime("%d-%m-%y %H:%M:%S"),
             ]
             writer.writerow(row)
 
         response = HttpResponse(content=output.getvalue(), content_type="text/csv")
         response[
             "Content-Disposition"
-        ] = 'attachment; filename="reservation_reports.csv"'
+        ] = 'attachment; filename="order_reports.csv"'
 
         return response
 

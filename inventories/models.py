@@ -296,6 +296,9 @@ class Order(BaseTimeModel):
             "Status",
             "Quantity",
             "Items",
+            "Variant",
+            "Price",
+            "Price Per Unit",
             "Customer Name",
             "Customer Email",
             "Customer Phone",
@@ -310,29 +313,34 @@ class Order(BaseTimeModel):
             customer_name = order.customer.first_name + " " + order.customer.last_name \
                 if order.customer else ""
             line_items = order.order_items.all()
-            description = ""
-
-            for line_item in line_items:
-                description += f"{line_item.quantity} x {line_item.name} = {line_item.variation_total} ({order.currency}) \n"
-            description = description.strip()
-
-            row = [
-                order.order_code,
-                order.origin,
-                order.retailer.name if order.retailer else "",
-                f"$ {order.total}",
-                order.status,
-                order.quantity,
-                description,
-                customer_name,
-                customer.email if customer else "",
-                customer.phone if customer else "",
-                customer.full_address() if customer else "",
-                order.order_time.strftime("%d-%m-%y %H:%M:%S")
-                        if order.order_time else order.created_at.strftime("%d-%m-%y %H:%M:%S"),
-                order.updated_at.strftime("%d-%m-%y %H:%M:%S"),
-            ]
-            writer.writerow(row)
+            for item in line_items:
+                if item.item_type == item.TYPE_ITEM:
+                    variant = item.variant
+                    item_name = variant.product.name
+                    variant_name = variant.name
+                else:
+                    item_name = item.name
+                    variant_name = ""
+                row = [
+                    order.order_code,
+                    order.origin,
+                    order.retailer.name if order.retailer else "",
+                    f"$ {order.total}",
+                    order.status,
+                    item.quantity,
+                    item_name,
+                    variant_name,
+                    item.variation_total,
+                    item.unit_price,
+                    customer_name,
+                    customer.email if customer else "",
+                    customer.phone if customer else "",
+                    customer.full_address() if customer else "",
+                    order.order_time.strftime("%d-%m-%y %H:%M:%S")
+                            if order.order_time else order.created_at.strftime("%d-%m-%y %H:%M:%S"),
+                    order.updated_at.strftime("%d-%m-%y %H:%M:%S"),
+                ]
+                writer.writerow(row)
 
         response = HttpResponse(content=output.getvalue(), content_type="text/csv")
         response[

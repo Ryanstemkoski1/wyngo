@@ -9,6 +9,7 @@ from django.db import models
 from django.http import HttpResponse
 
 from common.models import BaseTimeModel
+from common.pos.utils import date2sec
 from retailer.models import Retailer
 
 
@@ -299,21 +300,17 @@ class Order(BaseTimeModel):
             "Variant",
             "Price",
             "Price Per Unit",
-            "Customer Name",
-            "Customer Email",
-            "Customer Phone",
-            "Customer Address",
             "Reserved Date",
+            "Reserved Date (secs)",
             "Updated Date",
+            "Updated Date (secs)",
         ]
         writer.writerow(headers)
 
         for order in orders:
-            customer = order.customer
-            customer_name = order.customer.first_name + " " + order.customer.last_name \
-                if order.customer else ""
             line_items = order.order_items.all()
             for item in line_items:
+                order_time = order.order_time or order.created_at
                 if item.item_type == item.TYPE_ITEM:
                     variant = item.variant
                     item_name = variant.product.name
@@ -332,13 +329,10 @@ class Order(BaseTimeModel):
                     variant_name,
                     item.variation_total,
                     item.unit_price,
-                    customer_name,
-                    customer.email if customer else "",
-                    customer.phone if customer else "",
-                    customer.full_address() if customer else "",
-                    order.order_time.strftime("%d-%m-%y %H:%M:%S")
-                            if order.order_time else order.created_at.strftime("%d-%m-%y %H:%M:%S"),
-                    order.updated_at.strftime("%d-%m-%y %H:%M:%S"),
+                    order_time.strftime("%b. %-d, %Y, %-I:%M %p"),
+                    date2sec(order_time),
+                    order.updated_at.strftime("%b. %-d, %Y, %-I:%M %p"),
+                    date2sec(order.updated_at),
                 ]
                 writer.writerow(row)
 

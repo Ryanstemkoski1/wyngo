@@ -17,19 +17,11 @@ class LocationInline(admin.TabularInline):
     model = Location
     extra = 0
     readonly_fields = (
-        "name",
-        "address1",
-        "address2",
-        "address3",
-        "city",
-        "country",
-        "state",
-        "zip_code",
-        "pos_id",
+
     )
 
     def has_add_permission(self, request, _):
-        return False
+        return request.user.is_superuser
 
     class Media:
         css = {"all": ("css/admin/admin.css",)}

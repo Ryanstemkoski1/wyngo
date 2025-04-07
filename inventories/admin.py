@@ -15,6 +15,7 @@ from common.filters import PriceRangeFilter
 from common.pos.clover import CloverInventory
 from common.retailer_utils import RetailerUtils
 from retailer.models import Retailer
+from wyndo.forms import NonEmptyInlineFormSet
 from .forms import CategoryForm, ProductForm, VariantForm
 from .models import Category, Product, Variant, Inventory, Customer, OrderItem, OrderPickup, \
     Order, Reservation
@@ -23,20 +24,13 @@ from .models import Category, Product, Variant, Inventory, Customer, OrderItem, 
 class VariantInline(admin.TabularInline):
     model = Variant
     form = VariantForm
+    formset = NonEmptyInlineFormSet
     verbose_name = "Variation"
     verbose_name_plural = "Variations"
     extra = 0
     exclude = ("currency", "origin_id", "origin_parent_id")
     readonly_fields = (
         "display_images",
-        "name",
-        "price",
-        "sku",
-        "upc",
-        "stock",
-        "display_images",
-        "description",
-        "is_modified_by_admin",
     )
     fields = (
         "name",
@@ -51,7 +45,7 @@ class VariantInline(admin.TabularInline):
     )
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return request.user.is_superuser
 
     def display_images(self, obj):
         images = obj.get_images()
@@ -74,7 +68,7 @@ class VariantInline(admin.TabularInline):
     display_images.short_description = "Images"
 
     def has_add_permission(self, request, _):
-        return False
+        return request.user.is_superuser
 
     class Media:
         css = {"all": ("css/admin/admin.css", "css/admin/iconsgoogle.css")}
@@ -98,7 +92,6 @@ class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
     list_display = (
         "name",
-        "category",
         "is_active",
         "min_price",
         "max_price",
@@ -108,20 +101,12 @@ class ProductAdmin(admin.ModelAdmin):
         "updated_at",
     )
     readonly_fields = (
-        "name",
-        "category",
         "origin",
         "origin_id",
-        "min_price",
-        "inventory",
-        "max_price",
-        "total_stock",
-        "is_modified_by_admin",
     )
     fields = (
         "is_active",
         "name",
-        "category",
         "origin",
         "origin_id",
         "min_price",
@@ -282,8 +267,6 @@ class InventoryAdmin(admin.ModelAdmin):
     )
     inlines = [ProductInline]
     readonly_fields = (
-        "name",
-        "location",
     )
     list_display = ("name", "get_retailers", "created_at")
 

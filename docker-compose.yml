@@ -1,4 +1,4 @@
-version: '3.x'
+version: '3.3'
 
 services:
   web:
@@ -15,6 +15,8 @@ services:
       - .:/app
     ports:
       - "${DJANGO_PORT}:${DJANGO_PORT}"
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
@@ -78,22 +80,22 @@ services:
       - celery
     working_dir: /app
 
-  # Ngrok
-  ngrok:
-    container_name: wyndo-ngrok
-    image: ngrok/ngrok:latest
-    ports:
-      - 4040:4040
-    environment:
-      NGROK_AUTH_TOKEN: ${NGROK_AUTH_TOKEN}
-    command:
-      - start
-      - --all
-      - --authtoken=${NGROK_AUTH_TOKEN}
-      - --config
-      - /etc/ngrok.yml
-    volumes:
-      - ./ngrok.yml:/etc/ngrok.yml
+  # # Ngrok
+  # ngrok:
+  #   container_name: wyndo-ngrok
+  #   image: ngrok/ngrok:latest
+  #   ports:
+  #     - 4040:4040
+  #   environment:
+  #     NGROK_AUTH_TOKEN: ${NGROK_AUTH_TOKEN}
+  #   command:
+  #     - start
+  #     - --all
+  #     - --authtoken=${NGROK_AUTH_TOKEN}
+  #     - --config
+  #     - /etc/ngrok.yml
+  #   volumes:
+  #     - ./ngrok.yml:/etc/ngrok.yml
 
 volumes:
   pgdata-wyndo:

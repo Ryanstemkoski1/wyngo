@@ -329,9 +329,9 @@ class Order(BaseTimeModel):
                     variant_name,
                     item.variation_total,
                     item.unit_price,
-                    order_time.strftime("%b. %-d, %Y, %-I:%M %p"),
+                    order_time.strftime("%b. %-d, %Y, %-I:%M:%S %p"),
                     date2sec(order_time),
-                    order.updated_at.strftime("%b. %-d, %Y, %-I:%M %p"),
+                    order.updated_at.strftime("%b. %-d, %Y, %-I:%M:%S %p"),
                     date2sec(order.updated_at),
                 ]
                 writer.writerow(row)

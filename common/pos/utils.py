@@ -1,4 +1,5 @@
 import json
+from django.utils.timezone import localtime
 
 
 def print_json(payload):
@@ -44,3 +45,16 @@ def get_product_prices(products):
         }
     else:
         return {"min_price": 0, "max_price": 0, "price": products[0].get("price", 0)}
+
+
+def date2sec(dt) -> int:
+    """
+    Convert a date string into seconds since the beginning of the year.
+    Assumes date format: "MMM DD, YYYY HH:MM AM/PM".
+    """
+    try:
+        # Parse the date string
+        start_of_year = localtime(dt).replace(day=1, month=1, hour=0, minute=0, second=0, microsecond=0)
+        return int((dt - start_of_year).total_seconds())
+    except ValueError:
+        return 0  # Return 0 for invalid dates

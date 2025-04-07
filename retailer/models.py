@@ -17,8 +17,9 @@ from common.models import BaseTimeModel
 class Retailer(BaseTimeModel):
     CLOVER = "CLOVER"
     SQUARE = "SQUARE"
+    SELF_MANAGE = "Self Manage"
 
-    ORIGIN_CHOICES = ((CLOVER, CLOVER), (SQUARE, SQUARE))
+    ORIGIN_CHOICES = ((CLOVER, CLOVER), (SQUARE, SQUARE), (SELF_MANAGE, SELF_MANAGE))
 
     STATUS_REQUESTING = "requesting"
     STATUS_APPROVED = "approved"
@@ -37,7 +38,7 @@ class Retailer(BaseTimeModel):
 
     image = models.ImageField(upload_to="retail", null=True, blank=True)
 
-    origin = models.CharField(max_length=7, choices=ORIGIN_CHOICES, db_index=True)
+    origin = models.CharField(max_length=50, choices=ORIGIN_CHOICES, db_index=True)
 
     category = models.ManyToManyField("retailer.Category")
 

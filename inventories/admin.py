@@ -5,9 +5,10 @@ from django.contrib import admin
 from django.db.models import Q, QuerySet
 from django.db.models import Value as V
 from django.db.models.functions import Concat
-from django.urls import path
+from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 from rangefilter.filters import DateRangeFilter
 
@@ -198,22 +199,26 @@ class ProductInline(TabularInlinePaginated):
     extra = 0
     exclude = ("origin_id",)
     readonly_fields = (
-        "name",
-        "min_price",
-        "max_price",
-        "category",
-        "total_stock",
+        "product_admin_link",
         "created_at",
         "updated_at",
     )
     show_change_link = True
-    fields = ("name", "category", "min_price", "max_price", "created_at", "updated_at")
+    fields = ("name", "min_price", "max_price", "total_stock", "created_at", "updated_at", "product_admin_link")
 
     def has_add_permission(self, request, obj=None):
-        return False
+        return request.user.is_superuser
 
     def has_change_permission(self, request, obj=None):
-        return False
+        return request.user.is_superuser
+
+    def product_admin_link(self, obj):
+        if obj.pk:
+            url = f"/admin/inventories/product/{obj.pk}/change/"
+            return format_html('<a href="{}" target="_blank">Edit</a>', url)
+        return "-"
+    product_admin_link.allow_tags = True
+    product_admin_link.short_description = "Action"
 
     class Media:
         css = {"all": ("css/admin/admin.css",)}

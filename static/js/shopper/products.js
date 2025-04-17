@@ -182,7 +182,7 @@ function updateGallery(images) {
   images.forEach((image) => {
     swiperProductGalleryEl.swiper.appendSlide(
       `<swiper-slide class="flex justify-center">
-      <img src="${image}" alt="Product image" class="h-full object-fill">
+      <img src="${image}" alt="Product image" class="h-full object-fit w-full">
       </swiper-slide>`
     );
 
